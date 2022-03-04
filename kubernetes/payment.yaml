@@ -1,0 +1,69 @@
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  labels:
+    app: "payment"
+  name: "payment-service"
+spec:
+  ports:
+  - name: "port-1-payment"
+    port: 9096
+    protocol: "TCP"
+    targetPort: 9096
+  selector:
+    app: "payment"
+  type: "ClusterIP"
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  labels:
+    app: "payment"
+  name: "payment-deployment"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "payment"
+  template:
+    metadata:
+      labels:
+        app: "payment"
+    spec:
+      containers:
+      - image: "wso2inc/payment-service:v0.1.0"
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - "sleep"
+              - "15"
+        name: "payment-deployment"
+        ports:
+        - containerPort: 9096
+          name: "port-1-payment"
+          protocol: "TCP"
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+          requests:
+            memory: "100Mi"
+            cpu: "200m"
+      nodeSelector: {}
+---
+apiVersion: "autoscaling/v1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  labels:
+    app: "payment"
+  name: "payment-hpa"
+spec:
+  maxReplicas: 2
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: "apps/v1"
+    kind: "Deployment"
+    name: "payment-deployment"
+  targetCPUUtilizationPercentage: 50

@@ -1,0 +1,31 @@
+resources:
+  - ads.yaml
+  - cart.yaml
+  - checkout.yaml
+  - currency.yaml
+  - email.yaml
+  - frontend.yaml
+  - payment.yaml
+  - productcatalog.yaml
+  - recommendation.yaml
+  - shipping.yaml
+
+# configMapGenerator:
+#   - name: cm-payment-service
+#     behavior: create
+#     literals:
+#       - SHIPPING_SERVICE_URL=http://shipping-servic:9090
+#   - name: cm-book-store-service
+#     behavior: create
+#     literals:
+#       - PAYMENT_SERVICE_URL=http://payment-service:9090
+#       - CATALOG_SERVICE_URL=http://cat-svc:3000
+#   - name: cm-book-store-db
+#     behavior: create
+#     literals:
+#       - DB_SERVICE=book-store-db-service
+
+# secretGenerator:
+# - name: mysql-pass
+#   literals:
+#   - password=YOUR_PASSWORD

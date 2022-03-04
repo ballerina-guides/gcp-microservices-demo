@@ -1,0 +1,7 @@
+catalogUrl="catalog-service" 
+cartUrl="cart-service" 
+recommandUrl="recommendation-service" 
+currencyUrl="currency-service" 
+shippingUrl="shipping-service" 
+checkoutUrl="checkout-service" 
+adUrl="ads-service"

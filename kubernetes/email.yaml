@@ -1,0 +1,69 @@
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  labels:
+    app: "email"
+  name: "email-service"
+spec:
+  ports:
+  - name: "port-1-email-se"
+    port: 9097
+    protocol: "TCP"
+    targetPort: 9097
+  selector:
+    app: "email"
+  type: "ClusterIP"
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  labels:
+    app: "email"
+  name: "email-deployment"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "email"
+  template:
+    metadata:
+      labels:
+        app: "email"
+    spec:
+      containers:
+      - image: "wso2inc/email-service:v0.1.0"
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - "sleep"
+              - "15"
+        name: "email-deployment"
+        ports:
+        - containerPort: 9097
+          name: "port-1-email-se"
+          protocol: "TCP"
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+          requests:
+            memory: "100Mi"
+            cpu: "200m"
+      nodeSelector: {}
+---
+apiVersion: "autoscaling/v1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  labels:
+    app: "email"
+  name: "email-hpa"
+spec:
+  maxReplicas: 2
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: "apps/v1"
+    kind: "Deployment"
+    name: "email-deployment"
+  targetCPUUtilizationPercentage: 50

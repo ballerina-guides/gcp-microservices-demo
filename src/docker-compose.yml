@@ -1,0 +1,65 @@
+version: '3.1'
+
+services:
+  ads:
+    image: wso2inc/ads-service:v0.1.0
+  cart:
+    image: wso2inc/cart-service:v0.1.0 #add redis
+  checkout:
+    image: wso2inc/checkout-service:v0.1.0
+    environment:
+      BAL_CONFIG_DATA: catalogUrl="catalog" \n cartUrl="cart" \n currencyUrl="currency" \n shippingUrl="shipping" \n paymentUrl="payment" \n emailUrl="email"
+    links:
+      - catalog
+      - cart
+      - currency
+      - shipping
+      - payment
+      - email
+    depends_on:
+      - catalog
+      - cart
+      - currency
+      - shipping
+      - payment
+      - email
+  currency:
+    image: wso2inc/currency-service:v0.1.0
+  email:
+    image: wso2inc/email-service:v0.1.0
+  frontend:
+    image: wso2inc/frontend-service:v0.1.0
+    environment:
+      BAL_CONFIG_DATA: catalogUrl="catalog" \n cartUrl="cart" \n recommandUrl="recommendation" \n currencyUrl="currency" \n shippingUrl="shipping" \n checkoutUrl="checkout" \n adUrl="ads"
+    ports:
+      - 9098:9098
+    links:
+      - catalog
+      - cart
+      - recommendation
+      - currency
+      - shipping
+      - checkout
+      - ads
+    depends_on:
+      - catalog
+      - cart
+      - recommendation
+      - currency
+      - shipping
+      - checkout
+      - ads
+  payment:
+    image: wso2inc/payment-service:v0.1.0
+  catalog:
+    image: wso2inc/catalog-service:v0.1.0
+  recommendation:
+    image: wso2inc/recommendation-service:v0.1.0
+    environment:
+      BAL_CONFIG_DATA: catalogUrl="catalog"
+    links:
+      - catalog
+    depends_on:
+      - catalog
+  shipping:
+    image: wso2inc/shipping-service:v0.1.0

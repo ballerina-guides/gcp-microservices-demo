@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+( cd cart ; bal build)
+( cd currency ; bal build)
+( cd email ; bal build)
+( cd payment ; bal build)
+( cd productcatalog ; bal build)
+( cd recommendation ; bal build)
+( cd shipping ; bal build)
+( cd ads ; bal build)
+( cd checkout ; bal build)
+( cd frontend ; bal build)

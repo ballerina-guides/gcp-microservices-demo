@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+( cd cart ; eval $(minikube docker-env) ; bal build)
+( cd currency ; eval $(minikube docker-env) ; bal build)
+( cd email ; eval $(minikube docker-env) ; bal build)
+( cd payment ; eval $(minikube docker-env) ; bal build)
+( cd productcatalog ; eval $(minikube docker-env) ; bal build)
+( cd recommendation ;eval $(minikube docker-env);  bal build)
+( cd shipping ; eval $(minikube docker-env); bal build)
+( cd ads ; eval $(minikube docker-env) ; bal build)
+( cd checkout ; eval $(minikube docker-env) ; bal build)
+( cd frontend ; eval $(minikube docker-env) ; bal build)
