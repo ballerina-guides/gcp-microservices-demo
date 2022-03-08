@@ -119,7 +119,7 @@ service "CheckoutService" on ep {
 }
 ```
 
-## DataStore repository- Cart service
+## DataStore repository- Cart Service
 The usecase is to store user’s shopping cart details. The type of the store will be decided by the configurables loaded into the application by the factory. In memory and redis store is supported in the sample. You can find the code sample below.
 C# -
 ```c#
@@ -169,7 +169,7 @@ public isolated class RedisStore {
 }
 ```
 
-## Search products using query expressions - Catalog service
+## Search products using query expressions - Catalog Service
 Product catalog service contains all the details of avaiable products. The requirement is to get the products similar to the search query. You can find the original implementation below.
 
 ```go
@@ -206,7 +206,7 @@ isolated function isProductRelated(Product product, string query) returns boolea
 You can read more about Query expressions in this blog. You can have much more complicated queries using limit,let keywords, ordering, joins and so on. You can use query expressions not only for arrays but for streams, and tables as well.
 
 
-## Concurrency safety - Ad service
+## Concurrency safety - Ad Service
 Ballerina is designed for network based applications. The concept of isolation in Ballerina simplifies development by ensuring the safety of shared resources during concurrent execution. Ballerina Compiler warns if the application is not concurrent safe and helps to make it concurrent safe and performant at the same time. The following code shows how a class is marked as readonly so by default compiler makes enables concurrent calls to its objects.
 ```ballerina
 readonly class AdStore {
@@ -260,7 +260,7 @@ service "CheckoutService" on ep {
 ```
 As you shown in above code, ballerina make it very easy to invoke other microservices, log and handle errors. Configurable feature helps to configure the value of the variable by overriding in the runtime. This will be explained in depth in the testing and deployment sections of this article.
 
-## Html generation with XML - Email service
+## HTML generation with XML - Email Service
 Email service is responsible for generating a confirmation email with order details, tracking details. Ballerina’s built in XML feature is used for generating HTML code required for the email. You can see the below code to see how the if blocks, loops, concat, variables used in xml to create the html page.
 
 ```
@@ -316,7 +316,7 @@ isolated function getConfirmationHtml(OrderResult res) returns xml {
 }
 ```
 
-## Testing Microservices - Recommendation service
+## Testing Microservices - Recommendation Service
 Microservices are Loosely coupled, Independently deployable units. These units should be tested before we integrate them with other microservices. Ballerina’s test framework allows you to test your microservices effortlessly.
 First we need to make sure the catalogUrl is marked as configurable. 
 
