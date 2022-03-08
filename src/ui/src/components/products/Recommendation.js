@@ -16,25 +16,22 @@
  *  under the License.
  */
 
-import { Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Product from './pages/Product';
-import Cart from './pages/Cart';
-import NotFound from './pages/NotFound';
-function App() {
-
-  return (
-      <Routes>
-        <Route path='/' element={<Home />}>
-        </Route>
-        <Route path='/product/:productId' element={<Product />}>
-        </Route>
-        <Route path='/cart' element={<Cart />}>
-        </Route>
-        <Route path='*' element= {<NotFound />}>
-        </Route>
-      </Routes>
-  );
-}
-
-export default App;
+const Recommendation = (props) => {
+    return (
+        <div class="col-md-3">
+        <div>
+          <a href={`/product/${props.id}`}>
+            <img alt="" src={process.env.PUBLIC_URL + props.picture}/>
+          </a>
+          <div>
+            <h5>
+              {props.name}
+            </h5>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
+  export default Recommendation;
+  

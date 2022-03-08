@@ -16,25 +16,18 @@
  *  under the License.
  */
 
-import { Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Product from './pages/Product';
-import Cart from './pages/Cart';
-import NotFound from './pages/NotFound';
-function App() {
-
-  return (
-      <Routes>
-        <Route path='/' element={<Home />}>
-        </Route>
-        <Route path='/product/:productId' element={<Product />}>
-        </Route>
-        <Route path='/cart' element={<Cart />}>
-        </Route>
-        <Route path='*' element= {<NotFound />}>
-        </Route>
-      </Routes>
-  );
-}
-
-export default App;
+const Ad = (props) => {
+    return (
+    <div class="container py-3 px-lg-5 py-lg-5">
+        <div role="alert">
+            <strong>Ad</strong>
+            <a href={props.redirect_url} rel="nofollow" >
+                {props.text}
+            </a>
+        </div>
+    </div>
+    );
+  };
+  
+  export default Ad;
+  

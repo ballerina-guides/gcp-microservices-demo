@@ -1,10 +1,26 @@
+// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import ballerina/http;
 import ballerina/os;
 import ballerina/time;
 import ballerina/uuid;
 
 const string USER_COOKIE_NAME = "userId";
-const string userCurrency = "USD";
+const string USER_CURRENCY = "USD";
 final boolean is_cymbal_brand = os:getEnv("CYMBAL_BRANDING") == "true";
 
 listener http:Listener ep = new (9098);
@@ -17,7 +33,7 @@ service class AuthInterceptor {
                                 (http:Cookie cookie) returns boolean {
             return cookie.name == USER_COOKIE_NAME;
         });
-        if (usernameCookie.length() == 0) {
+        if usernameCookie.length() == 0 {
             http:Cookie cookie = new (USER_COOKIE_NAME, uuid:createType1AsString(),
                                                 path = "/");
 
@@ -52,7 +68,7 @@ service / on ep {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: {
-                user_currency: userCurrency, //Todo to cookies
+                user_currency: USER_CURRENCY, //Todo to cookies
                 currencies: supportedCurrencies,
                 cart_size: cart.items.length(),
                 is_cymbal_brand: is_cymbal_brand
@@ -70,7 +86,7 @@ service / on ep {
 
         ProductLocalized[] productsLocalized = [];
         foreach Product product in products {
-            Money converedMoney = check convertCurrency(product.price_usd, userCurrency);
+            Money converedMoney = check convertCurrency(product.price_usd, USER_CURRENCY);
             productsLocalized.push(toProductLocalized(product, renderMoney(converedMoney)));
         }
 
@@ -93,7 +109,7 @@ service / on ep {
         }
         string userId = cookie.value;
         Product product = check getProduct(id);
-        Money converedMoney = check convertCurrency(product.price_usd, userCurrency);
+        Money converedMoney = check convertCurrency(product.price_usd, USER_CURRENCY);
         ProductLocalized productLocal = toProductLocalized(product, renderMoney(converedMoney));
         Product[] recommendations = check getRecommendations(userId, [id]);
 
@@ -113,10 +129,6 @@ service / on ep {
         return {};
     }
 
-    resource function get logout() returns json {
-        return {};
-    }
-
     resource function get cart(@http:Header {name: "Cookie"} string cookieHeader)
                 returns CartResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getUserIdFromCookie(cookieHeader);
@@ -126,9 +138,9 @@ service / on ep {
         string userId = cookie.value;
         Cart cart = check getCart(userId);
         Product[] recommandations = check getRecommendations(userId, self.getProductIdFromCart(cart));
-        Money shippingCost = check getShippingQuote(cart.items, userCurrency);
+        Money shippingCost = check getShippingQuote(cart.items, USER_CURRENCY);
         Money totalPrice = {
-            currency_code: userCurrency,
+            currency_code: USER_CURRENCY,
             nanos: 0,
             units: 0
         };
@@ -136,7 +148,7 @@ service / on ep {
         foreach CartItem item in cart.items {
             Product product = check getProduct(item.product_id);
 
-            Money converedPrice = check convertCurrency(product.price_usd, userCurrency);
+            Money converedPrice = check convertCurrency(product.price_usd, USER_CURRENCY);
 
             Money price = multiplySlow(converedPrice, item.quantity);
             string renderedPrice = renderMoney(price);
@@ -179,21 +191,19 @@ service / on ep {
         string userId = cookie.value;
         Product|error product = getProduct(req.productId);
         if product is error {
-            http:BadRequest resp = {
+            return <http:BadRequest> {
                 body: "invalid request" + product.message()
             };
-            return resp;
         }
 
         check insertCart(userId, req.productId, req.quantity);
 
-        http:Ok resp = {
+        return <http:Ok> {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: "item added the cart"
         };
-        return resp;
     }
 
     resource function post cart/empty(@http:Header {name: "Cookie"} string cookieHeader)
@@ -204,13 +214,12 @@ service / on ep {
         }
         string userId = cookie.value;
         check emptyCart(userId);
-        http:Ok resp = {
+        return <http:Ok> {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: "cart emptied"
         };
-        return resp;
     }
 
     resource function post cart/checkout(@http:Payload CheckoutRequest req, @http:Header {name: "Cookie"} string cookieHeader)
@@ -231,7 +240,7 @@ service / on ep {
                 zip_code: req.zip_code
             },
             user_id: userId,
-            user_currency: userCurrency,
+            user_currency: USER_CURRENCY,
             credit_card: {
                 credit_card_cvv: req.credit_card_cvv,
                 credit_card_expiration_month: req.credit_card_expiration_month,

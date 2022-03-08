@@ -1,9 +1,26 @@
+/*
+ *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
+
 import { Fragment, useEffect } from 'react';
-import Header from '../components/new/Header';
-import Footer from '../components/new/Footer';
-import Product from '../components/new/Product';
+import Header from '../components/products/Header';
+import Footer from '../components/products/Footer';
+import Product from '../components/products/Product';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
-import NoQuotesFound from '../components/quotes/NoQuotesFound';
 import useHttp from '../hooks/use-http';
 import { getHomePage } from '../lib/api';
 
@@ -32,50 +49,7 @@ const HomePage = () => {
     //   if (status === 'completed' && (!loadedQuotes || loadedQuotes.length === 0)) {
     //     return <NoQuotesFound />;
     //   }
-
-    //   return <QuoteList quotes={loadedQuotes} />;
     let data = homeData;
-    // let data = {
-    //     session_id :"user 1",
-    //     request_id : "req 1",
-    //     user_currency : "usd",
-    //     show_currency : true,
-    //     currencies :["USD", "EUR", "YEN"],
-    //     cart_size: 5,
-    //     banner_color : "red",
-    //     platform_css : "local",
-    //     platform_name : "local",
-    //     is_cymbal_brand : false,
-    //     products :[{
-    //         product: {
-    //             "id": "OLJCESPC7Z",
-    //             "name": "Sunglasses",
-    //             "description": "Add a modern touch to your outfits with these sleek aviator sunglasses.",
-    //             "picture": "/static/img/products/sunglasses.jpg"
-    //         },
-    //         price: "$10.99"
-    //     }, {
-    //         product: {
-    //             "id": "66VCHSJNUP",
-    //             "name": "Tank Top",
-    //             "description": "Perfectly cropped cotton tank, with a scooped neckline.",
-    //             "picture": "/static/img/products/tank-top.jpg",
-    //         },
-    //         price: "$15.99"
-    //     }, {
-    //         product: {
-    //             "id": "1YMWWN1N4O",
-    //             "name": "Watch",
-    //             "description": "This gold-tone stainless steel watch will work with most of your outfits.",
-    //             "picture": "/static/img/products/watch.jpg",
-    //         },
-    //         price: "$20.99"
-    //     }],
-    //     ad : {
-    //         redirect_url: "/product/66VCHSJNUP",
-    //         text: "Buy this thingg"
-    //     },
-    // }
 
     const items = []
     for (const [index, value] of data.products.entries()) {

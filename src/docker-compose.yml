@@ -8,7 +8,7 @@ services:
   checkout:
     image: wso2inc/checkout-service:v0.1.0
     environment:
-      BAL_CONFIG_DATA: catalogUrl="catalog" \n cartUrl="cart" \n currencyUrl="currency" \n shippingUrl="shipping" \n paymentUrl="payment" \n emailUrl="email"
+      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n currencyHost="currency" \n shippingHost="shipping" \n paymentHost="payment" \n emailHost="email"
     links:
       - catalog
       - cart
@@ -30,7 +30,7 @@ services:
   frontend:
     image: wso2inc/frontend-service:v0.1.0
     environment:
-      BAL_CONFIG_DATA: catalogUrl="catalog" \n cartUrl="cart" \n recommandUrl="recommendation" \n currencyUrl="currency" \n shippingUrl="shipping" \n checkoutUrl="checkout" \n adUrl="ads"
+      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n recommandHost="recommendation" \n currencyHost="currency" \n shippingHost="shipping" \n checkoutHost="checkout" \n adHost="ads"
     ports:
       - 9098:9098
     links:
@@ -56,7 +56,7 @@ services:
   recommendation:
     image: wso2inc/recommendation-service:v0.1.0
     environment:
-      BAL_CONFIG_DATA: catalogUrl="catalog"
+      BAL_CONFIG_DATA: catalogHost="catalog"
     links:
       - catalog
     depends_on:

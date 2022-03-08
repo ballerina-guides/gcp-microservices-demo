@@ -16,25 +16,19 @@
  *  under the License.
  */
 
-import { Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Product from './pages/Product';
-import Cart from './pages/Cart';
-import NotFound from './pages/NotFound';
-function App() {
+import { Link } from 'react-router-dom';
 
+import classes from './NoQuotesFound.module.css';
+
+const NoQuotesFound = () => {
   return (
-      <Routes>
-        <Route path='/' element={<Home />}>
-        </Route>
-        <Route path='/product/:productId' element={<Product />}>
-        </Route>
-        <Route path='/cart' element={<Cart />}>
-        </Route>
-        <Route path='*' element= {<NotFound />}>
-        </Route>
-      </Routes>
+    <div className={classes.noquotes}>
+      <p>No quotes found!</p>
+      <Link className='btn' to='/new-quote'>
+        Add a Quote
+      </Link>
+    </div>
   );
-}
+};
 
-export default App;
+export default NoQuotesFound;
