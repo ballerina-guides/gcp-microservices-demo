@@ -28,11 +28,8 @@ readonly class AdStore {
     public isolated function getRandomAds() returns Ad[]|error {
         Ad[] allAds = [];
 
-        //TODO issue can we not pass array to varargs
         foreach Ad[] ads in self.ads {
-            foreach Ad ad in ads {
-                allAds.push(ad);
-            }
+            allAds.push(...ads);
         }
 
         Ad[] randomAds = [];

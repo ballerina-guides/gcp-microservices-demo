@@ -30,9 +30,7 @@ service "AdService" on adListener {
         Ad[] ads = [];
         foreach string category in request.context_keys {
             Ad[] availableAds = self.store.getAdsByCategory(category);
-            foreach Ad ad in availableAds {
-                ads.push(ad);
-            }
+            ads.push(...availableAds);
         }
 
         if ads.length() == 0 {

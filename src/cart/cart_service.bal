@@ -17,6 +17,7 @@
 import ballerina/grpc;
 import ballerina/log;
 
+configurable string datastore = "";
 configurable string redisHost = "";
 configurable string redisPassword = "";
 listener grpc:Listener ep = new (9092);
@@ -26,12 +27,12 @@ service "CartService" on ep {
     private final DataStore store;
 
     function init() {
-        if redisHost == "" && redisPassword == "" {
-            log:printInfo("In memory datastore used as redis config is not given");
-            self.store = new InMemoryStore();
-        } else {
+        if datastore == "redis" {
             log:printInfo("Redis datastore is selected");
             self.store = new RedisStore();
+        } else {
+            log:printInfo("In memory datastore used as redis config is not given");
+            self.store = new InMemoryStore();
         }
     }
 

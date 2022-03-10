@@ -37,9 +37,7 @@ public isolated class InMemoryStore {
                     select item;
                 if matchedItem.length() == 1 {
                     CartItem item = matchedItem[0];
-                    if item.product_id == productId {
-                        item.quantity = item.quantity + quantity;
-                    }
+                    item.quantity = item.quantity + quantity;
                 } else {
                     CartItem newItem = {product_id: productId, quantity: quantity};
                     existingItems.push(newItem);
@@ -84,9 +82,6 @@ public isolated class RedisStore {
     }
 
     isolated function emptyCart(string userId) {
-        lock {
-            _ = self.store.remove(userId);
-        }
     }
 
     isolated function getCart(string userId) returns Cart {
