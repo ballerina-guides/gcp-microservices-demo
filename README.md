@@ -1,7 +1,8 @@
 # Introduction
 The online boutique is a cloud-native microservices demo application written by the Google cloud platform. It consists of a 10-tier microservices application. The application is a web-based e-commerce app using which users can browse items, add them to the cart, and purchase them. This set of microservices is written using Ballerina to demonstrate the language features and showcase best practices for writing microservices using Ballerina. Communication between microservices is handled using gRPC and the frontend is exposed via an HTTP service.
-Architecture
 
+# Architecture
+![image info](architecture-diagram.png)
 
 # Microservices description
 
@@ -25,7 +26,7 @@ The original Go frontend service serves HTML directly using the HTTP server usin
 
 # Running the sample
 ## Docker-Compose
-Create the `Config.toml` file in `src/email/` and paste the following code after replacing the values. You can generate credentials by following [these steps] https://github.com/ballerina-platform/module-ballerinax-googleapis.gmail/tree/v0.99.11#prerequisites.
+Create the `Config.toml` file in `src/email/` and paste the following code after replacing the values. You can generate credentials by following [these steps](https://github.com/ballerina-platform/module-ballerinax-googleapis.gmail/tree/v0.99.11#prerequisites).
 ```toml
 [gmail]
 refreshToken = "<your-refresh-token>"
@@ -203,7 +204,7 @@ isolated function isProductRelated(Product product, string query) returns boolea
 }
 ```
 
-You can read more about query expressions in this blog. You can have much more complicated queries using the `limit` and `let` keywords, ordering, joins and so on. You can use query expressions not only for arrays but for streams, and tables as well.
+You can read more about query expressions in this [blog](https://dzone.com/articles/language-integrated-queries-in-ballerina). You can have much more complicated queries using the `limit` and `let` keywords, ordering, joins and so on. You can use query expressions not only for arrays but for streams, and tables as well.
 
 
 ## Concurrency safety - Ad service
@@ -222,7 +223,7 @@ readonly class AdStore {
     }
 }
 ```
-You can read this blog for more information about isolation concepts.
+You can read this [blog](https://dzone.com/articles/concurrency-safe-execution-ballerina-isolation) for more information about isolation concepts.
 
 ## Coordinating with multiple services and configurables - checkout service
 Microservices often requires to communicate with other services to get a specific task done. Checkout service coordinates with the cart service, catalog service, currency service, shipping service, payment service, and email service to perform the checkout. 
