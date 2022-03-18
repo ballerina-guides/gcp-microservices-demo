@@ -1,69 +1,69 @@
 # Introduction
-Online Boutique is a cloud-native microservices demo application written by the Google cloud platform. Online Boutique consists of a 10-tier microservices application. The application is a web-based e-commerce app where users can browse items, add them to the cart, and purchase them. We have written this set of microservices using ballerina to demonstrate the language features and showcase best practices for writing microservices using Ballerina. Microservice communication is handled using gRPC and the frontend exposes HTTP service.
+The online boutique is a cloud-native microservices demo application written by the Google cloud platform. It consists of a 10-tier microservices application. The application is a web-based e-commerce app using which users can browse items, add them to the cart, and purchase them. This set of microservices is written using Ballerina to demonstrate the language features and showcase best practices for writing microservices using Ballerina. Communication between microservices is handled using gRPC and the frontend is exposed via an HTTP service.
 Architecture
 
 
-# Microservices Description
+# Microservices description
 
-|Service Name | Description |
+|Service name | Description |
 |-------------|-------------|
-| Frontend | Exposes HTTP server to outside to serve data required for the React App. Acts as a frontend for all the backend microservices and abstracts the functionality.|
+| Frontend | Exposes an HTTP server to outside to serve data required for the React app. Acts as a frontend for all the backend microservices and abstracts the functionality.|
 | Cart | Stores the product items added to the cart and retrieves them. In memory store and Redis is supported as storage options.
-| ProductCatalog | Reads a list of products from a JSON file and provides the ability to search products and get individual products.
-| Currency | Reads exchange rates from a JSON and converts one money amount to another currency.
-| Payment | Validates the card details using Luhn algorithm and against supported card providers and returns a transaction ID. (Mock)
-| Shipping | Gives shipping cost estimates based on the shopping cart. Returns a tracking ID. (Mock)
-| Email | Sends user an order confirmation email with the cart details using the Gmail connector. (mock).
-| Checkout | Retrieves user cart, prepares the order, and orchestrates the payment, shipping, and email notification.
-| Recommendation | Recommends other products based on the user’s cart items
-| Ads | Provides text ads based on given context words.
+| ProductCatalog | Reads a list of products from a JSON file and provides the ability to search products and get then individually.
+| Currency | Reads the exchange rates from a JSON and converts one currency value to another.
+| Payment | Validates the card details (using the Luhn algorithm) against the supported card providers and returns a transaction ID. (Mock)
+| Shipping | Gives the shipping cost estimates based on the shopping cart. Returns a tracking ID. (Mock)
+| Email | Sends the user an order confirmation email with the cart details using the Gmail connector. (mock).
+| Checkout | Retrieves the user cart, prepares the order, and orchestrates the payment, shipping, and email notification.
+| Recommendation | Recommends other products based on the items added to the user’s cart.
+| Ads | Provides text advertisements based on the context of the given words.
 
 
-We will be using the same load generator service for load testing. 
-In the original frontend go service, It serves HTML directly using the HTTP server using go templates, In our sample, we have separated the backend and the frontend using Ballerina HTTP service and React frontend.
+Te same load generator service will be used for load testing. 
+The original Go frontend service serves HTML directly using the HTTP server using Go template.  In this sample, the backend is separated from the Ballerina HTTP service and React frontend.
 
 
 # Running the sample
 ## Docker-Compose
-Create `Config.toml` in `src/email/` and paste the following code after replacing the values. You can generate credentials using following these steps https://github.com/ballerina-platform/module-ballerinax-googleapis.gmail/tree/v0.99.11#prerequisites
+Create the `Config.toml` file in `src/email/` and paste the following code after replacing the values. You can generate credentials by following [these steps] https://github.com/ballerina-platform/module-ballerinax-googleapis.gmail/tree/v0.99.11#prerequisites.
 ```toml
 [gmail]
 refreshToken = "<your-refresh-token>"
 clientId = "<your-client-id>"
 clientSecret =  "<your-client-secret>"
 ```
-Change directory into src directory of the repository root and build the docker images and then execute docker-compose up.
+Change the directory into an src directory of the repository root, build the Docker images, and then execute the Docker-compose up.
 ```bash
 ./build-all-docker.sh
 docker-compose up
 ```
 
-We can start the react application by executing following commands in `src/ui/` directory.
+You can start the React application by executing following commands from the `src/ui/` directory.
 ```bash
 npm install
 npm start
 ```
 ## Kubernetes
 
-We use kustomize for combining all the YAML that have generated into one. You can execute the following command to build the final yaml.
+Kustomize is used for combining all the YAML files that have generated into one. You can execute the following command to build the final YAML file.
 ```
 kustomize build kubernetes > final.yaml
 ```
-If you are using minikube, you can execute the following bash script to build inside the minikube cluster.
+If you are using Minikube, you can execute the following `.bash` script to build the Minikube cluster.
 ```
 build-all-minikube.sh
 ```
 
-If you are not using minikube, you have to manually push to your docker registry. You need to make sure to make the Config.toml in `src/email/` a secret before pushing to public docker registries.
+If you are not using Minikube, you have to push the artifacts to your Docker registry manually.  Make sure that the `Config.toml` file  in the `src/email/` directory is a secret before pushing to public Docker registries.
 
-Finally you can deploy the artifacts into Kubernetes using the following command.
+Finally, you can deploy the artifacts into Kubernetes using the following command.
 ```
 kubectl apply -f final.yaml
 ```
 
 # Ballerina Highlights
 ## gRPC Support
-The online boutique store application uses gRPC as the communication method between each microservices. Each language has its own way of providing gRPC capabilities for the language. As many other languages, ballerina supports generating server and client codes using the proto file using `bal grpc` command. You can view the proto file here. Ballerina has services and clients as a first class construct and gRPC builds upon that foundation. You can compare the original golang code and ballerina code below.
+The online boutique store application uses gRPC as the communication method between the microservices. Each language has its own way of providing the gRPC capabilities for the language. As many other languages, Ballerina supports generating server and client codes using the `.proto` file using the `bal grpc` command. You can view the `.proto` file here. Ballerina has services and clients as first class constructs and gRPC builds upon that foundation. You can compare the original Go lang code and Ballerina code below.
 Go - 
 
 ```go
@@ -120,7 +120,7 @@ service "CheckoutService" on ep {
 ```
 
 ## DataStore repository- Cart Service
-The usecase is to store user’s shopping cart details. The type of the store will be decided by the configurables loaded into the application by the factory. In memory and redis store is supported in the sample. You can find the code sample below.
+The usecase is to store the user’s shopping cart details. The type of the store will be decided by the configurables loaded into the application by the factory. In memory and Redis store is supported in the sample. You can find the code sample below.
 C# -
 ```c#
 public interface ICartStore
@@ -169,13 +169,13 @@ public isolated class RedisStore {
 }
 ```
 
-## Search products using query expressions - Catalog Service
-Product catalog service contains all the details of avaiable products. The requirement is to get the products similar to the search query. You can find the original implementation below.
+## Search products using query expressions - catalog service
+The product catalog service contains all the details of the available products. The requirement is to get the products similar to the search query. You can find the original implementation below.
 
 ```go
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
 	time.Sleep(extraLatency)
-	// Intepret query as a substring match in name or description.
+	// Interpret the query as a substring match with the name or description.
 	var ps []*pb.Product
 	for _, p := range parseCatalog() {
 		if strings.Contains(strings.ToLower(p.Name), strings.ToLower(req.Query)) ||
@@ -187,7 +187,7 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 }
 ```
 
-Even tough we can implement the same using ballerina using foreach statement, we have used ballerina query expression to implement the search function. Query expressions contain a set of clauses similar to SQL to process the data.
+Even though you can implement the same using the Ballerina foreach statement, the Ballerina query expression is used to implement the search function. Query expressions contain a set of clauses similar to SQL to process the data.
 ```ballerina
 remote function SearchProducts(SearchProductsRequest value) returns SearchProductsResponse|error {
     return {
@@ -203,11 +203,11 @@ isolated function isProductRelated(Product product, string query) returns boolea
 }
 ```
 
-You can read more about Query expressions in this blog. You can have much more complicated queries using limit,let keywords, ordering, joins and so on. You can use query expressions not only for arrays but for streams, and tables as well.
+You can read more about query expressions in this blog. You can have much more complicated queries using the `limit` and `let` keywords, ordering, joins and so on. You can use query expressions not only for arrays but for streams, and tables as well.
 
 
-## Concurrency safety - Ad Service
-Ballerina is designed for network based applications. The concept of isolation in Ballerina simplifies development by ensuring the safety of shared resources during concurrent execution. Ballerina Compiler warns if the application is not concurrent safe and helps to make it concurrent safe and performant at the same time. The following code shows how a class is marked as readonly so by default compiler makes enables concurrent calls to its objects.
+## Concurrency safety - Ad service
+Ballerina is designed for network-based applications. The concept of isolation in Ballerina simplifies development by ensuring the safety of shared resources during concurrent execution. Ballerina Compiler warns if the application is not concurrent safe and helps to make it concurrent safe and performant at the same time. The following code shows how a class is marked as readonly so that by default, the compiler makes concurrent calls to its objects.
 ```ballerina
 readonly class AdStore {
 
@@ -224,8 +224,8 @@ readonly class AdStore {
 ```
 You can read this blog for more information about isolation concepts.
 
-## Coordinating with multiple services and Configurables - Checkout Service
-Microservices often requires to communicate with other services to get a specific task done. Checkout service coordinates with cart service, catalog service, currency service, shipping service payment service and email service to perform the checkout. 
+## Coordinating with multiple services and configurables - checkout service
+Microservices often requires to communicate with other services to get a specific task done. Checkout service coordinates with the cart service, catalog service, currency service, shipping service, payment service, and email service to perform the checkout. 
 
 ```ballerina
 configurable string cartUrl = "http://localhost:9092";
@@ -258,10 +258,10 @@ service "CheckoutService" on ep {
         return cart.items;
     }
 ```
-As you shown in above code, ballerina make it very easy to invoke other microservices, log and handle errors. Configurable feature helps to configure the value of the variable by overriding in the runtime. This will be explained in depth in the testing and deployment sections of this article.
+As shown in the above code, Ballerina makes it very easy to invoke other microservices, log, and handle errors. The configurable feature helps to configure the value of the variable by overriding it in the runtime. This will be explained in depth in the testing and deployment sections of this article.
 
-## HTML generation with XML - Email Service
-Email service is responsible for generating a confirmation email with order details, tracking details. Ballerina’s built in XML feature is used for generating HTML code required for the email. You can see the below code to see how the if blocks, loops, concat, variables used in xml to create the html page.
+## HTML generation with XML - email service
+The email service is responsible for generating a confirmation email with the order and tracking details. Ballerina’s built-in XML feature is used for generating HTML code required for the email. You can see the code below to see how the if blocks, loops, concat, variables are used in the XML to create the HTML page.
 
 ```
 isolated function getConfirmationHtml(OrderResult res) returns xml {
@@ -316,9 +316,9 @@ isolated function getConfirmationHtml(OrderResult res) returns xml {
 }
 ```
 
-## Testing Microservices - Recommendation Service
-Microservices are Loosely coupled, Independently deployable units. These units should be tested before we integrate them with other microservices. Ballerina’s test framework allows you to test your microservices effortlessly.
-First we need to make sure the catalogUrl is marked as configurable. 
+## Testing microservices - the recommendation service
+Microservices are loosely coupled, Independently deployable units. These units should be tested before we integrate them with other microservices. Ballerina’s test framework allows you to test your microservices effortlessly.
+First, we need to make sure that the catalog URL is marked as a configurable. 
 
 ```ballerina
 import ballerina/grpc;
@@ -341,12 +341,12 @@ final ProductCatalogServiceClient catalogClient;
 }
 ```
 
-In the tests directory you need to create a Config.toml and override that variable with mock url. This allows you to point to another service in the testing phase. 
+In the `tests` directory, you need to create a `Config.toml` file and override that variable with the mock URL. This allows you to point to another service in the testing phase. 
 ```toml
 catalogUrl="http://localhost:8989"
 ```
 
-You can define a mock service to represent the catalog service in the test file and execute the test based on that.
+You can define a mock service to represent the catalog service in the test file, and execute the test based on that.
 
 ```ballerina
 import ballerina/test;
@@ -390,4 +390,4 @@ function recommandTest() returns error?{
 }
 ```
 
-Ballerina has object mocking features that allows you to do this without even running a service. You can read in depth about object mocking here
+Ballerina has object mocking features that allows you to do this without even running a service. For in-depth information on object mocking, see[]().
