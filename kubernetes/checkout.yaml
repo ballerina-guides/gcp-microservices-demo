@@ -1,0 +1,89 @@
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  labels:
+    app: "checkout"
+  name: "checkout-service"
+spec:
+  ports:
+  - name: "port-1-checkout"
+    port: 9094
+    protocol: "TCP"
+    targetPort: 9094
+  selector:
+    app: "checkout"
+  type: "ClusterIP"
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  name: "check-config-map"
+data:
+  Config.toml: "catalogUrl=\"catalog-service\" \ncartUrl=\"cart-service\" \ncurrencyUrl=\"\
+    currency-service\" \nshippingUrl=\"shipping-service\" \npaymentUrl=\"payment-service\"\
+    \ \nemailUrl=\"email-service\""
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  labels:
+    app: "checkout"
+  name: "checkout-deployment"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "checkout"
+  template:
+    metadata:
+      labels:
+        app: "checkout"
+    spec:
+      containers:
+      - env:
+        - name: "BAL_CONFIG_FILES"
+          value: "/home/ballerina/conf/Config.toml:"
+        image: "wso2inc/checkout-service:v0.1.0"
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - "sleep"
+              - "15"
+        name: "checkout-deployment"
+        ports:
+        - containerPort: 9094
+          name: "port-1-checkout"
+          protocol: "TCP"
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+          requests:
+            memory: "100Mi"
+            cpu: "200m"
+        volumeMounts:
+        - mountPath: "/home/ballerina/conf/"
+          name: "check-config-map-volume"
+          readOnly: false
+      nodeSelector: {}
+      volumes:
+      - configMap:
+          name: "check-config-map"
+        name: "check-config-map-volume"
+---
+apiVersion: "autoscaling/v1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  labels:
+    app: "checkout"
+  name: "checkout-hpa"
+spec:
+  maxReplicas: 2
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: "apps/v1"
+    kind: "Deployment"
+    name: "checkout-deployment"
+  targetCPUUtilizationPercentage: 50

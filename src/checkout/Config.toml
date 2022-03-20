@@ -1,0 +1,6 @@
+catalogHost="catalog-service" 
+cartHost="cart-service" 
+currencyHost="currency-service" 
+shippingHost="shipping-service" 
+paymentHost="payment-service" 
+emailHost="email-service"
