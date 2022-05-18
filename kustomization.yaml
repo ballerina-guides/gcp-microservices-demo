@@ -1,0 +1,17 @@
+# Uncomment the following lines when the following issue is fixed
+# https://github.com/ballerina-guides/gcp-microservices-demo/issues/7
+
+resources:
+  - ads/target/kubernetes/ads/ads.yaml
+  - cart/target/kubernetes/cart/cart.yaml
+  # - checkout/target/kubernetes/checkout/checkout.yaml
+  - currency/target/kubernetes/currency/currency.yaml
+  - email/target/kubernetes/email/email.yaml
+  # - frontend/target/kubernetes/frontend/frontend.yaml
+  - payment/target/kubernetes/payment/payment.yaml
+  - productcatalog/target/kubernetes/productcatalog/productcatalog.yaml
+  # - recommendation/target/kubernetes/recommendation/recommendation.yaml
+  - shipping/target/kubernetes/shipping/shipping.yaml
+
+patchesStrategicMerge:
+- secret-env-patch.yaml

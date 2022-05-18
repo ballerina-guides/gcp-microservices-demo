@@ -24,22 +24,47 @@ Te same load generator service will be used for load testing.
 The original Go frontend service serves HTML directly using the HTTP server using Go template.  In this sample, the backend is separated from the Ballerina HTTP service and React frontend.
 
 
-# Running the sample
+# Running the Microservices on the Cloud
+
+## Setting up Email Credentials
+* A Gmail Account with access <br/> https://support.google.com/mail/answer/56256?hl=en
+
+* New project with `Gmail API` enabled on the API Console.
+    - Visit [Google API Console](https://console.developers.google.com), click **Create Project**, and follow the wizard 
+    to create a new project.
+
+* OAuth Credentials 
+    - Go to **Credentials -> OAuth Consent Screen**, enter a product name to be shown to users, and click **Save**.
+    - On the **Credentials** tab, click **Create Credentials** and select **OAuth Client ID**.
+    - Select the **Web application** application type, enter a name for the application, and specify a redirect URI 
+    (enter https://developers.google.com/oauthplayground if you want to use [OAuth 2.0 Playground](https://developers.google.com/oauthplayground) 
+    to receive the Authorization Code and obtain the Access Token and Refresh Token).
+    - Click **Create**. Your Client ID and Client Secret will appear.
+    - In a separate browser window or tab, visit [OAuth 2.0 Playground](https://developers.google.com/oauthplayground). 
+    Click on the `OAuth 2.0 Configuration` icon in the top right corner and click on `Use your own OAuth credentials` and 
+    provide your `OAuth Client ID` and `OAuth Client Secret`.
+    - Select the required Gmail API scopes from the list of APIs.
+    - Then click **Authorize APIs**.
+    - When you receive your authorization code, click **Exchange authorization code for tokens** to obtain the refresh 
+    token and access token.
+
+* Create the `Config.toml` file in `email/` and paste the following code after replacing the values.
+    ```toml
+    [gmail]
+    refreshToken = "<your-refresh-token>"
+    clientId = "<your-client-id>"
+    clientSecret =  "<your-client-secret>"
+    ```
+
 ## Docker-Compose
-Create the `Config.toml` file in `src/email/` and paste the following code after replacing the values. You can generate credentials by following [these steps](https://github.com/ballerina-platform/module-ballerinax-googleapis.gmail/tree/v0.99.11#prerequisites).
-```toml
-[gmail]
-refreshToken = "<your-refresh-token>"
-clientId = "<your-client-id>"
-clientSecret =  "<your-client-secret>"
-```
-Change the directory into an src directory of the repository root, build the Docker images, and then execute the Docker-compose up.
+
+Then execute the `build-all-docker.sh` to build the ballerina packages and Docker images, and then execute the Docker-compose up to run the containers.
 ```bash
 ./build-all-docker.sh
 docker-compose up
 ```
 
-You can start the React application by executing following commands from the `src/ui/` directory.
+You can start the React application by executing following commands from the `ui/` directory.
 ```bash
 npm install
 npm start
@@ -48,19 +73,29 @@ npm start
 
 Kustomize is used for combining all the YAML files that have generated into one. You can execute the following command to build the final YAML file.
 ```
-kustomize build kubernetes > final.yaml
+kustomize build . > final.yaml
 ```
-If you are using Minikube, you can execute the following `.bash` script to build the Minikube cluster.
+If you are using Minikube, you can execute the following `build-all-minikube.sh` script to build the containers into minikube cluster so you won't have to push the containers manually.
 ```
 build-all-minikube.sh
 ```
 
-If you are not using Minikube, you have to push the artifacts to your Docker registry manually.  Make sure that the `Config.toml` file  in the `src/email/` directory is a secret before pushing to public Docker registries.
+If you are not using Minikube, you have to push the artifacts to your Docker registry manually.
 
-Finally, you can deploy the artifacts into Kubernetes using the following command.
+You can deploy the artifacts into Kubernetes using the following command.
 ```
 kubectl apply -f final.yaml
 ```
+You can expose the frontend service via node port to access the backend services from the react app.
+```
+kubectl expose deployment frontend-deployment --type=NodePort --name=frontend-svc-local
+```
+
+Execute `kubectl get svc` and get the port of the `frontend-svc-local` service.
+
+Execute `minikube ip` to get the ip of the minikube cluster.
+
+Change the value of the `FRONTEND_SVC_URL` variable in `ui/src/lib/api.js` to the frontend service (Example Value - http://192.168.49.2:32437')
 
 # Ballerina Highlights
 ## gRPC Support

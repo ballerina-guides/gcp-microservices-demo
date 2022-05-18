@@ -1,0 +1,10 @@
+[container.image]
+name="email-service"
+repository="wso2inc"
+tag="v0.1.0"
+
+[[cloud.secret.files]]
+file="./Config.toml"
+
+[cloud.deployment]
+internal_domain_name="email-service"
