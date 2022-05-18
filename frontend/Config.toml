@@ -1,0 +1,7 @@
+catalogHost="catalog-service" 
+cartHost="cart-service" 
+recommandHost="recommendation-service" 
+currencyHost="currency-service" 
+shippingHost="shipping-service" 
+checkoutHost="checkout-service" 
+adHost="ads-service"
