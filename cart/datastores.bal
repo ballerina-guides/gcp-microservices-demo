@@ -22,6 +22,7 @@ public type DataStore object {
     isolated function getCart(string userId) returns Cart;
 };
 
+# Description
 public isolated class InMemoryStore {
     *DataStore;
     private map<Cart> store = {};
