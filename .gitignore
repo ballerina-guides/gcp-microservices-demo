@@ -24,6 +24,6 @@ hs_err_pid*
 
 target
 .idea/
-src/email/Config.toml
-src/email/tests/Config.toml
+email/Config.toml
+email/tests/Config.toml
 node_modules

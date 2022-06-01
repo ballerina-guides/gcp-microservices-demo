@@ -1,0 +1,31 @@
+name: GCP Microservice Build
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - master
+
+jobs:
+  build:
+    if: github.repository_owner == 'ballerina-platform'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test: [ads, cart, checkout, currency, email, frontend, payment, productcatalog, recommendation, shipping]
+    env:
+      TEST_NAME: "${{ matrix.test }}"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Write Test Name to outputs
+      id: testname
+      run: |
+        echo "::set-output name=test-name::${TEST_NAME}"
+    - name: Ballerina Build
+      uses: ballerina-platform/ballerina-action@nightly
+      env:
+        WORKING_DIR: ${{ steps.testname.outputs.test-name }}
+      with:
+        args:
+          build
