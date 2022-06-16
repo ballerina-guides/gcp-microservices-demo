@@ -15,7 +15,8 @@ dependencies = [
 	{org = "ballerina", name = "grpc"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "test"},
-	{org = "ballerinai", name = "observe"}
+	{org = "ballerinai", name = "observe"},
+	{org = "ballerinax", name = "redis"}
 ]
 modules = [
 	{org = "anjana", packageName = "cart", moduleName = "cart"}
@@ -260,6 +261,17 @@ dependencies = [
 ]
 modules = [
 	{org = "ballerinai", packageName = "observe", moduleName = "observe"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "redis"
+version = "2.2.2"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerinax", packageName = "redis", moduleName = "redis"}
 ]
 
 

@@ -14,12 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerinax/redis;
+
 public type DataStore object {
-    isolated function add(string userId, string productId, int quantity);
+    isolated function add(string userId, string productId, int quantity) returns error?;
 
-    isolated function emptyCart(string userId);
+    isolated function emptyCart(string userId) returns error?;
 
-    isolated function getCart(string userId) returns Cart;
+    isolated function getCart(string userId) returns Cart|error;
 };
 
 # Description
@@ -75,19 +77,43 @@ public isolated class InMemoryStore {
 }
 
 public isolated class RedisStore {
-    //TODO impl redis store
     *DataStore;
-    private map<Cart> store = {};
+    private final redis:Client redisClient;
 
-    isolated function add(string userId, string productId, int quantity) {
+    function init() returns error? {
+        self.redisClient = check new ({
+            host: redisHost,
+            password: redisPassword
+        });
     }
 
-    isolated function emptyCart(string userId) {
-    }
-
-    isolated function getCart(string userId) returns Cart {
-        lock {
-            return self.store.get(userId).cloneReadOnly();
+    isolated function add(string userId, string productId, int quantity) returns error? {
+        map<any> existingItems = check self.redisClient->hMGet(userId, [productId]);
+        if existingItems.get(productId) == null {
+            map<int> itemsMap = {productId: quantity};
+            _ = check self.redisClient->hMSet(userId, itemsMap);
+        } else {
+            int existingQuantity = check int:fromString(existingItems.get(productId).toString());
+            existingItems[productId] = existingQuantity + quantity;
+            _ = check self.redisClient->hMSet(userId, existingItems);
         }
+    }
+
+    isolated function emptyCart(string userId) returns error? {
+        _ = check self.redisClient->del([userId]);
+    }
+
+    isolated function getCart(string userId) returns Cart|error {
+        map<any> userItems = check self.redisClient->hGetAll(userId);
+
+        CartItem[] items = [];
+        foreach [string, any] [productId, quantity] in userItems.entries() {
+            CartItem item = {
+                product_id: productId,
+                quantity: check int:fromString(quantity.toString())
+            };
+            items.push(item);
+        }
+        return {user_id: userId, items: items};
     }
 }
