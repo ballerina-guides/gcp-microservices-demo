@@ -52,6 +52,10 @@ AuthInterceptor authInterceptor = new;
     },
     interceptors: [authInterceptor]
 }
+@display {
+    label: "Frontend",
+    id: "frontend"
+}
 service / on ep {
 
     resource function get metadata(@http:Header {name: "Cookie"} string cookieHeader)
@@ -191,14 +195,14 @@ service / on ep {
         string userId = cookie.value;
         Product|error product = getProduct(req.productId);
         if product is error {
-            return <http:BadRequest> {
+            return <http:BadRequest>{
                 body: "invalid request" + product.message()
             };
         }
 
         check insertCart(userId, req.productId, req.quantity);
 
-        return <http:Ok> {
+        return <http:Ok>{
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
@@ -214,7 +218,7 @@ service / on ep {
         }
         string userId = cookie.value;
         check emptyCart(userId);
-        return <http:Ok> {
+        return <http:Ok>{
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },

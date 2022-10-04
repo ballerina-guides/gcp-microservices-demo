@@ -23,6 +23,10 @@ final CurrencyServiceClient currencyClient = check new ("http://" + currencyHost
 configurable string catalogHost = "localhost";
 final ProductCatalogServiceClient catalogClient = check new ("http://" + catalogHost + ":9091");
 configurable string cartHost = "localhost";
+@display {
+    label: "",
+    id: "cart"
+}
 final CartServiceClient cartClient = check new ("http://" + cartHost + ":9092");
 configurable string shippingHost = "localhost";
 final ShippingServiceClient shippingClient = check new ("http://" + shippingHost + ":9095");
