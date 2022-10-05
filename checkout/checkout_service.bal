@@ -27,6 +27,10 @@ configurable string shippingHost = "localhost";
 configurable string paymentHost = "localhost";
 configurable string emailHost = "localhost";
 
+@display {
+    label: "",
+    id: "checkout"
+}
 @grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
 service "CheckoutService" on ep {
     final CartServiceClient cartClient;

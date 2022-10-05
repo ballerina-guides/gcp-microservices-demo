@@ -20,6 +20,10 @@ import ballerina/io;
 listener grpc:Listener ep = new (9093);
 configurable string currencyJsonPath = "./data/currency_conversion.json";
 
+@display {
+    label: "",
+    id: "currency"
+}
 @grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
 service "CurrencyService" on ep {
     final map<decimal> & readonly currencyMap;

@@ -39,6 +39,10 @@ gmail:ConnectionConfig gmailConfig = {
 
 final gmail:Client gmailClient = check new (gmailConfig);
 
+@display {
+    label: "",
+    id: "email"
+}
 @grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
 service "EmailService" on ep {
 

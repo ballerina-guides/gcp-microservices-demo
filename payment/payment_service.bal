@@ -20,6 +20,10 @@ import ballerina/log;
 
 listener grpc:Listener ep = new (9096);
 
+@display {
+    label: "",
+    id: "payment"
+}
 @grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
 service "PaymentService" on ep {
 
