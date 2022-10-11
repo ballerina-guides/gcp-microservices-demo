@@ -26,6 +26,10 @@ configurable string catalogHost = "localhost";
 }
 @grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
 service "RecommendationService" on ep {
+    @display {
+        label: "",
+        id: "catalog"
+    }
     final ProductCatalogServiceClient catalogClient;
 
     function init() returns error? {

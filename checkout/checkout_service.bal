@@ -33,11 +33,35 @@ configurable string emailHost = "localhost";
 }
 @grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
 service "CheckoutService" on ep {
+    @display {
+        label: "",
+        id: "cart"
+    }
     final CartServiceClient cartClient;
+    @display {
+        label: "",
+        id: "catalog"
+    }
     final ProductCatalogServiceClient catalogClient;
+    @display {
+        label: "",
+        id: "currency"
+    }
     final CurrencyServiceClient currencyClient;
+    @display {
+        label: "",
+        id: "shipping"
+    }
     final ShippingServiceClient shippingClient;
+    @display {
+        label: "",
+        id: "payment"
+    }
     final PaymentServiceClient paymentClient;
+    @display {
+        label: "",
+        id: "email"
+    }
     final EmailServiceClient emailClient;
 
     function init() returns error? {
