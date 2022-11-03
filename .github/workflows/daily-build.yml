@@ -21,7 +21,7 @@ jobs:
       run: |
         echo "::set-output name=test-name::${TEST_NAME}"
     - name: Ballerina Build
-      uses: ballerina-platform/ballerina-action@nightly
+      uses: ballerina-platform/ballerina-action@master
       env:
         WORKING_DIR: ${{ steps.testname.outputs.test-name }}
       with:
