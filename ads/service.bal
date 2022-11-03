@@ -18,6 +18,10 @@ import ballerina/grpc;
 
 listener grpc:Listener adListener = new (9099);
 
+@display {
+    label: "",
+    id: "ads"
+}
 @grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
 service "AdService" on adListener {
     final AdStore store;

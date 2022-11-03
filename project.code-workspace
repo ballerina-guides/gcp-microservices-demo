@@ -1,0 +1,38 @@
+{
+	"folders": [
+		{
+			"path": "ads"
+		},
+		{
+			"path": "cart"
+		},
+		{
+			"path": "checkout"
+		},
+		{
+			"path": "currency"
+		},
+		{
+			"path": "email"
+		},
+		{
+			"path": "frontend"
+		},
+		{
+			"path": "payment"
+		},
+		{
+			"path": "productcatalog"
+		},
+		{
+			"path": "recommendation"
+		},
+		{
+			"path": "shipping"
+		},
+		{
+			"path": "ui"
+		}
+	],
+	"settings": {}
+}

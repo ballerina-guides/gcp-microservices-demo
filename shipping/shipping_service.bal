@@ -18,6 +18,10 @@ import ballerina/grpc;
 
 listener grpc:Listener ep = new (9095);
 
+@display {
+    label: "",
+    id: "shipping"
+}
 @grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
 service "ShippingService" on ep {
     final float SHIPPING_COST = 8.99;

@@ -22,6 +22,10 @@ configurable string redisHost = "";
 configurable string redisPassword = "";
 listener grpc:Listener ep = new (9092);
 
+@display {
+    label: "Cart",
+    id: "cart"
+}
 @grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
 service "CartService" on ep {
     private final DataStore store;

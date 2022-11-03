@@ -20,6 +20,10 @@ import ballerina/io;
 listener grpc:Listener ep = new (9091);
 configurable string productJsonPath = "./resources/products.json";
 
+@display {
+    label: "",
+    id: "catalog"
+}
 @grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
 service "ProductCatalogService" on ep {
     final Product[] & readonly products;
