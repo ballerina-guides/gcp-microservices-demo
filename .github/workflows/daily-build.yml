@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    if: github.repository_owner == 'ballerina-platform'
+    if: github.repository_owner == 'ballerina-guides'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -21,7 +21,7 @@ jobs:
       run: |
         echo "::set-output name=test-name::${TEST_NAME}"
     - name: Ballerina Build
-      uses: ballerina-platform/ballerina-action@nightly
+      uses: ballerina-platform/ballerina-action@master
       env:
         WORKING_DIR: ${{ steps.testname.outputs.test-name }}
       with:
