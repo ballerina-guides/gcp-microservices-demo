@@ -20,7 +20,7 @@ The online boutique is a cloud-native microservices demo application written by 
 | Ads | Provides text advertisements based on the context of the given words.
 
 
-Te same load generator service will be used for load testing. 
+The same load generator service will be used for load testing. 
 The original Go frontend service serves HTML directly using the HTTP server using Go template.  In this sample, the backend is separated from the Ballerina HTTP service and React frontend.
 
 # Service Implementation
