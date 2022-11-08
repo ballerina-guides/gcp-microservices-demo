@@ -17,7 +17,6 @@
 import ballerina/grpc;
 import ballerina/log;
 
-listener grpc:Listener ep = new (9090);
 configurable string catalogHost = "localhost";
 
 @display {
@@ -25,7 +24,7 @@ configurable string catalogHost = "localhost";
     id: "recommendation"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "RecommendationService" on ep {
+service "RecommendationService" on new grpc:Listener(9090) {
     @display {
         label: "",
         id: "catalog"

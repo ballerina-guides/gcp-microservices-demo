@@ -20,14 +20,13 @@ import ballerina/log;
 configurable string datastore = "";
 configurable string redisHost = "";
 configurable string redisPassword = "";
-listener grpc:Listener ep = new (9092);
 
 @display {
     label: "Cart",
     id: "cart"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "CartService" on ep {
+service "CartService" on new grpc:Listener(9092) {
     private final DataStore store;
 
     function init() returns error? {
@@ -42,25 +41,21 @@ service "CartService" on ep {
 
     remote function AddItem(AddItemRequest value) returns Empty|error {
         lock {
-            error? result = self.store.add(value.user_id, value.item.product_id, value.item.quantity);
-            if result is error {
-                return result;
-            }
+            check self.store.add(value.user_id, value.item.product_id, value.item.quantity);
         }
         return {};
     }
+
     remote function GetCart(GetCartRequest value) returns Cart|error {
         lock {
             Cart cart = check self.store.getCart(value.user_id);
             return cart.cloneReadOnly();
         }
     }
+
     remote function EmptyCart(EmptyCartRequest value) returns Empty|error {
         lock {
-            error? result = self.store.emptyCart(value.user_id);
-            if result is error {
-                return result;
-            }
+            check self.store.emptyCart(value.user_id);
         }
         return {};
     }

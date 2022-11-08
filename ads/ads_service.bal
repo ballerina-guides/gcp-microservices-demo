@@ -16,21 +16,19 @@
 
 import ballerina/grpc;
 
-listener grpc:Listener adListener = new (9099);
-
 @display {
     label: "",
     id: "ads"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "AdService" on adListener {
+service "AdService" on new grpc:Listener(9099) {
     final AdStore store;
 
     function init() {
         self.store = new AdStore();
     }
 
-    remote function GetAds(AdRequest request) returns AdResponse|error? {
+    remote function GetAds(AdRequest request) returns AdResponse|error {
         Ad[] ads = [];
         foreach string category in request.context_keys {
             Ad[] availableAds = self.store.getAdsByCategory(category);

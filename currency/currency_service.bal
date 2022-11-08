@@ -17,7 +17,6 @@
 import ballerina/grpc;
 import ballerina/io;
 
-listener grpc:Listener ep = new (9093);
 configurable string currencyJsonPath = "./data/currency_conversion.json";
 
 @display {
@@ -25,7 +24,7 @@ configurable string currencyJsonPath = "./data/currency_conversion.json";
     id: "currency"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "CurrencyService" on ep {
+service "CurrencyService" on new grpc:Listener(9093) {
     final map<decimal> & readonly currencyMap;
 
     function init() returns error? {

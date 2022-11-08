@@ -18,8 +18,6 @@ import ballerina/grpc;
 import ballerina/uuid;
 import ballerina/log;
 
-listener grpc:Listener ep = new (9094);
-
 configurable string cartHost = "localhost";
 configurable string catalogHost = "localhost";
 configurable string currencyHost = "localhost";
@@ -32,22 +30,25 @@ configurable string emailHost = "localhost";
     id: "checkout"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "CheckoutService" on ep {
+service "CheckoutService" on new grpc:Listener(9094) {
     @display {
         label: "",
         id: "cart"
     }
     final CartServiceClient cartClient;
+
     @display {
         label: "",
         id: "catalog"
     }
     final ProductCatalogServiceClient catalogClient;
+
     @display {
         label: "",
         id: "currency"
     }
     final CurrencyServiceClient currencyClient;
+
     @display {
         label: "",
         id: "shipping"
@@ -58,6 +59,7 @@ service "CheckoutService" on ep {
         id: "payment"
     }
     final PaymentServiceClient paymentClient;
+
     @display {
         label: "",
         id: "email"
@@ -95,7 +97,7 @@ service "CheckoutService" on ep {
         string shippingTrackingId = check self.shipOrder(value.address, userCartItems);
         check self.emptyUserCart(value.user_id);
 
-        OrderResult orderRes = {
+        OrderResult 'order = {
             order_id: orderId,
             shipping_tracking_id: shippingTrackingId,
             shipping_cost: shippingPrice,
@@ -103,11 +105,9 @@ service "CheckoutService" on ep {
             items: orderItems
         };
 
-        check self.confirmationMail(value.email, orderRes);
+        check self.confirmationMail(value.email, 'order);
 
-        return {
-            'order: orderRes
-        };
+        return {'order};
     }
 
     function getUserCart(string userId, string userCurrency) returns CartItem[]|error {
@@ -141,7 +141,7 @@ service "CheckoutService" on ep {
                 return money;
             }
             orderItems.push({
-                item: item,
+                item,
                 cost: money
             });
         }
@@ -151,7 +151,7 @@ service "CheckoutService" on ep {
     function quoteShipping(Address address, CartItem[] items) returns Money|error {
         GetQuoteRequest req = {
             address: address,
-            items: items
+            items
         };
         GetQuoteResponse|grpc:Error getQuoteResponse = self.shippingClient->GetQuote(req);
         if getQuoteResponse is grpc:Error {
@@ -162,24 +162,24 @@ service "CheckoutService" on ep {
     }
 
     function convertCurrency(Money usd, string userCurrency) returns Money|error {
-        CurrencyConversionRequest req1 = {
+        CurrencyConversionRequest conversionRequest = {
             'from: usd,
             to_code: userCurrency
         };
-        Money|grpc:Error convert = self.currencyClient->Convert(req1);
+        Money|grpc:Error convert = self.currencyClient->Convert(conversionRequest);
         if convert is grpc:Error {
             log:printError("failed to call convert from currency service", 'error = convert);
             return convert;
         }
-        return self.currencyClient->Convert(req1);
+        return self.currencyClient->Convert(conversionRequest);
     }
 
     function chargeCard(Money total, CreditCardInfo card) returns string|error {
-        ChargeRequest req = {
+        ChargeRequest chargeRequest = {
             amount: total,
             credit_card: card
         };
-        ChargeResponse|grpc:Error chargeResponse = self.paymentClient->Charge(req);
+        ChargeResponse|grpc:Error chargeResponse = self.paymentClient->Charge(chargeRequest);
         if chargeResponse is grpc:Error {
             log:printError("failed to call charge from payment service", 'error = chargeResponse);
             return chargeResponse;
@@ -188,8 +188,8 @@ service "CheckoutService" on ep {
     }
 
     function shipOrder(Address address, CartItem[] items) returns string|error {
-        ShipOrderRequest req = {};
-        ShipOrderResponse|grpc:Error getSupportedCurrenciesResponse = self.shippingClient->ShipOrder(req);
+        ShipOrderRequest orderRequest = {};
+        ShipOrderResponse|grpc:Error getSupportedCurrenciesResponse = self.shippingClient->ShipOrder(orderRequest);
         if getSupportedCurrenciesResponse is grpc:Error {
             log:printError("failed to call shipOrder from shipping service", 'error = getSupportedCurrenciesResponse);
             return getSupportedCurrenciesResponse;
@@ -198,10 +198,10 @@ service "CheckoutService" on ep {
     }
 
     function emptyUserCart(string userId) returns error? {
-        EmptyCartRequest req = {
+        EmptyCartRequest request = {
             user_id: userId
         };
-        Empty|grpc:Error emptyCart = self.cartClient->EmptyCart(req);
+        Empty|grpc:Error emptyCart = self.cartClient->EmptyCart(request);
         if emptyCart is grpc:Error {
             log:printError("failed to call emptyCart from cart service", 'error = emptyCart);
             return emptyCart;
@@ -209,11 +209,11 @@ service "CheckoutService" on ep {
     }
 
     function confirmationMail(string email, OrderResult orderRes) returns error? {
-        SendOrderConfirmationRequest req = {
+        SendOrderConfirmationRequest orderConfirmRequest = {
             email: email,
             'order: orderRes
         };
-        Empty|grpc:Error sendOrderConfirmation = self.emailClient->SendOrderConfirmation(req);
+        Empty|grpc:Error sendOrderConfirmation = self.emailClient->SendOrderConfirmation(orderConfirmRequest);
         if sendOrderConfirmation is grpc:Error {
             log:printError("failed to call sendOrderConfirmation from email service", 'error = sendOrderConfirmation);
             return sendOrderConfirmation;
