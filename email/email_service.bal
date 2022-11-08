@@ -43,7 +43,7 @@ final gmail:Client gmailClient = check new (gmailConfig);
     label: "",
     id: "email"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "EmailService" on ep {
 
     isolated remote function SendOrderConfirmation(SendOrderConfirmationRequest value) returns Empty|error {

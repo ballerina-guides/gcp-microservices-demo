@@ -22,7 +22,7 @@ listener grpc:Listener adListener = new (9099);
     label: "",
     id: "ads"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "AdService" on adListener {
     final AdStore store;
 

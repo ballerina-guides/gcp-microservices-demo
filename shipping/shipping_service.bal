@@ -22,7 +22,7 @@ listener grpc:Listener ep = new (9095);
     label: "",
     id: "shipping"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "ShippingService" on ep {
     final float SHIPPING_COST = 8.99;
 

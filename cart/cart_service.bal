@@ -26,7 +26,7 @@ listener grpc:Listener ep = new (9092);
     label: "Cart",
     id: "cart"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "CartService" on ep {
     private final DataStore store;
 

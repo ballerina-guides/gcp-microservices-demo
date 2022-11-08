@@ -31,7 +31,7 @@ configurable string emailHost = "localhost";
     label: "",
     id: "checkout"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "CheckoutService" on ep {
     @display {
         label: "",

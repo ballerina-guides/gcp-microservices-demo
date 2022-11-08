@@ -24,7 +24,7 @@ configurable string catalogHost = "localhost";
     label: "",
     id: "recommendation"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "RecommendationService" on ep {
     @display {
         label: "",

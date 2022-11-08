@@ -24,7 +24,7 @@ configurable string currencyJsonPath = "./data/currency_conversion.json";
     label: "",
     id: "currency"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "CurrencyService" on ep {
     final map<decimal> & readonly currencyMap;
 

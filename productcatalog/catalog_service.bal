@@ -24,7 +24,7 @@ configurable string productJsonPath = "./resources/products.json";
     label: "",
     id: "catalog"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "ProductCatalogService" on ep {
     final Product[] & readonly products;
 

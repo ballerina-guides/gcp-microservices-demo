@@ -24,7 +24,7 @@ listener grpc:Listener ep = new (9096);
     label: "",
     id: "payment"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "PaymentService" on ep {
 
     isolated remote function Charge(ChargeRequest value) returns ChargeResponse|error {
