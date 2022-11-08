@@ -32,7 +32,7 @@ import ballerina/grpc;
 
 listener grpc:Listener adListener = new (9099);
 
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "AdService" on adListener {
 
     remote function GetAds(AdRequest request) returns AdResponse|error? {
@@ -71,7 +71,7 @@ Ballerina Language provides an in-built functionality to configure values at run
 listener grpc:Listener ep = new (9090);
 configurable string catalogHost = "localhost";
 
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "RecommendationService" on ep {
     final ProductCatalogServiceClient catalogClient;
 
@@ -430,7 +430,7 @@ The Catalog Service maintains a list of products available in the store. The pro
 listener grpc:Listener ep = new (9091);
 configurable string productJsonPath = "./resources/products.json";
 
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "ProductCatalogService" on ep {
     final Product[] & readonly products;
 
