@@ -16,16 +16,21 @@
 
 import ballerina/grpc;
 
+# Gives the shipping cost estimates based on the shopping cart.
 @display {
     label: "",
     id: "shipping"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "ShippingService" on new grpc:Listener(9095) {
-    final float SHIPPING_COST = 8.99;
+isolated service "ShippingService" on new grpc:Listener(9095) {
+    private final float SHIPPING_COST = 8.99;
 
-    isolated remote function GetQuote(GetQuoteRequest value) returns GetQuoteResponse|error {
-        CartItem[] items = value.items;
+    # Provides a quote with shipping cost.
+    #
+    # + request - `GetQuoteRequest` contaning the user's selected items
+    # + return - `GetQuoteResponse` containing the shipping cost 
+    isolated remote function GetQuote(GetQuoteRequest request) returns GetQuoteResponse|error {
+        CartItem[] items = request.items;
         int count = 0;
         float cost = 0.0;
         foreach CartItem item in items {
@@ -38,15 +43,19 @@ service "ShippingService" on new grpc:Listener(9095) {
         float cents = cost % 1;
         int dollars = <int>(cost - cents);
 
-        Money money = {currency_code: "USD", nanos: <int>cents * 10000000, units: dollars};
+        Money usdCost = {currency_code: "USD", nanos: <int>cents * 10000000, units: dollars};
 
         return {
-            cost_usd: money
+            cost_usd: usdCost
         };
     }
 
-    isolated remote function ShipOrder(ShipOrderRequest value) returns ShipOrderResponse|error {
-        Address address = value.address;
+    # Ships the order and provide a tracking id.
+    #
+    # + request - `ShipOrderRequest` containing the address and the user's order items
+    # + return - `ShipOrderResponse` containing the tracking id or an error
+    isolated remote function ShipOrder(ShipOrderRequest request) returns ShipOrderResponse|error {
+        Address address = request.address;
         return {
             tracking_id: generateTrackingId(string `${address.street_address}, ${address.city}, ${address.state}`)
         };

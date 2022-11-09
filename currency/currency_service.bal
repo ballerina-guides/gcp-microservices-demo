@@ -19,24 +19,34 @@ import ballerina/io;
 
 configurable string currencyJsonPath = "./data/currency_conversion.json";
 
+# This service is used read the exchange rates from a JSON and convert one currency value to another.
 @display {
     label: "",
     id: "currency"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "CurrencyService" on new grpc:Listener(9093) {
-    final map<decimal> & readonly currencyMap;
+isolated service "CurrencyService" on new grpc:Listener(9093) {
+    private final map<decimal> & readonly currencyMap;
 
-    function init() returns error? {
+    isolated function init() returns error? {
         json currencyJson = check io:fileReadJson(currencyJsonPath);
         self.currencyMap = check parseCurrencyJson(currencyJson).cloneReadOnly();
     }
 
-    remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse|error {
+    # Provides the set of supported currencies.
+    #
+    # + request - an empty request
+    # + return - `GetSupportedCurrenciesResponse` containing supported currencies or else and error
+    isolated remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse|error {
         return {currency_codes: self.currencyMap.keys()};
 
     }
-    remote function Convert(CurrencyConversionRequest request) returns Money|error {
+
+    # Converts a specific `Money` value to a required currency.
+    #
+    # + request - `CurrencyConversionRequest` containing the `Money` value and the required currency
+    # + return - returns the `Money` in the required currency or an error
+    isolated remote function Convert(CurrencyConversionRequest request) returns Money|error {
         Money moneyFrom = request.'from;
         final decimal fractionSize = 1000000000;
         //From Unit
@@ -62,13 +72,12 @@ service "CurrencyService" on new grpc:Listener(9093) {
     }
 }
 
-isolated function parseCurrencyJson(json jsonContents) returns map<decimal>|error {
+isolated function parseCurrencyJson(json currencyJson) returns map<decimal>|error {
     map<decimal> currencies = {};
-    map<string> originalValues = check jsonContents.cloneWithType();
+    map<string> currencyValues = check currencyJson.cloneWithType();
 
-    foreach string key in originalValues.keys() {
-        string value = originalValues.get(key);
-        currencies[key] = check decimal:fromString(value);
+    foreach string key in currencyValues.keys() {
+        currencies[key] = check decimal:fromString(currencyValues.get(key));
     }
     return currencies;
 }

@@ -14,23 +14,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# checks if specified value has a valid units/nanos signs and ranges.
+# Checks if specified value has a valid units/nanos signs and ranges.
 #
-# + m - object to be validated
+# + money - object to be validated
 # + return - Validity
-isolated function isValid(Money m) returns boolean {
-    return signMatches(m) && validNanos(m.nanos);
+isolated function isValid(Money money) returns boolean {
+    return signMatches(money) && validNanos(money.nanos);
 }
 
-# checks if the sign matches
+# Checks if the sign matches.
 #
-# + m - object to be validated
+# + money - object to be validated
 # + return - validity status
-isolated function signMatches(Money m) returns boolean {
-    return m.nanos == 0 || m.units == 0 || (m.nanos < 0) == (m.units < 0);
+isolated function signMatches(Money money) returns boolean {
+    return money.nanos == 0 || money.units == 0 || (money.nanos < 0) == (money.units < 0);
 }
 
-# checks if nanos are valid
+# Checks if nanos are valid.
 #
 # + nanos - nano input
 # + return - validity status
@@ -38,31 +38,31 @@ isolated function validNanos(int nanos) returns boolean {
     return -999999999 <= nanos && nanos <= +999999999;
 }
 
-# checks if the money is zero
+# Checks if the money is zero.
 #
-# + m - object to be validated
+# + money - object to be validated
 # + return - zero status
-isolated function isZero(Money m) returns boolean {
-    return m.units == 0 && m.nanos == 0;
+isolated function isZero(Money money) returns boolean {
+    return money.units == 0 && money.nanos == 0;
 }
 
-# returns true if the specified money value is valid and is positive.
+# Returns true if the specified money value is valid and is positive.
 #
-# + m - object to the validated
+# + money - object to the validated
 # + return - positive status
-isolated function isPositive(Money m) returns boolean {
-    return isValid(m) && m.units > 0 || (m.units == 0 && m.nanos > 0);
+isolated function isPositive(Money money) returns boolean {
+    return isValid(money) && money.units > 0 || (money.units == 0 && money.nanos > 0);
 }
 
-# returns true if the specified money value is valid and is negative.
+# Returns true if the specified money value is valid and is negative.
 #
-# + m - object to the validated
+# + money - object to the validated
 # + return - negative status
-isolated function isNegative(Money m) returns boolean {
-    return isValid(m) && m.units < 0 || (m.units == 0 && m.nanos < 0);
+isolated function isNegative(Money money) returns boolean {
+    return isValid(money) && money.units < 0 || (money.units == 0 && money.nanos < 0);
 }
 
-# returns true if values l and r have a currency code and they are the same values.
+# Returns true if values l and r have a currency code and they are the same values.
 #
 # + l - first money object
 # + r - second money object
@@ -71,7 +71,7 @@ isolated function areSameCurrency(Money l, Money r) returns boolean {
     return l.currency_code == r.currency_code && l.currency_code != "";
 }
 
-# returns true if values l and r are the equal, including the currency.
+# Returns true if values l and r are the equal, including the currency.
 #
 # + l - first money object
 # + r - second money object
@@ -81,19 +81,19 @@ isolated function areEquals(Money l, Money r) returns boolean {
 l.units == r.units && l.nanos == r.nanos;
 }
 
-# negate returns the same amount with the sign negated.
+# Negate returns the same amount with the sign negated.
 #
-# + m - object to be negated
+# + money - object to be negated
 # + return - negated money object
-isolated function negate(Money m) returns Money {
+isolated function negate(Money money) returns Money {
     return {
-        units: -m.units,
-        nanos: -m.nanos,
-        currency_code: m.currency_code
+        units: -money.units,
+        nanos: -money.nanos,
+        currency_code: money.currency_code
     };
 }
 
-# sum adds two values.
+# Sum adds two values.
 #
 # + l - first money object
 # + r - second money object
@@ -127,16 +127,16 @@ isolated function sum(Money l, Money r) returns Money {
     };
 }
 
-# slow multiplication operation done through adding the value to itself n-1 times.
+# Slow multiplication operation done through adding the value to itself n-1 times.
 #
-# + m - money object to be multiplied
-# + n - multiply factor
+# + money - money object to be multiplied
+# + factor - multiply factor
 # + return - multiplied money object
-isolated function multiplySlow(Money m, int n) returns Money {
-    int t = n;
-    Money out = m;
+isolated function multiplySlow(Money money, int factor) returns Money {
+    int t = factor;
+    Money out = money;
     while t > 1 {
-        out = sum(out, m);
+        out = sum(out, money);
         t = t - 1;
     }
     return out;

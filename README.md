@@ -10,7 +10,7 @@ The online boutique is a cloud-native microservices demo application written by 
 |-------------|-------------|
 | Frontend | Exposes an HTTP server to outside to serve data required for the React app. Acts as a frontend for all the backend microservices and abstracts the functionality.|
 | Cart | Stores the product items added to the cart and retrieves them. In memory store and Redis is supported as storage option.
-| ProductCatalog | Reads a list of products from a JSON file and provides the ability to search products and get then individually.
+| ProductCatalog | Reads a list of products from a JSON file and provides the ability to search products and get them individually.
 | Currency | Reads the exchange rates from a JSON and converts one currency value to another.
 | Payment | Validates the card details (using the Luhn algorithm) against the supported card providers and returns a transaction ID. (Mock)
 | Shipping | Gives the shipping cost estimates based on the shopping cart. Returns a tracking ID. (Mock)
