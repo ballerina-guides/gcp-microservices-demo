@@ -22,7 +22,7 @@ import ballerina/grpc;
     id: "ads"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "AdService" on new grpc:Listener(9099) {
+isolated service "AdService" on new grpc:Listener(9099) {
     private final AdStore store;
 
     isolated function init() {

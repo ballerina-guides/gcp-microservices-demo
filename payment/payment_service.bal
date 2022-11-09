@@ -24,7 +24,7 @@ import ballerina/uuid;
     id: "payment"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "PaymentService" on new grpc:Listener(9096) {
+isolated service "PaymentService" on new grpc:Listener(9096) {
 
     # Validate and charge the amount from the card.
     #

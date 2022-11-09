@@ -22,7 +22,7 @@ import ballerina/grpc;
     id: "shipping"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "ShippingService" on new grpc:Listener(9095) {
+isolated service "ShippingService" on new grpc:Listener(9095) {
     private final float SHIPPING_COST = 8.99;
 
     # Provides a quote with shipping cost.

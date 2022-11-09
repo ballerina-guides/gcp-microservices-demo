@@ -25,7 +25,7 @@ configurable string currencyJsonPath = "./data/currency_conversion.json";
     id: "currency"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "CurrencyService" on new grpc:Listener(9093) {
+isolated service "CurrencyService" on new grpc:Listener(9093) {
     private final map<decimal> & readonly currencyMap;
 
     isolated function init() returns error? {

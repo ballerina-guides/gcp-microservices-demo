@@ -31,7 +31,7 @@ configurable string emailHost = "localhost";
     id: "checkout"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "CheckoutService" on new grpc:Listener(9094) {
+isolated service "CheckoutService" on new grpc:Listener(9094) {
     @display {
         label: "",
         id: "cart"

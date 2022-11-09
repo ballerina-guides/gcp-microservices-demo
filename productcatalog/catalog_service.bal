@@ -25,7 +25,7 @@ configurable string productJsonPath = "./resources/products.json";
     id: "catalog"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "ProductCatalogService" on new grpc:Listener(9091) {
+isolated service "ProductCatalogService" on new grpc:Listener(9091) {
     private final Product[] & readonly products;
 
     isolated function init() returns error? {
