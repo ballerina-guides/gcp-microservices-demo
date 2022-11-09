@@ -19,6 +19,7 @@ import ballerina/io;
 
 configurable string currencyJsonPath = "./data/currency_conversion.json";
 
+# This service is used read the exchange rates from a JSON and convert one currency value to another.
 @display {
     label: "",
     id: "currency"
@@ -32,11 +33,19 @@ service "CurrencyService" on new grpc:Listener(9093) {
         self.currencyMap = check parseCurrencyJson(currencyJson).cloneReadOnly();
     }
 
+    # Provides the set of supported currencies.
+    #
+    # + request - an empty request
+    # + return - `GetSupportedCurrenciesResponse` containing supported currencies or else and error
     isolated remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse|error {
         return {currency_codes: self.currencyMap.keys()};
 
     }
 
+    # Converts a specific `Money` value to a required currency.
+    #
+    # + request - `CurrencyConversionRequest` containing the `Money` value and the required currency
+    # + return - returns the `Money` in the required currency or an error
     isolated remote function Convert(CurrencyConversionRequest request) returns Money|error {
         Money moneyFrom = request.'from;
         final decimal fractionSize = 1000000000;
