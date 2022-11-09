@@ -33,7 +33,7 @@ isolated service "RecommendationService" on new grpc:Listener(9090) {
     private final ProductCatalogServiceClient catalogClient;
 
     isolated function init() returns error? {
-        self.catalogClient = check new ("http://" + catalogHost + ":9091");
+        self.catalogClient = check new (string `http://${catalogHost}:9091`);
     }
 
     # Provides a product list according to the request.
@@ -44,12 +44,13 @@ isolated service "RecommendationService" on new grpc:Listener(9090) {
         ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
         if listProducts is grpc:Error {
             log:printError("failed to call ListProducts of catalog service", 'error = listProducts);
-            return listProducts;
+            return error grpc:InternalError("failed to get list of products from catalog service", listProducts);
         }
 
         return {
             product_ids: from Product product in listProducts.products
                 where request.product_ids.indexOf(product.id) is ()
+                limit 5
                 select product.id
         };
     }
