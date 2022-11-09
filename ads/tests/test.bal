@@ -20,7 +20,7 @@ import ballerina/test;
 function listProductsTest() returns error? {
     AdServiceClient adClient = check new ("http://localhost:9099");
     AdRequest request = {
-        context_keys: []
+        context_keys: ["accessories"]
     };
 
     AdResponse response = check adClient->GetAds(request);

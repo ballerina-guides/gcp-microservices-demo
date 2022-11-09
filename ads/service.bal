@@ -36,11 +36,9 @@ service "AdService" on adListener {
             Ad[] availableAds = self.store.getAdsByCategory(category);
             ads.push(...availableAds);
         }
-
         if ads.length() == 0 {
             ads = check self.store.getRandomAds();
         }
-
         return {
             ads: ads
         };

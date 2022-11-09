@@ -18,20 +18,18 @@ import ballerina/random;
 
 readonly class AdStore {
 
-    final map<Ad[]> & readonly ads;
+    private final map<Ad[]> & readonly ads;
     private final int MAX_ADS_TO_SERVE = 2;
 
     isolated function init() {
-        self.ads =  getAds().cloneReadOnly();
+        self.ads = getAds().cloneReadOnly();
     }
 
     public isolated function getRandomAds() returns Ad[]|error {
         Ad[] allAds = [];
-
         foreach Ad[] ads in self.ads {
             allAds.push(...ads);
         }
-
         Ad[] randomAds = [];
         foreach int i in 0 ..< self.MAX_ADS_TO_SERVE {
             randomAds.push(allAds[check random:createIntInRange(0, allAds.length())]);
@@ -82,6 +80,6 @@ isolated function getAds() returns map<Ad[]> {
         "footwear": [loafers],
         "hair": [hairdryer],
         "decor": [candleHolder],
-        "kitchen":[bambooGlassJar, mug]
+        "kitchen": [bambooGlassJar, mug]
     };
 }
