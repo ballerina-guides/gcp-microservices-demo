@@ -89,8 +89,8 @@ public isolated class RedisStore {
 
     isolated function add(string userId, string productId, int quantity) returns error? {
         map<any> existingItems = check self.redisClient->hMGet(userId, [productId]);
-        if existingItems.get(productId) == null {
-            map<int> itemsMap = {productId: quantity};
+        if existingItems.get(productId) is () {
+            map<int> itemsMap = {[productId] : quantity};
             _ = check self.redisClient->hMSet(userId, itemsMap);
         } else {
             int existingQuantity = check int:fromString(existingItems.get(productId).toString());
