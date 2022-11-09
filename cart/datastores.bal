@@ -16,15 +16,30 @@
 
 import ballerinax/redis;
 
+# Provides the interface for the RedisStore and InMemoryStore
 public type DataStore distinct object {
+    # Adds an item to the store.
+    #
+    # + userId - user's id
+    # + productId - related productId 
+    # + quantity - related product quantity
+    # + return - an error if an error occured while adding, else ()
     isolated function add(string userId, string productId, int quantity) returns error?;
 
+    # Clears the cart of the related user.
+    #
+    # + userId - user id of the user
+    # + return - an error if an error occured while emptying, else ()
     isolated function emptyCart(string userId) returns error?;
 
+    # Provides the carts of specific users.
+    #
+    # + userId - user id of the user whose cart is required
+    # + return - `Cart` or an error if error occurs
     isolated function getCart(string userId) returns Cart|error;
 };
 
-# Description
+# Provides in-memory functionalities by using a `map<Cart>`.
 public isolated class InMemoryStore {
     *DataStore;
     private map<Cart> store = {};
@@ -76,6 +91,7 @@ public isolated class InMemoryStore {
     }
 }
 
+# Uses a `redis:Client` to provide the cart functionalities.
 public isolated class RedisStore {
     *DataStore;
     private final redis:Client redisClient;
