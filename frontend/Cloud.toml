@@ -8,3 +8,4 @@ internal_domain_name="frontend-service"
 
 [[cloud.config.files]]
 file="./k8s/Config.toml"
+name="frontend-config" 
