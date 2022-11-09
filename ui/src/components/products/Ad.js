@@ -15,19 +15,24 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+import PropTypes from 'prop-types';
 
 const Ad = (props) => {
     return (
-    <div class="container py-3 px-lg-5 py-lg-5">
-        <div role="alert">
-            <strong>Ad</strong>
-            <a href={props.redirect_url} rel="nofollow" >
-                {props.text}
-            </a>
+        <div className="container py-3 px-lg-5 py-lg-5">
+            <div role="alert">
+                <strong>Ad</strong>
+                <a href={props.redirect_url} rel="nofollow" >
+                    {props.text}
+                </a>
+            </div>
         </div>
-    </div>
     );
-  };
-  
-  export default Ad;
-  
+};
+
+Ad.propTypes = {
+    redirect_url: PropTypes.string,
+    text: PropTypes.string
+};
+
+export default Ad;

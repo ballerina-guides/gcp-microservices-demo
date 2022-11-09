@@ -19,8 +19,8 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import Header from '../components/products/Header';
 import Footer from '../components/products/Footer';
-import CartItem from "../components/products/CartItem";
-import ExpireOptionPicker from "../components/products/ExpireOptionPicker";
+import CartItem from '../components/products/CartItem';
+import ExpireOptionPicker from '../components/products/ExpireOptionPicker';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
 import useHttp from '../hooks/use-http';
 import { getCartPage, checkout } from '../lib/api';
@@ -35,7 +35,7 @@ const CartPage = () => {
     const cityRef = useRef();
     const stateRef = useRef();
     const countryRef = useRef();
-    const cardNumberRef = useRef(); 
+    const cardNumberRef = useRef();
     const expireMonthRef = useRef();
     const expireYearRef = useRef();
     const cvvRef = useRef();
@@ -54,19 +54,19 @@ const CartPage = () => {
         const expireYear = expireYearRef.current.value;
         const cvv = cvvRef.current.value;
 
-        let data = {
-            email: email,
-            street_address : address,
+        const data = {
+            email,
+            street_address: address,
             zip_code: parseInt(zip),
-            city : city,
-            state : state,
-            country : country,
-            credit_card_number : cardNumber,
-            credit_card_expiration_month : parseInt(expireMonth),
-            credit_card_expiration_year : parseInt(expireYear),
-            credit_card_cvv : parseInt(cvv)
-        }
-        let data1 = await checkout(data);
+            city,
+            state,
+            country,
+            credit_card_number: cardNumber,
+            credit_card_expiration_month: parseInt(expireMonth),
+            credit_card_expiration_year: parseInt(expireYear),
+            credit_card_cvv: parseInt(cvv)
+        };
+        const data1 = await checkout(data);
         setSubmitted(data1);
     }
 
@@ -75,204 +75,154 @@ const CartPage = () => {
         true
     );
 
-      useEffect(() => {
+    useEffect(() => {
         sendRequest();
-      }, [sendRequest]);
+    }, [sendRequest]);
 
-      if (status === 'pending') {
+    if (status === 'pending') {
         return (
-          <div className='centered'>
-            <LoadingSpinner />
-          </div>
+            <div className='centered'>
+                <LoadingSpinner />
+            </div>
         );
-      }
+    }
 
-      if (error) {
+    if (error) {
         return <p className='centered focused'>{error}</p>;
-      }
+    }
 
-      let data = cartData;
-    // let data = {
-    //     session_id: "user 1",
-    //     request_id: "req 1",
-    //     user_currency: "usd",
-    //     show_currency: true,
-    //     currencies: ["USD", "EUR", "YEN"],
-    //     cart_size: 5,
-    //     banner_color: "red",
-    //     platform_css: "local",
-    //     platform_name: "local",
-    //     is_cymbal_brand: false,
-    //     recommendations: [{
-    //         "id": "L9ECAV7KIM",
-    //         "name": "Loafers",
-    //         "description": "A neat addition to your summer wardrobe.",
-    //         "picture": "/static/img/products/loafers.jpg",
-    //     }, {
-    //         "id": "2ZYFJ3GM2N",
-    //         "name": "Hairdryer",
-    //         "description": "This lightweight hairdryer has 3 heat and speed settings. It's perfect for travel.",
-    //         "picture": "/static/img/products/hairdryer.jpg",
-    //     }],
-    //     items: [{
-    //         product: {
-    //             id: "OLJCESPC7Z",
-    //             name: "Sunglasses",
-    //             description: "Add a modern touch to your outfits with these sleek aviator sunglasses.",
-    //             picture: "/static/img/products/sunglasses.jpg"
-    //         },
-    //         price: "15.99$",
-    //         quantity: 2
-    //     }, {
-    //         product: {
-    //             id: "66VCHSJNUP",
-    //             name: "Tank Top",
-    //             description: "Perfectly cropped cotton tank, with a scooped neckline.",
-    //             picture: "/static/img/products/tank-top.jpg",
-    //         },
-    //         price: "10.00$",
-    //         quantity: 2
-    //     }],
-    //     shipping_cost: "$9.99",
-    //     total_cost: "$35.99",
-    //     expiration_years: [2022, 2023, 2024, 2025]
-    // }
+    const data = cartData;
+    const cart = data.items;
 
-    let cart = data.items;
+    const recommendations = data.recommendations;
 
-    let recommendations = data.recommendations
+    const shippingCost = data.shipping_cost;
+    const totalCost = data.total_cost;
 
-    let shippingCost = data.shipping_cost
-    let totalCost = data.total_cost
-
-    const cartItemsList = []
+    const cartItemsList = [];
     for (const [index, val] of cart.entries()) {
-        let value = val.product
-        cartItemsList.push(<CartItem key={index} id={value.id} picture={value.picture} name={value.name} price={val.price} quantity={val.quantity} />)
+        const value = val.product;
+        cartItemsList.push(
+            <CartItem
+                key={index}
+                id={value.id}
+                picture={value.picture}
+                name={value.name}
+                price={val.price}
+                quantity={val.quantity}
+            />
+        );
     }
 
-
-    let expireOptionList = []
+    const expireOptionList = [];
     for (const [index, value] of data.expiration_years.entries()) {
-        expireOptionList.push(<ExpireOptionPicker key={index} year={value} />)
+        expireOptionList.push(<ExpireOptionPicker key={index} year={value} />);
     }
 
-    let cartBlock = <section class="empty-cart-section">
+    let cartBlock = <section className="empty-cart-section">
         <h3>Your shopping cart is empty!</h3>
         <p>Items you add to your shopping cart will appear here.</p>
-        <a class="cymbal-button-primary" href="/" role="button">Continue Shopping</a>
+        <a className="cymbal-button-primary" href="/" role="button">Continue Shopping</a>
     </section>;
 
     if (cart.length > 0) {
-        cartBlock = <section class="container">
-            <div class="row">
-
-                <div class="col-lg-6 col-xl-5 offset-xl-1 cart-summary-section">
-
-                    <div class="row mb-3 py-2">
-                        <div class="col-4 pl-md-0">
+        cartBlock = <section className="container">
+            <div className="row">
+                <div className="col-lg-6 col-xl-5 offset-xl-1 cart-summary-section">
+                    <div className="row mb-3 py-2">
+                        <div className="col-4 pl-md-0">
                             <h3>Cart ({cart.length})</h3>
                         </div>
-                        <div class="col-8 pr-md-0 text-right">
+                        <div className="col-8 pr-md-0 text-right">
                             <form method="POST" action="/cart/empty">
-                                <button class="cymbal-button-secondary cart-summary-empty-cart-button" type="submit">
+                                <button className="cymbal-button-secondary cart-summary-empty-cart-button" type="submit">
                                     Empty Cart
                                 </button>
-                                <a class="cymbal-button-primary" href="/" role="button">
+                                <a className="cymbal-button-primary" href="/" role="button">
                                     Continue Shopping
                                 </a>
                             </form>
                         </div>
                     </div>
                     {cartItemsList}
-                    <div class="row cart-summary-shipping-row">
-                        <div class="col pl-md-0">Shipping</div>
-                        <div class="col pr-md-0 text-right">{shippingCost}</div>
+                    <div className="row cart-summary-shipping-row">
+                        <div className="col pl-md-0">Shipping</div>
+                        <div className="col pr-md-0 text-right">{shippingCost}</div>
                     </div>
-
-                    <div class="row cart-summary-total-row">
-                        <div class="col pl-md-0">Total</div>
-                        <div class="col pr-md-0 text-right">{totalCost}</div>
+                    <div className="row cart-summary-total-row">
+                        <div className="col pl-md-0">Total</div>
+                        <div className="col pr-md-0 text-right">{totalCost}</div>
                     </div>
-
                 </div>
-
-                <div class="col-lg-5 offset-lg-1 col-xl-4">
-
-                    <form class="cart-checkout-form" onSubmit={submitFormHandler}>
-
-                        <div class="row">
-                            <div class="col">
+                <div className="col-lg-5 offset-lg-1 col-xl-4">
+                    <form className="cart-checkout-form" onSubmit={submitFormHandler}>
+                        <div className="row">
+                            <div className="col">
                                 <h3>Shipping Address</h3>
                             </div>
                         </div>
-
-                        <div class="form-row">
-                            <div class="col cymbal-form-field">
-                                <label for="email">E-mail Address</label>
+                        <div className="form-row">
+                            <div className="col cymbal-form-field">
+                                <label htmlFor="email">E-mail Address</label>
                                 <input type="email" id="email"
-                                    name="email" defaultValue="someone@example.com" required ref={emailRef}/>
+                                    name="email" defaultValue="someone@example.com" required ref={emailRef} />
                             </div>
                         </div>
-
-                        <div class="form-row">
-                            <div class="col cymbal-form-field">
-                                <label for="street_address">Street Address</label>
+                        <div className="form-row">
+                            <div className="col cymbal-form-field">
+                                <label htmlFor="street_address">Street Address</label>
                                 <input type="text" name="street_address"
-                                    id="street_address" defaultValue="1600 Amphitheatre Parkway" required ref={addressRef}/>
+                                    id="street_address" defaultValue="1600 Amphitheatre Parkway" required ref={addressRef} />
                             </div>
                         </div>
-
-                        <div class="form-row">
-                            <div class="col cymbal-form-field">
-                                <label for="zip_code">Zip Code</label>
+                        <div className="form-row">
+                            <div className="col cymbal-form-field">
+                                <label htmlFor="zip_code">Zip Code</label>
                                 <input type="text"
-                                    name="zip_code" id="zip_code" defaultValue="94043" required pattern="\d{4,5}" ref={zipRef}/>
+                                    name="zip_code" id="zip_code" defaultValue="94043" required pattern="\d{4,5}" ref={zipRef} />
                             </div>
                         </div>
-
-                        <div class="form-row">
-                            <div class="col cymbal-form-field">
-                                <label for="city">City</label>
+                        <div className="form-row">
+                            <div className="col cymbal-form-field">
+                                <label htmlFor="city">City</label>
                                 <input type="text" name="city" id="city"
-                                    defaultValue="Mountain View" required ref={cityRef}/>
+                                    defaultValue="Mountain View" required ref={cityRef} />
                             </div>
                         </div>
-
-                        <div class="form-row">
-                            <div class="col-md-5 cymbal-form-field">
-                                <label for="state">State</label>
+                        <div className="form-row">
+                            <div className="col-md-5 cymbal-form-field">
+                                <label htmlFor="state">State</label>
                                 <input type="text" name="state" id="state"
-                                    defaultValue="CA" required ref={stateRef}/>
+                                    defaultValue="CA" required ref={stateRef} />
                             </div>
-                            <div class="col-md-7 cymbal-form-field">
-                                <label for="country">Country</label>
+                            <div className="col-md-7 cymbal-form-field">
+                                <label htmlFor="country">Country</label>
                                 <input type="text" id="country"
                                     placeholder="Country Name"
-                                    name="country" defaultValue="United States" required ref={countryRef}/>
+                                    name="country" defaultValue="United States" required ref={countryRef} />
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col">
-                                <h3 class="payment-method-heading">Payment Method</h3>
+                        <div className="row">
+                            <div className="col">
+                                <h3 className="payment-method-heading">Payment Method</h3>
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="col cymbal-form-field">
-                                <label for="credit_card_number">Credit Card Number</label>
+                        <div className="form-row">
+                            <div className="col cymbal-form-field">
+                                <label htmlFor="credit_card_number">Credit Card Number</label>
                                 <input type="text" id="credit_card_number"
                                     name="credit_card_number"
                                     placeholder="0000-0000-0000-0000"
                                     defaultValue="4432-8015-6152-0454"
-                                    required pattern="\d{4}-\d{4}-\d{4}-\d{4}" ref={cardNumberRef}/>
+                                    required pattern="\d{4}-\d{4}-\d{4}-\d{4}" ref={cardNumberRef} />
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="col-md-5 cymbal-form-field">
-                                <label for="credit_card_expiration_month">Month</label>
+                        <div className="form-row">
+                            <div className="col-md-5 cymbal-form-field">
+                                <label htmlFor="credit_card_expiration_month">Month</label>
                                 <select name="credit_card_expiration_month" id="credit_card_expiration_month" ref={expireMonthRef}>
                                     <option value="1">January</option>
                                     <option value="2">February</option>
@@ -287,25 +237,25 @@ const CartPage = () => {
                                     <option value="11">November</option>
                                     <option value="12" selected>December</option>
                                 </select>
-                                <img src={process.env.PUBLIC_URL + "/static/icons/Hipster_DownArrow.svg"} alt="" class="cymbal-dropdown-chevron" />
+                                <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_DownArrow.svg'} alt="" className="cymbal-dropdown-chevron" />
                             </div>
-                            <div class="col-md-4 cymbal-form-field">
-                                <label for="credit_card_expiration_year">Year</label>
+                            <div className="col-md-4 cymbal-form-field">
+                                <label htmlFor="credit_card_expiration_year">Year</label>
                                 <select name="credit_card_expiration_year" id="credit_card_expiration_year" ref={expireYearRef}>
                                     {expireOptionList}
                                 </select>
-                                <img src={process.env.PUBLIC_URL + "/static/icons/Hipster_DownArrow.svg"} alt="" class="cymbal-dropdown-chevron" />
+                                <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_DownArrow.svg'} alt="" className="cymbal-dropdown-chevron" />
                             </div>
-                            <div class="col-md-3 cymbal-form-field">
-                                <label for="credit_card_cvv">CVV</label>
+                            <div className="col-md-3 cymbal-form-field">
+                                <label htmlFor="credit_card_cvv">CVV</label>
                                 <input type="password" id="credit_card_cvv"
-                                    name="credit_card_cvv" defaultValue="672" required pattern="\d{3}" ref={cvvRef}/>
+                                    name="credit_card_cvv" defaultValue="672" required pattern="\d{3}" ref={cvvRef} />
                             </div>
                         </div>
 
-                        <div class="form-row justify-content-center">
-                            <div class="col text-center">
-                                <button class="cymbal-button-primary" type="submit">
+                        <div className="form-row justify-content-center">
+                            <div className="col text-center">
+                                <button className="cymbal-button-primary" type="submit">
                                     Place Order
                                 </button>
                             </div>
@@ -316,32 +266,32 @@ const CartPage = () => {
                 </div>
 
             </div>
-        </section>
+        </section>;
     }
-    let contents = <main role="main" class="cart-sections">
-    {cartBlock}
-</main>;
+    let contents = <main role="main" className="cart-sections">
+        {cartBlock}
+    </main>;
 
     if (Object.keys(isSubmitted).length !== 0) {
-        contents = <Order orderId={isSubmitted.order.order_id} shippingTrackingId={isSubmitted.order.shipping_tracking_id} totalPaid={isSubmitted.total_paid}></Order>;
+        contents = <Order orderId={isSubmitted.order.order_id} shippingTrackingId={isSubmitted.order.shipping_tracking_id} totalPaid={isSubmitted.total_paid} />;
     }
 
     return <Fragment>
-        <Header/>
-        <div class="local">
-            <span class="platform-flag">
+        <Header />
+        <div className="local">
+            <span className="platform-flag">
                 local
             </span>
         </div>
         {contents}
         <div>
             {recommendations.length > 0 &&
-                <Recommendations values={recommendations} ></Recommendations>
+                <Recommendations values={recommendations} />
             }
         </div>
 
-        <Footer></Footer>
-    </Fragment>
+        <Footer />
+    </Fragment>;
 };
 
 export default CartPage;

@@ -15,21 +15,29 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+import PropTypes from 'prop-types';
 
 const Product = (props) => {
+    console.log(props);
     return (
-    <div class="col-md-4 hot-product-card">
-        <a href={`/product/${props.id}`}>
-          <img alt="" src={`${process.env.PUBLIC_URL + props.picture}`}></img>
-          <div class="hot-product-card-img-overlay"></div>
-        </a>
-        <div>
-          <div class="hot-product-card-name">{props.name}</div>
-          <div class="hot-product-card-price">{props.price}</div>
+        <div className="col-md-4 hot-product-card">
+            <a href={`/product/${props.id}`}>
+                <img alt="" src={`${process.env.PUBLIC_URL + props.picture}`} />
+                <div className="hot-product-card-img-overlay" />
+            </a>
+            <div>
+                <div className="hot-product-card-name">{props.name}</div>
+                <div className="hot-product-card-price">{props.price}</div>
+            </div>
         </div>
-      </div>
     );
-  };
-  
-  export default Product;
-  
+};
+
+Product.propTypes = {
+    id: PropTypes.string.isRequired,
+    picture: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.string.isRequired
+};
+
+export default Product;

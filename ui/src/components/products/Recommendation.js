@@ -15,23 +15,29 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+import PropTypes from 'prop-types';
 
 const Recommendation = (props) => {
     return (
-        <div class="col-md-3">
-        <div>
-          <a href={`/product/${props.id}`}>
-            <img alt="" src={process.env.PUBLIC_URL + props.picture}/>
-          </a>
-          <div>
-            <h5>
-              {props.name}
-            </h5>
-          </div>
+        <div className="col-md-3">
+            <div>
+                <a href={`/product/${props.id}`}>
+                    <img alt="" src={process.env.PUBLIC_URL + props.picture} />
+                </a>
+                <div>
+                    <h5>
+                        {props.name}
+                    </h5>
+                </div>
+            </div>
         </div>
-      </div>
     );
-  };
-  
-  export default Recommendation;
-  
+};
+
+Recommendation.propTypes = {
+    id: PropTypes.string.isRequired,
+    picture: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired
+};
+
+export default Recommendation;

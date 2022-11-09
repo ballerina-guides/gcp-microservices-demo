@@ -427,7 +427,7 @@ footer .footer-top a {
 }
 
 /* The <p> containing the session-id. */
-footer .footer-top p:nth-child(3) {
+footer .footer-top p:nth-child(4) {
   margin-top: 56px;
 }
 
