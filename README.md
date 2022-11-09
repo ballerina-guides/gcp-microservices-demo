@@ -532,7 +532,7 @@ spec:
     to create a new project.
 
 * OAuth Credentials 
-    - Go to **Credentials -> OAuth Consent Screen**, enter a product name to be shown to users, and click **Save**.
+    - Go to **OAuth Consent Screen**, select `User Type` as `Internal` and click **Create**. Add an `App name`, `User support email` and `Developer email address` click **Save**.
     - On the **Credentials** tab, click **Create Credentials** and select **OAuth Client ID**.
     - Select the **Web application** application type, enter a name for the application, and specify a redirect URI 
     (enter https://developers.google.com/oauthplayground if you want to use [OAuth 2.0 Playground](https://developers.google.com/oauthplayground) 
@@ -541,7 +541,7 @@ spec:
     - In a separate browser window or tab, visit [OAuth 2.0 Playground](https://developers.google.com/oauthplayground). 
     Click on the `OAuth 2.0 Configuration` icon in the top right corner and click on `Use your own OAuth credentials` and 
     provide your `OAuth Client ID` and `OAuth Client Secret`.
-    - Select the required Gmail API scopes from the list of APIs.
+    - Select the required Gmail API scopes from the list of APIs (`auth.gmail.send`).
     - Then click **Authorize APIs**.
     - When you receive your authorization code, click **Exchange authorization code for tokens** to obtain the refresh 
     token and access token.
