@@ -21,12 +21,13 @@ configurable string datastore = "";
 configurable string redisHost = "";
 configurable string redisPassword = "";
 
+# Stores the product items added to the cart and retrieves them.
 @display {
     label: "Cart",
     id: "cart"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "CartService" on new grpc:Listener(9092) {
+isolated service "CartService" on new grpc:Listener(9092) {
     private final DataStore store;
 
     function init() returns error? {
@@ -39,25 +40,35 @@ service "CartService" on new grpc:Listener(9092) {
         }
     }
 
-    remote function AddItem(AddItemRequest value) returns Empty|error {
+    # Adds an item to the cart
+    #
+    # + request - `AddItemRequest` containing the user id and the `CartItem`
+    # + return - an `Empty` value or an error
+    isolated remote function AddItem(AddItemRequest request) returns error? {
         lock {
-            check self.store.addItem(value.user_id, value.item.product_id, value.item.quantity);
+            check self.store.addItem(request.user_id, request.item.product_id, request.item.quantity);
         }
-        return {};
     }
 
-    remote function GetCart(GetCartRequest value) returns Cart|error {
+    # Provides the cart with items.
+    #
+    # + request - `GetCartRequest` containing the user id
+    # + return - `Cart` containing the items or an error
+    isolated remote function GetCart(GetCartRequest request) returns Cart|error {
         lock {
-            Cart cart = check self.store.getCart(value.user_id);
+            Cart cart = check self.store.getCart(request.user_id);
             return cart.cloneReadOnly();
         }
     }
 
-    remote function EmptyCart(EmptyCartRequest value) returns Empty|error {
+    # Clears the cart.
+    #
+    # + request - `EmptyCartRequest` containing the user id
+    # + return - `Empty` value or an error
+    isolated remote function EmptyCart(EmptyCartRequest request) returns error? {
         lock {
-            check self.store.emptyCart(value.user_id);
+            check self.store.emptyCart(request.user_id);
         }
-        return {};
     }
 }
 

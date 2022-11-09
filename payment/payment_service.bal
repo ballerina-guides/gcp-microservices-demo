@@ -15,16 +15,21 @@
 // under the License.
 
 import ballerina/grpc;
-import ballerina/uuid;
 import ballerina/log;
+import ballerina/uuid;
 
+# This service validates the card details (using the Luhn algorithm) against the supported card providers and charges the card.
 @display {
     label: "",
     id: "payment"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-service "PaymentService" on new grpc:Listener(9096) {
+isolated service "PaymentService" on new grpc:Listener(9096) {
 
+    # Validate and charge the amount from the card.
+    #
+    # + value - `ChargeRequest` containing the card details and the amount to charge
+    # + return - `ChargeResponse` with the transaction id or an error
     isolated remote function Charge(ChargeRequest value) returns ChargeResponse|error {
         CreditCardInfo creditCard = value.credit_card;
         CardValidator cardValidator = new (creditCard.credit_card_number, creditCard.credit_card_expiration_year, creditCard.credit_card_expiration_month);
@@ -33,6 +38,8 @@ service "PaymentService" on new grpc:Listener(9096) {
             log:printError("Credit card is not valid", 'error = cardValid);
             return cardValid;
         }
+        log:printInfo(string `Transaction processed: the card ending ${creditCard.credit_card_number.substring(creditCard.credit_card_number.length() - 4)}, 
+        Amount: ${value.amount.currency_code}${value.amount.units}.${value.amount.nanos}`);
         return {
             transaction_id: uuid:createType1AsString()
         };

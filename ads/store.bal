@@ -16,6 +16,7 @@
 
 import ballerina/random;
 
+# Class used to provide ads by category or by random.
 readonly class AdStore {
 
     private final map<Ad[]> & readonly ads;
@@ -25,6 +26,8 @@ readonly class AdStore {
         self.ads = getAds().cloneReadOnly();
     }
 
+    # Returns a set of random ads
+    # + return - an `Ad[]` or an error
     public isolated function getRandomAds() returns Ad[]|error {
         Ad[] allAds = [];
         foreach Ad[] ads in self.ads {
@@ -37,6 +40,10 @@ readonly class AdStore {
         return randomAds;
     }
 
+    # Returns a set of ads related to a category
+    #
+    # + category - related ad category
+    # + return - returns an `Ad[]`
     public isolated function getAdsByCategory(string category) returns Ad[] {
         if !self.ads.hasKey(category) {
             return [];

@@ -25,17 +25,17 @@ isolated function parseProductJson(json jsonContents) returns Product[]|error {
             name: check productJson.name,
             description: check productJson.description,
             picture: check productJson.picture,
-            price_usd: check parseMoneyJson(check productJson.priceUsd),
+            price_usd: check parseUsdPrice(check productJson.priceUsd),
             categories: check (check productJson.categories).cloneWithType()
         }
         select product;
 }
 
-isolated function parseMoneyJson(json moneyJson) returns Money|error {
+isolated function parseUsdPrice(json usdPrice) returns Money|error {
     return {
-        currency_code: check moneyJson.currencyCode,
-        units: check moneyJson.units,
-        nanos: check moneyJson.nanos
+        currency_code: check usdPrice.currencyCode,
+        units: check usdPrice.units,
+        nanos: check usdPrice.nanos
     };
 }
 

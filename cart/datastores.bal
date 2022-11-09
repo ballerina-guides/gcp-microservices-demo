@@ -16,7 +16,7 @@
 
 import ballerinax/redis;
 
-public type DataStore object {
+public type DataStore distinct object {
     isolated function addItem(string userId, string productId, int quantity) returns error?;
 
     isolated function emptyCart(string userId) returns error?;
