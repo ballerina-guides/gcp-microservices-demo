@@ -106,7 +106,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         };
 
         error? err = self.sendConfirmationMail(request.email, 'order);
-        if (err is error) {
+        if err is error {
             log:printWarn(string `failed to send order confirmation to ${request.email}`, 'error = err);
         } else {
             log:printInfo(string `order confirmation email sent to ${request.email}`);
