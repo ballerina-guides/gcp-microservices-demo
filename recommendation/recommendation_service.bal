@@ -19,6 +19,7 @@ import ballerina/log;
 
 configurable string catalogHost = "localhost";
 
+# Recommends other products based on the items added to the user’s cart.
 @display {
     label: "",
     id: "recommendation"
@@ -35,6 +36,10 @@ service "RecommendationService" on new grpc:Listener(9090) {
         self.catalogClient = check new ("http://" + catalogHost + ":9091");
     }
 
+    # Provides a product list according to the request.
+    #
+    # + request - `ListRecommendationsRequest` containing product ids
+    # + return - `ListRecommendationsResponse` containing the recommended product ids
     isolated remote function ListRecommendations(ListRecommendationsRequest request) returns ListRecommendationsResponse|error {
         ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
         if listProducts is grpc:Error {
