@@ -36,7 +36,7 @@ gmail:ConnectionConfig gmailConfig = {
 };
 
 @display {
-    label: "",
+    label: "Email",
     id: "email"
 }
 @grpc:Descriptor {value: DEMO_DESC}
