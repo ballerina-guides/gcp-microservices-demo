@@ -19,6 +19,7 @@ import ballerina/io;
 
 configurable string productJsonPath = "./resources/products.json";
 
+# Reads a list of products from a JSON file and provides the ability to search products and get them individually.
 @display {
     label: "",
     id: "catalog"
@@ -33,10 +34,18 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
         self.products = products.cloneReadOnly();
     }
 
+    # Provides a set of products.
+    #
+    # + request - an empty request
+    # + return - `ListProductsResponse` containing a `Product[]`
     isolated remote function ListProducts(Empty request) returns ListProductsResponse {
         return {products: self.products};
     }
 
+    # Provides a specific product related to an id.
+    #
+    # + request - `GetProductRequest` containing the product id
+    # + return - `Product` related to the required id or an error
     isolated remote function GetProduct(GetProductRequest request) returns Product|error {
         foreach Product product in self.products {
             if product.id == request.id {
@@ -46,6 +55,10 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
         return error("product not found");
     }
 
+    # Provides a list of products related to a search query.
+    #
+    # + request - `SearchProductsRequest` containing the search query
+    # + return - `SearchProductsResponse` containing the matching products
     isolated remote function SearchProducts(SearchProductsRequest request) returns SearchProductsResponse|error {
         return {
             results: from Product product in self.products
