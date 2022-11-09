@@ -48,20 +48,21 @@ class CardValidator {
 
     isolated function isValid() returns CardCompany|error {
         if (self.card.length() < 13) || (self.card.length() > 19) {
-            return error CardValidationError("failed length check");
+            return error CardValidationError("Credit card info is invalid: failed length check");
         }
 
         if !check self.isLuhnValid() {
-            return error CardValidationError("failed luhn check");
+            return error CardValidationError("Credit card info is invalid: failed luhn check");
         }
 
         CardCompany? gleanCompany = self.getCompany();
         if gleanCompany is () {
-            return error CardValidationError("unsupported card company");
+            return error CardValidationError("Sorry, we cannot process the credit card. Only VISA or MasterCard is accepted.");
         }
 
         if self.isExpired() {
-            return error CardValidationError("card expired");
+            return error CardValidationError(
+                string `Your credit card (ending ${self.card.substring(self.card.length() -4)}) expired on ${self.expireMonth}/${self.expireYear}`);
         }
 
         return gleanCompany;
