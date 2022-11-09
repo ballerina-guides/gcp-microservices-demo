@@ -164,7 +164,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
             address: address,
             items
         };
-        GetQuoteResponse|grpc:Error getQuoteResponse = self.shippingClient->GetQuote(req);
+        GetQuoteResponse|grpc:Error getQuoteResponse = self.shippingClient->GetQuote(quoteRequest);
         if getQuoteResponse is grpc:Error {
             log:printError("failed to call getQuote from shipping service", 'error = getQuoteResponse);
             return error grpc:InternalError(
@@ -205,7 +205,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
         ShipOrderRequest orderRequest = {};
         ShipOrderResponse|grpc:Error shipOrderResponse = self.shippingClient->ShipOrder(orderRequest);
         if shipOrderResponse is grpc:Error {
-            log:printError("failed to call shipOrder from shipping service", 'error = getSupportedCurrenciesResponse);
+            log:printError("failed to call shipOrder from shipping service", 'error = shipOrderResponse);
             return error grpc:UnavailableError(
                 string `shipment failed: ${shipOrderResponse.message()}`, shipOrderResponse);
         }

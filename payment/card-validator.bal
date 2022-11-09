@@ -60,7 +60,7 @@ class CardValidator {
         }
         if self.isExpired() {
             return error CardValidationError(
-                string `Your credit card (ending ${self.card.substring(self.card.length() -4)}) expired on ${self.expireMonth}/${self.expireYear}`);
+                string `Your credit card (ending ${self.cardNumber.substring(self.cardNumber.length() -4)}) expired on ${self.expireMonth}/${self.expireYear}`);
         }
         return gleanCompany;
     }
