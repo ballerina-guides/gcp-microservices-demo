@@ -47,8 +47,9 @@ service "ShippingService" on new grpc:Listener(9095) {
 
     isolated remote function ShipOrder(ShipOrderRequest value) returns ShipOrderResponse|error {
         Address address = value.address;
-        string trackingId = generateTrackingId(string`${address.street_address}, ${address.city}, ${address.state}`);
-        return {tracking_id: trackingId};
+        return {
+            tracking_id: generateTrackingId(string `${address.street_address}, ${address.city}, ${address.state}`)
+        };
     }
 }
 

@@ -75,14 +75,14 @@ service "CheckoutService" on new grpc:Listener(9094) {
         self.emailClient = check new ("http://" + emailHost + ":9097");
     }
 
-    remote function PlaceOrder(PlaceOrderRequest value) returns PlaceOrderResponse|error {
+    remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|error {
         string orderId = uuid:createType1AsString();
-        CartItem[] userCartItems = check self.getUserCart(value.user_id, value.user_currency);
-        OrderItem[] orderItems = check self.prepOrderItems(userCartItems, value.user_currency);
-        Money shippingPrice = check self.convertCurrency(check self.quoteShipping(value.address, userCartItems), value.user_currency);
+        CartItem[] userCartItems = check self.getUserCart(request.user_id, request.user_currency);
+        OrderItem[] orderItems = check self.prepOrderItems(userCartItems, request.user_currency);
+        Money shippingPrice = check self.convertCurrency(check self.quoteShipping(request.address, userCartItems), request.user_currency);
 
         Money totalCost = {
-            currency_code: value.user_currency,
+            currency_code: request.user_currency,
             units: 0,
             nanos: 0
         };
@@ -92,20 +92,20 @@ service "CheckoutService" on new grpc:Listener(9094) {
             totalCost = sum(totalCost, multPrice);
         }
 
-        string transactionId = check self.chargeCard(totalCost, value.credit_card);
+        string transactionId = check self.chargeCard(totalCost, request.credit_card);
         log:printInfo("payment went through " + transactionId);
-        string shippingTrackingId = check self.shipOrder(value.address, userCartItems);
-        check self.emptyUserCart(value.user_id);
+        string shippingTrackingId = check self.shipOrder(request.address, userCartItems);
+        check self.emptyUserCart(request.user_id);
 
         OrderResult 'order = {
             order_id: orderId,
             shipping_tracking_id: shippingTrackingId,
             shipping_cost: shippingPrice,
-            shipping_address: value.address,
+            shipping_address: request.address,
             items: orderItems
         };
 
-        check self.confirmationMail(value.email, 'order);
+        check self.sendConfirmationMail(request.email, 'order);
 
         return {'order};
     }
@@ -130,12 +130,12 @@ service "CheckoutService" on new grpc:Listener(9094) {
                 return product;
             }
 
-            CurrencyConversionRequest req1 = {
+            CurrencyConversionRequest conversionRequest = {
                 'from: product.price_usd,
                 to_code: userCurrency
             };
 
-            Money|grpc:Error money = self.currencyClient->Convert(req1);
+            Money|grpc:Error money = self.currencyClient->Convert(conversionRequest);
             if money is grpc:Error {
                 log:printError("failed to call convert from currency service", 'error = money);
                 return money;
@@ -208,9 +208,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
         }
     }
 
-    function confirmationMail(string email, OrderResult orderRes) returns error? {
+    function sendConfirmationMail(string email, OrderResult orderRes) returns error? {
         SendOrderConfirmationRequest orderConfirmRequest = {
-            email: email,
+            email,
             'order: orderRes
         };
         Empty|grpc:Error sendOrderConfirmation = self.emailClient->SendOrderConfirmation(orderConfirmRequest);

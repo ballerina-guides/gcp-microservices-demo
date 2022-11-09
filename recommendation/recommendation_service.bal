@@ -35,8 +35,7 @@ service "RecommendationService" on new grpc:Listener(9090) {
         self.catalogClient = check new ("http://" + catalogHost + ":9091");
     }
 
-    isolated remote function ListRecommendations(ListRecommendationsRequest value) returns ListRecommendationsResponse|error {
-        string[] productIds = value.product_ids;
+    isolated remote function ListRecommendations(ListRecommendationsRequest request) returns ListRecommendationsResponse|error {
         ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
         if listProducts is grpc:Error {
             log:printError("failed to call ListProducts of catalog service", 'error = listProducts);
@@ -45,7 +44,7 @@ service "RecommendationService" on new grpc:Listener(9090) {
 
         return {
             product_ids: from Product product in listProducts.products
-                where productIds.indexOf(product.id) is ()
+                where request.product_ids.indexOf(product.id) is ()
                 select product.id
         };
     }

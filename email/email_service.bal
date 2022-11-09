@@ -35,8 +35,6 @@ gmail:ConnectionConfig gmailConfig = {
     }
 };
 
-
-
 @display {
     label: "",
     id: "email"
@@ -50,10 +48,10 @@ service "EmailService" on new grpc:Listener(9097) {
         self.gmailClient = check new (gmailConfig);
     }
 
-    isolated remote function SendOrderConfirmation(SendOrderConfirmationRequest value) returns Empty|error {
-        string htmlBody = self.getConfirmationHtml(value.'order).toString();
+    isolated remote function SendOrderConfirmation(SendOrderConfirmationRequest request) returns Empty|error {
+        string htmlBody = self.getConfirmationHtml(request.'order).toString();
         gmail:MessageRequest messageRequest = {
-            recipient: value.email,
+            recipient: request.email,
             subject: "Order Confirmation",
             messageBody: htmlBody,
             contentType: gmail:TEXT_HTML

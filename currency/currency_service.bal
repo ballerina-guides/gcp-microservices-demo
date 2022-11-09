@@ -32,12 +32,12 @@ service "CurrencyService" on new grpc:Listener(9093) {
         self.currencyMap = check parseCurrencyJson(currencyJson).cloneReadOnly();
     }
 
-    remote function GetSupportedCurrencies(Empty value) returns GetSupportedCurrenciesResponse|error {
+    remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse|error {
         return {currency_codes: self.currencyMap.keys()};
 
     }
-    remote function Convert(CurrencyConversionRequest value) returns Money|error {
-        Money moneyFrom = value.'from;
+    remote function Convert(CurrencyConversionRequest request) returns Money|error {
+        Money moneyFrom = request.'from;
         final decimal fractionSize = 1000000000;
         //From Unit
         decimal pennys = <decimal>moneyFrom.nanos / fractionSize;
@@ -48,14 +48,14 @@ service "CurrencyService" on new grpc:Listener(9093) {
         decimal euroAmount = totalUSD / rate;
 
         //UNIT to Target
-        decimal targetRate = self.currencyMap.get(value.to_code);
+        decimal targetRate = self.currencyMap.get(request.to_code);
         decimal targetAmount = euroAmount * targetRate;
 
         int units = <int>targetAmount.floor();
         int nanos = <int>decimal:floor((targetAmount - <decimal>units) * fractionSize);
 
         return {
-            currency_code: value.to_code,
+            currency_code: request.to_code,
             nanos,
             units
         };

@@ -33,23 +33,23 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
         self.products = products.cloneReadOnly();
     }
 
-    remote function ListProducts(Empty value) returns ListProductsResponse {
+    remote function ListProducts(Empty request) returns ListProductsResponse {
         return {products: self.products};
     }
 
-    remote function GetProduct(GetProductRequest value) returns Product|error {
+    remote function GetProduct(GetProductRequest request) returns Product|error {
         foreach Product product in self.products {
-            if product.id == value.id {
+            if product.id == request.id {
                 return product;
             }
         }
         return error("product not found");
     }
 
-    remote function SearchProducts(SearchProductsRequest value) returns SearchProductsResponse|error {
+    remote function SearchProducts(SearchProductsRequest request) returns SearchProductsResponse|error {
         return {
             results: from Product product in self.products
-                where isProductRelated(product, value.query)
+                where isProductRelated(product, request.query)
                 select product
         };
     }

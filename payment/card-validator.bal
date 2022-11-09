@@ -76,7 +76,7 @@ class CardValidator {
             int digit = 0;
             digit = check int:fromString(self.card[count]);
 
-            if (((count & 1) ^ oddOrEven) == 0) {
+            if ((count & 1) ^ oddOrEven) == 0 {
                 digit *= 2;
                 if digit > 9 {
                     digit -= 9;
@@ -88,9 +88,9 @@ class CardValidator {
     }
 
     isolated function getCompany() returns CardCompany|() {
-        foreach CardCompany cc in self.companies {
-            if regex:matches(self.card, cc.pattern) {
-                return cc;
+        foreach CardCompany company in self.companies {
+            if regex:matches(self.card, company.pattern) {
+                return company;
             }
         }
         return ();
