@@ -562,7 +562,11 @@ Then execute the `build-all-docker.sh` to build the Ballerina packages and Docke
 docker-compose up
 ```
 
-You can start the React application by executing following commands from the `ui/` directory.
+For running the react application you require the following prerequisites.
+- Node(>= v16.15.0)
+- NPM
+
+Once all the prerequisites are installed. You can start the React application by executing following commands from the `ui/` directory.
 ```bash
 npm install
 npm start
