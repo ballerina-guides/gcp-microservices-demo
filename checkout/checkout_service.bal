@@ -171,7 +171,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
             log:printError("failed to call convert from currency service", 'error = convert);
             return convert;
         }
-        return self.currencyClient->Convert(conversionRequest);
+        return convert;
     }
 
     function chargeCard(Money total, CreditCardInfo card) returns string|error {
