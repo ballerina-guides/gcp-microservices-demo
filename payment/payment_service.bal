@@ -18,7 +18,7 @@ import ballerina/grpc;
 import ballerina/log;
 import ballerina/uuid;
 
-# This service validates the card details (using the Luhn algorithm) against the supported card providers and charges the card..
+# This service validates the card details (using the Luhn algorithm) against the supported card providers and charges the card.
 @display {
     label: "",
     id: "payment"
