@@ -2,14 +2,14 @@
 The online boutique is a cloud-native microservices demo application written by the Google cloud platform. It consists of a 10-tier microservices application. The application is a web-based e-commerce app using which users can browse items, add them to the cart, and purchase them. This set of microservices is written using Ballerina to demonstrate the language features and showcase best practices for writing microservices using Ballerina. Communication between microservices is handled using gRPC and the frontend is exposed via an HTTP service.
 
 # Architecture
-![image info](architecture-diagram.jpg)
+![image info](architecture-diagram.png)
 
 # Microservices description
 
 |Service name | Description |
 |-------------|-------------|
 | Frontend | Exposes an HTTP server to outside to serve data required for the React app. Acts as a frontend for all the backend microservices and abstracts the functionality.|
-| Cart | Stores the product items added to the cart and retrieves them. In memory store and Redis is supported as storage options.
+| Cart | Stores the product items added to the cart and retrieves them. In memory store and Redis is supported as storage option.
 | ProductCatalog | Reads a list of products from a JSON file and provides the ability to search products and get then individually.
 | Currency | Reads the exchange rates from a JSON and converts one currency value to another.
 | Payment | Validates the card details (using the Luhn algorithm) against the supported card providers and returns a transaction ID. (Mock)
@@ -24,23 +24,21 @@ The same load generator service will be used for load testing.
 The original Go frontend service serves HTML directly using the HTTP server using Go template.  In this sample, the backend is separated from the Ballerina HTTP service and React frontend.
 
 # Service Implementation
-First we will be covering a general implementation related stuff thats common to all the services and then we will be diving into specific implementations of each microservices.
+First, we will be covering general implementation-related stuff thats common to all the services and then we will be diving into specific implementations of each microservices.
 
-As shown in the diagram, `Frontend Service` is the only service that is being exposed to the internet. All the microservices except the `Frontend Service` uses gRPC for service to service communication. You can see the following example from the `Ad Service`
+As shown in the diagram, `Frontend Service` is the only service that is being exposed to the internet. All the microservices except the `Frontend Service` uses gRPC for service-to-service communication. You can see the following example from the `Ad Service`.
 ```bal
 import ballerina/grpc;
 
-listener grpc:Listener adListener = new (9099);
-
 @grpc:Descriptor {value: DEMO_DESC}
-service "AdService" on adListener {
+service "AdService" on new grpc:Listener(9099) {
 
-    remote function GetAds(AdRequest request) returns AdResponse|error? {
+    remote function GetAds(AdRequest request) returns AdResponse|error {
     }
 }
 ```
 
-Ballerina provides the capability to generate docker, Kubernetes artifacts to deploy the code on the cloud with minimal configuration. To enable this you need to add the `cloud="k8s"` under build options into the `Ballerina.toml` file of the project.
+Ballerina provides the capability to generate docker, and Kubernetes artifacts to deploy the code on the cloud with minimal configuration. To enable this you need to add the `cloud="k8s"` under build options into the `Ballerina.toml` file of the project.
 
 ```toml
 [package]
@@ -53,7 +51,7 @@ observabilityIncluded = true
 cloud = "k8s"
 ```
 
-Additionally, you could make a `Cloud.toml` file in the project directory and configure various things in the container and the deployment. For every microservice in this sample, we would be modifying the container org, name, tag of the created kubernetes yaml. Additionally we add the cloud.deployment.internal_domain_name property to define a name for the generated service name. This allows us to easily specify host name values for services that depend on this service. This will be explained in depth in the next section.You can find a sample from the recommendation service below. Service specific features of the `Cloud.toml` will be covered in their own sections.
+Additionally, you could make a `Cloud.toml` file in the project directory and configure various things in the container and the deployment. For every microservice in this sample, we would be modifying the container org, name, and tag of the created kubernetes yaml. Additionally, we add the cloud.deployment.internal_domain_name property to define a name for the generated service name. This allows us to easily specify host name values for services that depend on this service. This will be explained in depth in the next section. You can find a sample from the recommendation service below. Service-specific features of the `Cloud.toml` will be covered in their own sections.
 
 ```toml
 [container.image]
@@ -65,7 +63,7 @@ tag="v0.1.0"
 internal_domain_name="recommendation-service"
 ```
 
-Ballerina Language provides an in-built functionality to configure values at runtime through configurable module-level variables. This feature will be used in almost all the microservices we write in this sample. When we deploy the services in different platforms(local, docker compose, k8s) the host name of the service changes. Consider the following sample from recommendation service. The recommendation service depends on catalog service, therefore it needs to resolve the hostname  of the catalog service. The value "localhost" is assigned as the default value but it will be changed depending on the value pass on to it in runtime. You can find more details about this in the [configurable learn page](https://ballerina.io/learn/configure-ballerina-programs/configure-a-sample-ballerina-service/).
+Ballerina Language provides an in-built functionality to configure values at runtime through configurable module-level variables. This feature will be used in almost all the microservices we write in this sample. When we deploy the services in different platforms(local, docker-compose, k8s) the hostname of the service changes. Consider the following sample from the recommendation service. The recommendation service depends on the catalog service, therefore it needs to resolve the hostname of the catalog service. The value "localhost" is assigned as the default value but it will be changed depending on the value passed on to it in runtime. You can find more details about this on the [configurable learn page](https://ballerina.io/learn/configure-ballerina-programs/configure-a-sample-ballerina-service/).
 
 ```bal
 listener grpc:Listener ep = new (9090);
@@ -98,7 +96,7 @@ file="./k8s/Config.toml"
 
 ## Cart Service
 
-The cart service manages all the details about the shopping card of the user. It implements the Repository pattern to have multiple implementations of DataStore. We have a in-memory data store and redis based data store in the application.
+The cart service manages all the details about the shopping card of the user. It implements the Repository pattern to have multiple implementations of DataStore. We have an in-memory data store and redis based data store in the application.
 
 In the original c# implementation, the repository is defined using an interface. You can find the ballerina representation below. As you notice, the function body is not implemented. This forces the implementer to implement the body of the function. 
 ```bal
@@ -111,7 +109,7 @@ public type DataStore object {
 };
 ```
 
-Then we implement the DataStore using the concrete class InMemoryStore and RedisStore to provide the actual implementation of the Datastore.
+Then we implement the DataStore using the concrete class `InMemoryStore` and `RedisStore` to provide the actual implementation of the Datastore.
 
 ```bal
 public isolated class InMemoryStore {
@@ -149,9 +147,8 @@ And finally, we use the appropriate data store based on the config given by the 
 
 ```bal
 configurable string datastore = "";
-listener grpc:Listener ep = new (9092);
 
-service "CartService" on ep {
+service "CartService" on new grpc:Listener(9092) {
     private final DataStore store;
 
     function init() {
@@ -168,7 +165,7 @@ service "CartService" on ep {
 
 ## Ads Service
 
-The Ad service loads a set of ads based on the category when the service is initialized and then serves ads based on the products in the cart.
+The Ads service loads a set of ads based on the category when the service is initialized and then serves ads based on the products in the cart.
 The Ad Store represents a read only class as these ads are not updated after the service is initialized. This allows us to access the ad store without lock statements allowing the concurrent calls to the service.
 
 ```bal
@@ -203,13 +200,13 @@ isolated function getAds() returns map<Ad[]> {
 
 ## Checkout Service
 
-Checkout service gets called when the user confirms the checkout request. This service represents as an intermediate coordination service between several services. 
-`PlaceOrder` remote function will be called upon the checkout request. It will call the `Cart Service` to get the products of the card in the user's account. Then it will match those products with `Catalog Service` and call the `Currency Service` to convert the prices to user's preferred currency.Then it calls `Shipping Service` to get the shipping quote and it converts the shipping cost to user's preferred currency using the `Currency Service`. Then the service calculates the total cost and calls the `Payment Service` so it would be charged from the card and it returns a transaction id. Then we ship the order using the `Shipping Service` then clear the cart of the user using the `Cart Service`. Finally we send an email with all the details to user's email using `Email Service` and the return the order summary to the caller.
+The checkout service gets called when the user confirms the checkout request. This service represents an intermediate coordination service between several services. 
+The `PlaceOrder` remote function will be called upon the checkout request. It will call the `Cart Service` to get the products of the cart in the user's account. Then it will match those products with `Catalog Service` and call the `Currency Service` to convert the prices to the user's preferred currency. Then it calls `Shipping Service` to get the shipping quote and it converts the shipping cost to the user's preferred currency using the `Currency Service`. Then the service calculates the total cost and calls the `Payment Service` so it would be charged from the card and it returns a transaction id. Then we ship the order using the `Shipping Service` then clear the cart of the user using the `Cart Service`. Finally, we send an email with all the details to the user's email using `Email Service` and return the order summary to the caller.
 
 ```bal
 configurable string cartHost = "localhost";
 
-service "CheckoutService" on ep {
+service "CheckoutService" on new grpc:Listener(9094) {
     final CartServiceClient cartClient;
     ...
 
@@ -226,12 +223,12 @@ service "CheckoutService" on ep {
 
 ## Currency Service
 
-The Currency service is responsible for converting a given currency object to another currency. The service contains a json file with the conversion rates. When the service is initialized it will read this json and store it in a read only map as its not getting modified afterwards. When `Convert` remote function is invoked, it will read the rate from the map, convert the value and return the converted currency value to the caller.
+The Currency service is responsible for converting a given currency object to another currency. The service contains a JSON file with the conversion rates. When the service is initialized it will read this JSON and store it in a read-only map as it's not getting modified afterward. When the `Convert` remote function is invoked, it will read the rate from the map, convert the value and return the converted currency value to the caller.
 
 ```bal
 configurable string currencyJsonPath = "./data/currency_conversion.json";
 
-service "CurrencyService" on ep {
+service "CurrencyService" on new grpc:Listener(9093) {
     final map<decimal> & readonly currencyMap;
 
     function init() returns error? {
@@ -249,7 +246,7 @@ service "CurrencyService" on ep {
 }
 ```
 
-Additionally since we are reading the Currency rates from the json file, therefore we need to copy the json into the container. This can be done using having the following codeblock in the `Cloud.toml`
+Additionally, since we are reading the Currency rates from the JSON file, therefore we need to copy the JSON into the container. This can be done using having the following codeblock in the `Cloud.toml`.
 ```toml
 [[container.copy.files]]
 sourceFile="./data/currency_conversion.json"
@@ -258,17 +255,15 @@ target="/home/ballerina/data/currency_conversion.json"
 
 ## Email Service
 
-The service is responsible for sending an email with the order confirmation after checkout completion. The html generation required for the Email formatting is done using ballerina's built in xml feature. The email sending part is handled by the gmail connector. 
+The service is responsible for sending an email with the order confirmation after checkout completion. The HTML generation required for the Email formatting is done using ballerina's built-in XML feature. The email-sending part is handled by the Gmail connector. 
 
 ```bal
-service "EmailService" on ep {
+service "EmailService" on new grpc:Listener(9097) {
 
     isolated remote function SendOrderConfirmation(SendOrderConfirmationRequest value) returns Empty|error {
-
-        OrderResult orderRes = value.'order;
-        string htmlBody = self.getConfirmationHtml(orderRes).toString();
+        string htmlBody = self.getConfirmationHtml(request.'order).toString();
         gmail:MessageRequest messageRequest = {
-            recipient: value.email,
+            recipient: request.email,
             subject: "Order Confirmation",
             messageBody: htmlBody,
             contentType: gmail:TEXT_HTML
@@ -303,7 +298,7 @@ service "EmailService" on ep {
 }
 ```
 
-This service requires sensitive gmail credentials, to use in the gmail connector. This also is done with the help of ballerina's configurable feature. Sample code and the `Config.toml` file can be found below.
+This service requires sensitive Gmail credentials, to use in the Gmail connector. This also is done with the help of Ballerina's configurable feature. The sample code and the `Config.toml` file can be found below.
 
 ```bal
 type GmailConfig record {|
@@ -330,7 +325,7 @@ file="./Config.toml"
 
 ### Frontend Service
 
-The HTTP service uses cookies to identify the user details. Since this sample does not have an register capability, if the cookie is not found in the request it will always regenerate a new cookie with return the cookie with the response. Please note that this is not the secured way to do this but for demo purposes only. Anyhow, to implement feature, since we need to intercept each request, without repeating the code we have implemented an AuthInterceptor and registered into the service.
+The HTTP service uses cookies to identify the user details. Since this sample does not have a register capability, if the cookie is not found in the request it will always regenerate a new cookie with return the cookie with the response. Please note that this is not a secure way to do this but for demo purposes only. Anyhow, to implement the feature, since we need to intercept each request, without repeating the code we have implemented an AuthInterceptor and registered into the service.
 
 
 ```bal
@@ -368,7 +363,7 @@ service / on ep {
 }
 ```
 
-In ballerina, http resource is represented from a resource function. The function definition have all the information about the resource. The following resource function has the resource path of /cart and gets invoked for POST requests. The resource expects a payload with `AddToCartRequest` record format and the cookie header. It could return responses with different HTTP error codes depending on various reasons. You can find more information about writing a REST service from the [learn page.](https://ballerina.io/learn/write-a-restful-api-with-ballerina/)
+In ballerina, an HTTP resource is represented by a resource function. The function definition has all the information about the resource. The following resource function has the resource path of /cart and gets invoked for POST requests. The resource expects a payload with the `AddToCartRequest` record format and the cookie header. It could return responses with different HTTP error codes depending on various reasons. You can find more information about writing a REST service from the [learn page.](https://ballerina.io/learn/write-a-restful-api-with-ballerina/).
 
 ```bal
 resource function post cart(@http:Payload AddToCartRequest req, @http:Header {name: "Cookie"} string cookieHeader)
@@ -397,7 +392,7 @@ resource function post cart(@http:Payload AddToCartRequest req, @http:Header {na
 ```
 ## Payment Service
 
-Payment Service is responsible for validating the card details and sending a mock payment id. The validation is done by checking length, performing luhn algorithm validation, validating card company and checking expiry date. This microservice shows some usage of low level operations to implement the validation algorithm.
+Payment Service is responsible for validating the card details and sending a mock payment id. The validation is done by checking length, performing Luhn algorithm validation, validating the card company, and checking the expiry date. This microservice shows some usage of low-level operations to implement the validation algorithm.
 
 
 ```bal
@@ -424,14 +419,13 @@ isolated function isLuhnValid() returns boolean|error {
 
 ## Product Catalog Service
 
-The Catalog Service maintains a list of products available in the store. The product list will be read from json, converted to a readonly array of `Product` when the service is initialized. The `Catalog Service` has the Search Product capability. This feature is implemented using ballerina query expressions. It allows you to write sql like queries to filter data from the array. You can find more details about query expressions in this [blog](https://dzone.com/articles/language-integrated-queries-in-ballerina).
+The Catalog Service maintains a list of products available in the store. The product list will be read from JSON and converted to a readonly array of `Product` when the service is initialized. The `Catalog Service` has the Search Product capability. This feature is implemented using ballerina query expressions. It allows you to write SQL like queries to filter data from the array. You can find more details about query expressions in this [blog](https://dzone.com/articles/language-integrated-queries-in-ballerina).
 
 ```
-listener grpc:Listener ep = new (9091);
 configurable string productJsonPath = "./resources/products.json";
 
 @grpc:Descriptor {value: DEMO_DESC}
-service "ProductCatalogService" on ep {
+service "ProductCatalogService" on new grpc:Listener(9091) {
     final Product[] & readonly products;
 
     function init() returns error? {
@@ -465,7 +459,7 @@ service "ProductCatalogService" on ep {
 
 ## Recommendation Service
 
-`Recommendation Service` simply calls the `Catalog Service` and returns set of product which is not included in the user's cart. For this filtration also we make use of query expressions.
+`Recommendation Service` simply calls the `Catalog Service` and returns a set of product which is not included in the user's cart. For this filtration also we make use of query expressions.
 
 ```bal
 isolated remote function ListRecommendations(ListRecommendationsRequest value) returns ListRecommendationsResponse|error {
@@ -488,10 +482,9 @@ isolated remote function ListRecommendations(ListRecommendationsRequest value) r
 
 The `Shipping Service` is a mock service where it returns a constant shipping cost if the cart is not empty. It also has the capability to generate a mock tracking number for the shipment. 
 
-
 ## Kustomize
 
-[Kustomize](https://kustomize.io/) is a tool where you can add, remove or update Kubernetes yamls without modifying the original yaml. This tool can be used to apply more modifications into the generated yaml from code to cloud. In the `kustomization.yaml` in the root directory, you can find a sample kustomize definition. This simply takes all the generated yamls from each projects and combines into one. Then we need to add an environment variable to specify where the Config.toml is located for the email service. This is done by using kustomize patches. You can see the sample code below.
+[Kustomize](https://kustomize.io/) is a tool where you can add, remove or update Kubernetes yamls without modifying the original yaml. This tool can be used to apply more modifications to the generated yaml from code to cloud. In the `kustomization.yaml` in the root directory, you can find a sample kustomize definition. This simply takes all the generated yamls from each project and combines them into one. Then we need to add an environment variable to specify where the Config.toml is located for the email service. This is done by using kustomize patches. You can see the sample code below.
 
 kustomization.yaml
 ```yaml
@@ -563,7 +556,7 @@ spec:
 
 ## Docker-Compose
 
-Then execute the `build-all-docker.sh` to build the ballerina packages and Docker images, and then execute the Docker-compose up to run the containers.
+Then execute the `build-all-docker.sh` to build the Ballerina packages and Docker images, and then execute `docker-compose up` to run the containers.
 ```bash
 ./build-all-docker.sh
 docker-compose up
@@ -576,11 +569,11 @@ npm start
 ```
 ## Kubernetes
 
-Kustomize is used for combining all the YAML files that have generated into one. You can execute the following command to build the final YAML file.
+Kustomize is used for combining all the YAML files that have been generated into one. You can execute the following command to build the final YAML file.
 ```
 kubectl kustomize ./ > final.yaml
 ```
-If you are using Minikube, you can execute the following `build-all-minikube.sh` script to build the containers into minikube cluster so you won't have to push the containers manually.
+If you are using Minikube, you can execute the following `build-all-minikube.sh` script to build the containers into the minikube cluster so you won't have to push the containers manually.
 ```
 build-all-minikube.sh
 ```
