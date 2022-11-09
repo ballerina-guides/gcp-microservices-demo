@@ -18,8 +18,6 @@ import ballerina/grpc;
 import ballerina/log;
 import ballerinax/googleapis.gmail as gmail;
 
-listener grpc:Listener ep = new (9097);
-
 type GmailConfig record {|
     string refreshToken;
     string clientId;
@@ -37,27 +35,29 @@ gmail:ConnectionConfig gmailConfig = {
     }
 };
 
-final gmail:Client gmailClient = check new (gmailConfig);
-
 @display {
     label: "",
     id: "email"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
-service "EmailService" on ep {
+@grpc:Descriptor {value: DEMO_DESC}
+service "EmailService" on new grpc:Listener(9097) {
 
-    isolated remote function SendOrderConfirmation(SendOrderConfirmationRequest value) returns Empty|error {
+    final gmail:Client gmailClient;
 
-        OrderResult orderRes = value.'order;
-        string htmlBody = self.getConfirmationHtml(orderRes).toString();
+    function init() returns error? {
+        self.gmailClient = check new (gmailConfig);
+    }
+
+    isolated remote function SendOrderConfirmation(SendOrderConfirmationRequest request) returns Empty|error {
+        string htmlBody = self.getConfirmationHtml(request.'order).toString();
         gmail:MessageRequest messageRequest = {
-            recipient: value.email,
+            recipient: request.email,
             subject: "Order Confirmation",
             messageBody: htmlBody,
             contentType: gmail:TEXT_HTML
         };
 
-        gmail:Message|error sendMessageResponse = gmailClient->sendMessage(messageRequest);
+        gmail:Message|error sendMessageResponse = self.gmailClient->sendMessage(messageRequest);
 
         if sendMessageResponse is gmail:Message {
             log:printInfo("Sent Message ID: " + sendMessageResponse.id);

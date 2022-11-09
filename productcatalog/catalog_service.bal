@@ -17,15 +17,14 @@
 import ballerina/grpc;
 import ballerina/io;
 
-listener grpc:Listener ep = new (9091);
 configurable string productJsonPath = "./resources/products.json";
 
 @display {
     label: "",
     id: "catalog"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
-service "ProductCatalogService" on ep {
+@grpc:Descriptor {value: DEMO_DESC}
+service "ProductCatalogService" on new grpc:Listener(9091) {
     final Product[] & readonly products;
 
     function init() returns error? {
@@ -34,23 +33,23 @@ service "ProductCatalogService" on ep {
         self.products = products.cloneReadOnly();
     }
 
-    remote function ListProducts(Empty value) returns ListProductsResponse {
+    remote function ListProducts(Empty request) returns ListProductsResponse {
         return {products: self.products};
     }
 
-    remote function GetProduct(GetProductRequest value) returns Product|error {
+    remote function GetProduct(GetProductRequest request) returns Product|error {
         foreach Product product in self.products {
-            if product.id == value.id {
+            if product.id == request.id {
                 return product;
             }
         }
         return error("product not found");
     }
 
-    remote function SearchProducts(SearchProductsRequest value) returns SearchProductsResponse|error {
+    remote function SearchProducts(SearchProductsRequest request) returns SearchProductsResponse|error {
         return {
             results: from Product product in self.products
-                where isProductRelated(product, value.query)
+                where isProductRelated(product, request.query)
                 select product
         };
     }

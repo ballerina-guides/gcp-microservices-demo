@@ -19,7 +19,7 @@ isolated function parseProductJson(json jsonContents) returns Product[]|error {
     if productsJson !is json[] {
         return error("product array is not found");
     }
-    Product[] products = from json productJson in productsJson
+    return from json productJson in productsJson
         let Product product = {
             id: check productJson.id,
             name: check productJson.name,
@@ -29,14 +29,13 @@ isolated function parseProductJson(json jsonContents) returns Product[]|error {
             categories: check (check productJson.categories).cloneWithType()
         }
         select product;
-    return products;
 }
 
-isolated function parseMoneyJson(json moenyJson) returns Money|error {
+isolated function parseMoneyJson(json moneyJson) returns Money|error {
     return {
-        currency_code: check moenyJson.currencyCode,
-        units: check moenyJson.units,
-        nanos: check moenyJson.nanos
+        currency_code: check moneyJson.currencyCode,
+        units: check moneyJson.units,
+        nanos: check moneyJson.nanos
     };
 }
 

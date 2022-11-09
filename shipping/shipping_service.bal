@@ -16,14 +16,12 @@
 
 import ballerina/grpc;
 
-listener grpc:Listener ep = new (9095);
-
 @display {
     label: "",
     id: "shipping"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
-service "ShippingService" on ep {
+@grpc:Descriptor {value: DEMO_DESC}
+service "ShippingService" on new grpc:Listener(9095) {
     final float SHIPPING_COST = 8.99;
 
     isolated remote function GetQuote(GetQuoteRequest value) returns GetQuoteResponse|error {
@@ -46,11 +44,12 @@ service "ShippingService" on ep {
             cost_usd: money
         };
     }
+
     isolated remote function ShipOrder(ShipOrderRequest value) returns ShipOrderResponse|error {
-        Address ress = value.address;
-        string baseAddress = ress.street_address + ", " + ress.city + ", " + ress.state;
-        string trackingId = generateTrackingId(baseAddress);
-        return {tracking_id: trackingId};
+        Address address = value.address;
+        return {
+            tracking_id: generateTrackingId(string `${address.street_address}, ${address.city}, ${address.state}`)
+        };
     }
 }
 

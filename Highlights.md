@@ -42,7 +42,7 @@ Ballerina -
 ```ballerina
 configurable string cartUrl = "http://localhost:9092";
 
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "CheckoutService" on ep {
     
     function init() returns error? {
@@ -167,7 +167,7 @@ Microservices often requires to communicate with other services to get a specifi
 ```ballerina
 configurable string cartUrl = "http://localhost:9092";
 
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "CheckoutService" on ep {
     final CartServiceClient cartClient;
     …
@@ -264,7 +264,7 @@ import ballerina/log;
 listener grpc:Listener ep = new (9090);
 configurable string catalogUrl = "http://localhost:9091";
 
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "RecommendationService" on ep {
 final ProductCatalogServiceClient catalogClient;
 
@@ -289,7 +289,7 @@ You can define a mock service to represent the catalog service in the test file,
 import ballerina/test;
 import ballerina/grpc;
 
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "ProductCatalogService" on new grpc:Listener(8989) {
     remote function ListProducts(Empty value) returns ListProductsResponse {
         return {products: [{

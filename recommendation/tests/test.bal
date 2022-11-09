@@ -17,7 +17,7 @@
 import ballerina/test;
 import ballerina/grpc;
 
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
+@grpc:Descriptor {value: DEMO_DESC}
 service "ProductCatalogService" on new grpc:Listener(8989) {
     remote function ListProducts(Empty value) returns ListProductsResponse {
         return {

@@ -17,15 +17,14 @@
 import ballerina/grpc;
 import ballerina/io;
 
-listener grpc:Listener ep = new (9093);
 configurable string currencyJsonPath = "./data/currency_conversion.json";
 
 @display {
     label: "",
     id: "currency"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
-service "CurrencyService" on ep {
+@grpc:Descriptor {value: DEMO_DESC}
+service "CurrencyService" on new grpc:Listener(9093) {
     final map<decimal> & readonly currencyMap;
 
     function init() returns error? {
@@ -33,12 +32,12 @@ service "CurrencyService" on ep {
         self.currencyMap = check parseCurrencyJson(currencyJson).cloneReadOnly();
     }
 
-    remote function GetSupportedCurrencies(Empty value) returns GetSupportedCurrenciesResponse|error {
+    remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse|error {
         return {currency_codes: self.currencyMap.keys()};
 
     }
-    remote function Convert(CurrencyConversionRequest value) returns Money|error {
-        Money moneyFrom = value.'from;
+    remote function Convert(CurrencyConversionRequest request) returns Money|error {
+        Money moneyFrom = request.'from;
         final decimal fractionSize = 1000000000;
         //From Unit
         decimal pennys = <decimal>moneyFrom.nanos / fractionSize;
@@ -49,14 +48,14 @@ service "CurrencyService" on ep {
         decimal euroAmount = totalUSD / rate;
 
         //UNIT to Target
-        decimal targetRate = self.currencyMap.get(value.to_code);
+        decimal targetRate = self.currencyMap.get(request.to_code);
         decimal targetAmount = euroAmount * targetRate;
 
         int units = <int>targetAmount.floor();
         int nanos = <int>decimal:floor((targetAmount - <decimal>units) * fractionSize);
 
         return {
-            currency_code: value.to_code,
+            currency_code: request.to_code,
             nanos,
             units
         };

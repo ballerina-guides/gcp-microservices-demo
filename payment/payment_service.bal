@@ -18,14 +18,12 @@ import ballerina/grpc;
 import ballerina/uuid;
 import ballerina/log;
 
-listener grpc:Listener ep = new (9096);
-
 @display {
     label: "",
     id: "payment"
 }
-@grpc:ServiceDescriptor {descriptor: ROOT_DESCRIPTOR_DEMO, descMap: getDescriptorMapDemo()}
-service "PaymentService" on ep {
+@grpc:Descriptor {value: DEMO_DESC}
+service "PaymentService" on new grpc:Listener(9096) {
 
     isolated remote function Charge(ChargeRequest value) returns ChargeResponse|error {
         CreditCardInfo creditCard = value.credit_card;
