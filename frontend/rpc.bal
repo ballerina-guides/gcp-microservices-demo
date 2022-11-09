@@ -139,24 +139,23 @@ isolated function insertCart(string userId, string productId, int quantity) retu
 }
 
 isolated function convertCurrency(Money usd, string userCurrency) returns Money|error {
-    CurrencyConversionRequest req1 = {
+    CurrencyConversionRequest req = {
         'from: usd,
         to_code: userCurrency
     };
-    Money|grpc:Error convert = currencyClient->Convert(req1);
+    Money|grpc:Error convert = currencyClient->Convert(req);
     if convert is grpc:Error {
         log:printError("failed to call convert from currency service", 'error = convert);
-        return convert;
     }
     return convert;
 }
 
 isolated function getShippingQuote(CartItem[] items, string currency) returns Money|error {
-    GetQuoteRequest req1 = {
+    GetQuoteRequest req = {
         items,
         address: {}
     };
-    GetQuoteResponse|grpc:Error quote = shippingClient->GetQuote(req1);
+    GetQuoteResponse|grpc:Error quote = shippingClient->GetQuote(req);
     if quote is grpc:Error {
         log:printError("failed to call getQuote from shipping service", 'error = quote);
         return quote;

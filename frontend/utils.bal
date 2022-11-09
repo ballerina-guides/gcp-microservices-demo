@@ -18,7 +18,7 @@ import ballerina/http;
 import ballerina/log;
 import ballerina/regex;
 
-isolated function getUserIdFromCookie(string cookieStr) returns http:Cookie|http:Unauthorized {
+isolated function getSessionIdFromCookieHeader(string cookieStr) returns http:Cookie|http:Unauthorized {
     http:Cookie[] cookies = parseCookieHeader(cookieStr);
     http:Cookie[] usernameCookie = cookies.filter(cookie => cookie.name == SESSION_ID_COOKIE);
     if usernameCookie.length() == 1 {
