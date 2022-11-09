@@ -16,6 +16,7 @@
 
 import ballerina/grpc;
 
+# Provides text advertisements based on the context of the given words.
 @display {
     label: "",
     id: "ads"
@@ -28,6 +29,10 @@ service "AdService" on new grpc:Listener(9099) {
         self.store = new AdStore();
     }
 
+    # Retrieves ads based on context provided in the request.
+    #
+    # + request - the request containing context
+    # + return - the related/random ad response or else an error
     isolated remote function GetAds(AdRequest request) returns AdResponse|error {
         Ad[] ads = [];
         foreach string category in request.context_keys {
