@@ -44,17 +44,19 @@ const Header = () => {
         items.push(<CurrencyOption user_currency={value} />);
     }
 
-    const currencyInfo = <div className="h-controls">
-        <div className="h-control">
-            <span className="icon currency-icon"> {myData.user_currency}</span>
-            <form method="POST" className="controls-form" action="/setCurrency" id="currency_form" >
-                <select name="currency_code" onChange="document.getElementById('currency_form').submit();">
-                    {items}
-                </select>
-            </form>
-            <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_DownArrow.svg'} alt="" className="icon arrow" />
+    const currencyInfo = (
+        <div className="h-controls">
+            <div className="h-control">
+                <span className="icon currency-icon"> {myData.user_currency}</span>
+                <form method="POST" className="controls-form" action="/setCurrency" id="currency_form" >
+                    <select name="currency_code" onChange="document.getElementById('currency_form').submit();">
+                        {items}
+                    </select>
+                </form>
+                <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_DownArrow.svg'} alt="" className="icon arrow" />
+            </div>
         </div>
-    </div>;
+    );
     let cartSize;
     if (myData.cart_size) {
         cartSize = <span className="cart-size-circle">{myData.cart_size}</span>;

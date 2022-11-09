@@ -68,57 +68,59 @@ const Product = () => {
     const product = data.product;
     const recommendations = data.recommendations;
 
-    return <Fragment>
-        <Header />
-        <div className="local">
-            <span className="platform-flag">
-                local
-            </span>
-        </div>
-        <main role="main">
-            <div className="h-product container">
-                <div className="row">
-                    <div className="col-md-6">
-                        <img className="product-image" alt="" src={`${process.env.PUBLIC_URL + product.picture}`} />
-                    </div>
-                    <div className="product-info col-md-5">
-                        <div className="product-wrapper">
+    return (
+        <>
+            <Header />
+            <div className="local">
+                <span className="platform-flag">
+                    local
+                </span>
+            </div>
+            <main role="main">
+                <div className="h-product container">
+                    <div className="row">
+                        <div className="col-md-6">
+                            <img className="product-image" alt="" src={`${process.env.PUBLIC_URL + product.picture}`} />
+                        </div>
+                        <div className="product-info col-md-5">
+                            <div className="product-wrapper">
 
-                            <h2>{product.id}</h2>
-                            <p className="product-price">{product.price}</p>
-                            <p>{product.description}</p>
+                                <h2>{product.id}</h2>
+                                <p className="product-price">{product.price}</p>
+                                <p>{product.description}</p>
 
-                            <form onSubmit={submitFormHandler}>
-                                <input type="hidden" name="product_id" value={product.id} />
-                                <div className="product-quantity-dropdown">
-                                    <select name="quantity" id="quantity" ref={quantityRef}>
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                        <option>10</option>
-                                    </select>
-                                    <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_DownArrow.svg'} alt="" />
-                                </div>
-                                <button type="submit" className="cymbal-button-primary">Add To Cart</button>
-                            </form>
+                                <form onSubmit={submitFormHandler}>
+                                    <input type="hidden" name="product_id" value={product.id} />
+                                    <div className="product-quantity-dropdown">
+                                        <select name="quantity" id="quantity" ref={quantityRef}>
+                                            <option>1</option>
+                                            <option>2</option>
+                                            <option>3</option>
+                                            <option>4</option>
+                                            <option>5</option>
+                                            <option>10</option>
+                                        </select>
+                                        <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_DownArrow.svg'} alt="" />
+                                    </div>
+                                    <button type="submit" className="cymbal-button-primary">Add To Cart</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div>
-                {recommendations.length > 0 &&
-                    <Recommendations values={recommendations} />
-                }
-            </div>
-            <div className="ad">
-                <Ad redirect_url={data.ad.redirect_url} text={data.ad.text} />
-            </div>
-        </main>
+                <div>
+                    {recommendations.length > 0 &&
+                        <Recommendations values={recommendations} />
+                    }
+                </div>
+                <div className="ad">
+                    <Ad redirect_url={data.ad.redirect_url} text={data.ad.text} />
+                </div>
+            </main>
 
-        <Footer />
-    </Fragment>;
+            <Footer />
+        </>
+    );
 };
 
 export default Product;
