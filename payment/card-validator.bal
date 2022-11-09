@@ -24,6 +24,7 @@ type CardCompany record {|
     string pattern;
 |};
 
+# Class used to validate the card details.
 class CardValidator {
     final CardCompany[] companies = [
         {
