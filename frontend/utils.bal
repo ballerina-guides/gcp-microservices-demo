@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,15 +20,12 @@ import ballerina/regex;
 
 isolated function getUserIdFromCookie(string cookieStr) returns http:Cookie|http:Unauthorized {
     http:Cookie[] cookies = parseCookieHeader(cookieStr);
-    http:Cookie[] usernameCookie = cookies.filter(isolated function
-                            (http:Cookie cookie) returns boolean {
-        return cookie.name == USER_COOKIE_NAME;
-    });
+    http:Cookie[] usernameCookie = cookies.filter(cookie => cookie.name == SESSION_ID_COOKIE);
     if usernameCookie.length() == 1 {
         return usernameCookie[0];
     }
     return {
-        body: USER_COOKIE_NAME + " cookie is not available."
+        body: SESSION_ID_COOKIE + " cookie is not available."
     };
 }
 
@@ -55,12 +52,7 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
 
 isolated function toProductLocalized(Product product, string price) returns ProductLocalized {
     return {
-        id: product.id,
-        categories: product.categories,
-        description: product.description,
-        name: product.name,
-        picture: product.picture,
-        price_usd: product.price_usd,
+        ...product,
         price: price
     };
 }

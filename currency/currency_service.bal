@@ -50,8 +50,8 @@ isolated service "CurrencyService" on new grpc:Listener(9093) {
         Money moneyFrom = request.'from;
         final decimal fractionSize = 1000000000;
         //From Unit
-        decimal pennys = <decimal>moneyFrom.nanos / fractionSize;
-        decimal totalUSD = <decimal>moneyFrom.units + pennys;
+        decimal pennies = <decimal>moneyFrom.nanos / fractionSize;
+        decimal totalUSD = <decimal>moneyFrom.units + pennies;
 
         //UNIT Euro
         decimal rate = self.currencyMap.get(moneyFrom.currency_code);

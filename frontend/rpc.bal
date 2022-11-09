@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -148,7 +148,7 @@ isolated function convertCurrency(Money usd, string userCurrency) returns Money|
         log:printError("failed to call convert from currency service", 'error = convert);
         return convert;
     }
-    return currencyClient->Convert(req1);
+    return convert;
 }
 
 isolated function getShippingQuote(CartItem[] items, string currency) returns Money|error {
@@ -161,7 +161,7 @@ isolated function getShippingQuote(CartItem[] items, string currency) returns Mo
         log:printError("failed to call getQuote from shipping service", 'error = quote);
         return quote;
     }
-    return check convertCurrency(quote.cost_usd, currency);
+    return convertCurrency(quote.cost_usd, currency);
 }
 
 isolated function getRecommendations(string userId, string[] productIds) returns Product[]|error {
@@ -184,12 +184,12 @@ isolated function getAd(string[] ctxKeys) returns Ad[]|error {
     AdRequest request = {
         context_keys: ctxKeys
     };
-    AdResponse|grpc:Error ads = adClient->GetAds(request);
-    if ads is grpc:Error {
-        log:printError("failed to call getAds from ads service", 'error = ads);
-        return ads;
+    AdResponse|grpc:Error adResponse = adClient->GetAds(request);
+    if adResponse is grpc:Error {
+        log:printError("failed to call getAds from ads service", 'error = adResponse);
+        return adResponse;
     }
-    return ads.ads;
+    return adResponse.ads;
 }
 
 isolated function chooseAd(string[] ctxKeys) returns Ad|error {

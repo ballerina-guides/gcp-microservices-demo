@@ -52,7 +52,7 @@ isolated service "ProductCatalogService" on new grpc:Listener(9091) {
                 return product;
             }
         }
-        return error("product not found");
+        return error grpc:NotFoundError(string `no product with ID ${request.id}`);
     }
 
     # Provides a list of products related to a search query.
