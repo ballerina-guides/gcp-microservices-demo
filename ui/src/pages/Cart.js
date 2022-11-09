@@ -211,7 +211,7 @@ const CartPage = () => {
                             <div class="col cymbal-form-field">
                                 <label for="email">E-mail Address</label>
                                 <input type="email" id="email"
-                                    name="email" value="someone@example.com" required ref={emailRef}/>
+                                    name="email" defaultValue="someone@example.com" required ref={emailRef}/>
                             </div>
                         </div>
 
@@ -219,7 +219,7 @@ const CartPage = () => {
                             <div class="col cymbal-form-field">
                                 <label for="street_address">Street Address</label>
                                 <input type="text" name="street_address"
-                                    id="street_address" value="1600 Amphitheatre Parkway" required ref={addressRef}/>
+                                    id="street_address" defaultValue="1600 Amphitheatre Parkway" required ref={addressRef}/>
                             </div>
                         </div>
 
@@ -227,7 +227,7 @@ const CartPage = () => {
                             <div class="col cymbal-form-field">
                                 <label for="zip_code">Zip Code</label>
                                 <input type="text"
-                                    name="zip_code" id="zip_code" value="94043" required pattern="\d{4,5}" ref={zipRef}/>
+                                    name="zip_code" id="zip_code" defaultValue="94043" required pattern="\d{4,5}" ref={zipRef}/>
                             </div>
                         </div>
 
@@ -235,7 +235,7 @@ const CartPage = () => {
                             <div class="col cymbal-form-field">
                                 <label for="city">City</label>
                                 <input type="text" name="city" id="city"
-                                    value="Mountain View" required ref={cityRef}/>
+                                    defaultValue="Mountain View" required ref={cityRef}/>
                             </div>
                         </div>
 
@@ -243,13 +243,13 @@ const CartPage = () => {
                             <div class="col-md-5 cymbal-form-field">
                                 <label for="state">State</label>
                                 <input type="text" name="state" id="state"
-                                    value="CA" required ref={stateRef}/>
+                                    defaultValue="CA" required ref={stateRef}/>
                             </div>
                             <div class="col-md-7 cymbal-form-field">
                                 <label for="country">Country</label>
                                 <input type="text" id="country"
                                     placeholder="Country Name"
-                                    name="country" value="United States" required ref={countryRef}/>
+                                    name="country" defaultValue="United States" required ref={countryRef}/>
                             </div>
                         </div>
 
@@ -265,7 +265,7 @@ const CartPage = () => {
                                 <input type="text" id="credit_card_number"
                                     name="credit_card_number"
                                     placeholder="0000-0000-0000-0000"
-                                    value="4432-8015-6152-0454"
+                                    defaultValue="4432-8015-6152-0454"
                                     required pattern="\d{4}-\d{4}-\d{4}-\d{4}" ref={cardNumberRef}/>
                             </div>
                         </div>
@@ -299,7 +299,7 @@ const CartPage = () => {
                             <div class="col-md-3 cymbal-form-field">
                                 <label for="credit_card_cvv">CVV</label>
                                 <input type="password" id="credit_card_cvv"
-                                    name="credit_card_cvv" value="672" required pattern="\d{3}" ref={cvvRef}/>
+                                    name="credit_card_cvv" defaultValue="672" required pattern="\d{3}" ref={cvvRef}/>
                             </div>
                         </div>
 
