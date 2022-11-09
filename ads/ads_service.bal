@@ -22,13 +22,13 @@ import ballerina/grpc;
 }
 @grpc:Descriptor {value: DEMO_DESC}
 service "AdService" on new grpc:Listener(9099) {
-    final AdStore store;
+    private final AdStore store;
 
-    function init() {
+    isolated function init() {
         self.store = new AdStore();
     }
 
-    remote function GetAds(AdRequest request) returns AdResponse|error {
+    isolated remote function GetAds(AdRequest request) returns AdResponse|error {
         Ad[] ads = [];
         foreach string category in request.context_keys {
             Ad[] availableAds = self.store.getAdsByCategory(category);
@@ -37,8 +37,6 @@ service "AdService" on new grpc:Listener(9099) {
         if ads.length() == 0 {
             ads = check self.store.getRandomAds();
         }
-        return {
-            ads: ads
-        };
+        return {ads};
     }
 }
