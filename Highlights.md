@@ -1,6 +1,6 @@
 # Ballerina Highlights
 ## gRPC Support
-The online boutique store application uses gRPC as the communication method between the microservices. Each language has its own way of providing the gRPC capabilities for the language. As many other languages, Ballerina supports generating server and client codes using the `.proto` file using the `bal grpc` command. You can view the `.proto` file here. Ballerina has services and clients as first class constructs and gRPC builds upon that foundation. You can compare the original Go lang code and Ballerina code below.
+The online boutique store application uses gRPC as the communication method between the microservices. Each language has its way of providing the gRPC capabilities for the language. Like many other languages, Ballerina supports generating server and client codes using the `.proto` file using the `bal grpc` command. You can view the `.proto` file here. Ballerina has services and clients as first-class constructs and gRPC builds upon that foundation. You can compare the original Go lang code and the Ballerina code below.
 Go - 
 
 ```go
@@ -43,7 +43,7 @@ Ballerina -
 configurable string cartUrl = "http://localhost:9092";
 
 @grpc:Descriptor {value: DEMO_DESC}
-service "CheckoutService" on ep {
+service "CheckoutService" on new grpc:Listener(9094) {
     
     function init() returns error? {
         self.cartClient = check new (cartUrl);
@@ -57,7 +57,7 @@ service "CheckoutService" on ep {
 ```
 
 ## DataStore repository- Cart Service
-The usecase is to store the user’s shopping cart details. The type of the store will be decided by the configurables loaded into the application by the factory. In memory and Redis store is supported in the sample. You can find the code sample below.
+The usecase is to store the user’s shopping cart details. The type of the store will be decided by the configurables loaded into the application by the factory. In-memory and Redis store is supported in the sample. You can find the code sample below.
 C# -
 ```c#
 public interface ICartStore
@@ -107,7 +107,7 @@ public isolated class RedisStore {
 ```
 
 ## Search products using query expressions - catalog service
-The product catalog service contains all the details of the available products. The requirement is to get the products similar to the search query. You can find the original implementation below.
+The product catalog service contains all the details of the available products. The requirement is to get products similar to the search query. You can find the original implementation below.
 
 ```go
 func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProductsRequest) (*pb.SearchProductsResponse, error) {
@@ -124,7 +124,7 @@ func (p *productCatalog) SearchProducts(ctx context.Context, req *pb.SearchProdu
 }
 ```
 
-Even though you can implement the same using the Ballerina foreach statement, the Ballerina query expression is used to implement the search function. Query expressions contain a set of clauses similar to SQL to process the data.
+Even though you can implement the same using the Ballerina `foreach` statement, the Ballerina query expression is used to implement the search function. Query expressions contain a set of clauses similar to SQL to process the data.
 ```ballerina
 remote function SearchProducts(SearchProductsRequest value) returns SearchProductsResponse|error {
     return {
@@ -140,7 +140,7 @@ isolated function isProductRelated(Product product, string query) returns boolea
 }
 ```
 
-You can read more about query expressions in this [blog](https://dzone.com/articles/language-integrated-queries-in-ballerina). You can have much more complicated queries using the `limit` and `let` keywords, ordering, joins and so on. You can use query expressions not only for arrays but for streams, and tables as well.
+You can read more about query expressions in this [blog](https://dzone.com/articles/language-integrated-queries-in-ballerina). You can have much more complicated queries using the `limit` and `let` keywords, ordering, joins, and so on. You can use query expressions not only for arrays but for streams, and tables as well.
 
 
 ## Concurrency safety - Ad service
@@ -162,13 +162,13 @@ readonly class AdStore {
 You can read this [blog](https://dzone.com/articles/concurrency-safe-execution-ballerina-isolation) for more information about isolation concepts.
 
 ## Coordinating with multiple services and configurables - checkout service
-Microservices often requires to communicate with other services to get a specific task done. Checkout service coordinates with the cart service, catalog service, currency service, shipping service, payment service, and email service to perform the checkout. 
+Microservices often require to communicate with other services to get a specific task done. The checkout service coordinates with the cart service, catalog service, currency service, shipping service, payment service, and email service to perform the checkout. 
 
 ```ballerina
 configurable string cartUrl = "http://localhost:9092";
 
 @grpc:Descriptor {value: DEMO_DESC}
-service "CheckoutService" on ep {
+service "CheckoutService" on new grpc:Listener(9094) {
     final CartServiceClient cartClient;
     …
     
@@ -188,7 +188,7 @@ service "CheckoutService" on ep {
   function getUserCart(string userId, string userCurrency) returns CartItem[]|error {
         GetCartRequest req = {user_id: userId};
         Cart|grpc:Error cart = self.cartClient->GetCart(req);
-        if (cart is grpc:Error) {
+        if cart is grpc:Error {
             log:printError("failed to call getCart of cart service", 'error = cart);
             return cart;
         }
@@ -198,7 +198,7 @@ service "CheckoutService" on ep {
 As shown in the above code, Ballerina makes it very easy to invoke other microservices, log, and handle errors. The configurable feature helps to configure the value of the variable by overriding it in the runtime. This will be explained in depth in the testing and deployment sections of this article.
 
 ## HTML generation with XML - email service
-The email service is responsible for generating a confirmation email with the order and tracking details. Ballerina’s built-in XML feature is used for generating HTML code required for the email. You can see the code below to see how the if blocks, loops, concat, variables are used in the XML to create the HTML page.
+The email service is responsible for generating a confirmation email with the order and tracking details. Ballerina’s built-in XML feature is used for generating the HTML code required for the email. You can see the code below to see how the if blocks, loops, concat, and variables are used in the XML to create the HTML page.
 
 ```
 isolated function getConfirmationHtml(OrderResult res) returns xml {
@@ -254,18 +254,17 @@ isolated function getConfirmationHtml(OrderResult res) returns xml {
 ```
 
 ## Testing microservices - the recommendation service
-Microservices are loosely coupled, Independently deployable units. These units should be tested before we integrate them with other microservices. Ballerina’s test framework allows you to test your microservices effortlessly.
-First, we need to make sure that the catalog URL is marked as a configurable. 
+Microservices are loosely coupled independently deployable units. These units should be tested before we integrate them with other microservices. Ballerina’s test framework allows you to test your microservices effortlessly.
+First, we need to make sure that the catalog URL is marked as configurable.
 
 ```ballerina
 import ballerina/grpc;
 import ballerina/log;
 
-listener grpc:Listener ep = new (9090);
 configurable string catalogUrl = "http://localhost:9091";
 
 @grpc:Descriptor {value: DEMO_DESC}
-service "RecommendationService" on ep {
+service "RecommendationService" on new grpc:Listener(9090) {
 final ProductCatalogServiceClient catalogClient;
 
     function init() returns error? {
@@ -327,4 +326,4 @@ function recommandTest() returns error?{
 }
 ```
 
-Ballerina has object mocking features that allows you to do this without even running a service. For in-depth information on object mocking, see[]().
+Ballerina has object mocking features that allows you to do this without even running a service. For in-depth information on object mocking, see the following [guide](https://ballerina.io/learn/by-example/testerina-mocking-objects/).
