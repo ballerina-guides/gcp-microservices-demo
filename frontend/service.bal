@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -19,8 +19,10 @@ import ballerina/os;
 import ballerina/time;
 import ballerina/uuid;
 
-const string USER_COOKIE_NAME = "userId";
+const string SESSION_ID_COOKIE = "sessionIdCookie";
+const string SESSION_ID = "sessionId";
 const string USER_CURRENCY = "USD";
+const ENABLE_SINGLE_SHARED_SESSION = "ENABLE_SINGLE_SHARED_SESSION";
 final boolean is_cymbal_brand = os:getEnv("CYMBAL_BRANDING") == "true";
 
 listener http:Listener ep = new (9098);
@@ -28,29 +30,32 @@ listener http:Listener ep = new (9098);
 service class AuthInterceptor {
     *http:RequestInterceptor;
     resource function 'default [string... path](http:RequestContext ctx, http:Request req)
-                returns http:NextService|error? {
-        http:Cookie[] usernameCookie = req.getCookies().filter(function
-                                (http:Cookie cookie) returns boolean {
-            return cookie.name == USER_COOKIE_NAME;
-        });
+        returns http:NextService|error? {
+        http:Cookie[] usernameCookie = req.getCookies().filter(cookie => cookie.name == SESSION_ID_COOKIE);
+        string sessionId;
         if usernameCookie.length() == 0 {
-            http:Cookie cookie = new (USER_COOKIE_NAME, uuid:createType1AsString(),
-                                                path = "/");
-
+            if os:getEnv(ENABLE_SINGLE_SHARED_SESSION) == "true" {
+                // Hard coded user id, shared across sessions
+                sessionId = "12345678-1234-1234-1234-123456789123";
+            } else {
+                sessionId = uuid:createType1AsString();
+            }
+            http:Cookie cookie = new (SESSION_ID_COOKIE, sessionId, path = "/");
             req.addCookies([cookie]);
+        } else {
+            sessionId = usernameCookie[0].value;
         }
+        ctx.set(SESSION_ID, sessionId);
         return ctx.next();
     }
 }
-
-AuthInterceptor authInterceptor = new;
 
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["http://localhost:3000"],
         allowCredentials: true
     },
-    interceptors: [authInterceptor]
+    interceptors: [new AuthInterceptor()]
 }
 @display {
     label: "Frontend",
