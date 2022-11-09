@@ -22,7 +22,7 @@ import ballerina/grpc;
 }
 @grpc:Descriptor {value: DEMO_DESC}
 service "ShippingService" on new grpc:Listener(9095) {
-    final float SHIPPING_COST = 8.99;
+    private final float SHIPPING_COST = 8.99;
 
     isolated remote function GetQuote(GetQuoteRequest value) returns GetQuoteResponse|error {
         CartItem[] items = value.items;
@@ -38,10 +38,10 @@ service "ShippingService" on new grpc:Listener(9095) {
         float cents = cost % 1;
         int dollars = <int>(cost - cents);
 
-        Money money = {currency_code: "USD", nanos: <int>cents * 10000000, units: dollars};
+        Money usdCost = {currency_code: "USD", nanos: <int>cents * 10000000, units: dollars};
 
         return {
-            cost_usd: money
+            cost_usd: usdCost
         };
     }
 

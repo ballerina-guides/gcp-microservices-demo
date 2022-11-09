@@ -15,8 +15,8 @@
 // under the License.
 
 import ballerina/grpc;
-import ballerina/uuid;
 import ballerina/log;
+import ballerina/uuid;
 
 @display {
     label: "",

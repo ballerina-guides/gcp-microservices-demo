@@ -29,9 +29,9 @@ service "RecommendationService" on new grpc:Listener(9090) {
         label: "",
         id: "catalog"
     }
-    final ProductCatalogServiceClient catalogClient;
+    private final ProductCatalogServiceClient catalogClient;
 
-    function init() returns error? {
+    isolated function init() returns error? {
         self.catalogClient = check new ("http://" + catalogHost + ":9091");
     }
 
