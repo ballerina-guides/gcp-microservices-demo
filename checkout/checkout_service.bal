@@ -67,12 +67,12 @@ service "CheckoutService" on new grpc:Listener(9094) {
     final EmailServiceClient emailClient;
 
     function init() returns error? {
-        self.cartClient = check new ("http://" + cartHost + ":9092");
-        self.catalogClient = check new ("http://" + catalogHost + ":9091");
-        self.currencyClient = check new ("http://" + currencyHost + ":9093");
-        self.shippingClient = check new ("http://" + shippingHost + ":9095");
-        self.paymentClient = check new ("http://" + paymentHost + ":9096");
-        self.emailClient = check new ("http://" + emailHost + ":9097");
+        self.cartClient = check new (string `http://${cartHost}:9092`, timeout = 3);
+        self.catalogClient = check new (string `http://${catalogHost}:9091`, timeout = 3);
+        self.currencyClient = check new (string `http://${currencyHost}:9093`, timeout = 3);
+        self.shippingClient = check new (string `http://${shippingHost}:9095`, timeout = 3);
+        self.paymentClient = check new (string `http://${paymentHost}:9096`, timeout = 3);
+        self.emailClient = check new (string `http://${emailHost}:9097`, timeout = 3);
     }
 
     remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|error {

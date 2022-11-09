@@ -37,8 +37,6 @@ service "AdService" on new grpc:Listener(9099) {
         if ads.length() == 0 {
             ads = check self.store.getRandomAds();
         }
-        return {
-            ads: ads
-        };
+        return {ads};
     }
 }

@@ -39,11 +39,10 @@ service "CartService" on new grpc:Listener(9092) {
         }
     }
 
-    remote function AddItem(AddItemRequest value) returns Empty|error {
+    remote function AddItem(AddItemRequest value) returns error? {
         lock {
             check self.store.add(value.user_id, value.item.product_id, value.item.quantity);
         }
-        return {};
     }
 
     remote function GetCart(GetCartRequest value) returns Cart|error {
@@ -53,11 +52,10 @@ service "CartService" on new grpc:Listener(9092) {
         }
     }
 
-    remote function EmptyCart(EmptyCartRequest value) returns Empty|error {
+    remote function EmptyCart(EmptyCartRequest value) returns error? {
         lock {
             check self.store.emptyCart(value.user_id);
         }
-        return {};
     }
 }
 
