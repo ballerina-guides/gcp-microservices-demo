@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -62,13 +62,13 @@ service "EmailService" on new grpc:Listener(9097) {
         if sendMessageResponse is gmail:Message {
             log:printInfo("Sent Message ID: " + sendMessageResponse.id);
             log:printInfo("Sent Thread ID: " + sendMessageResponse.threadId);
-        } else {
-            log:printError("Error sending confirmation mail ", 'error = sendMessageResponse);
+            return {};
         }
-        return {};
+        log:printError("Error sending confirmation mail ", 'error = sendMessageResponse);
+        return sendMessageResponse;
     }
 
-    isolated function getConfirmationHtml(OrderResult res) returns xml {
+    isolated function getConfirmationHtml(OrderResult result) returns xml {
         string fontUrl = "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
 
         xml items = xml `<tr>
@@ -77,7 +77,7 @@ service "EmailService" on new grpc:Listener(9097) {
           <th>Price</th>
         </tr>`;
 
-        foreach OrderItem item in res.items {
+        foreach OrderItem item in result.items {
             xml content = xml `<tr>
             <td>#${item.item.product_id}</td>
             <td>${item.item.quantity}</td> 
@@ -90,17 +90,16 @@ service "EmailService" on new grpc:Listener(9097) {
         <h2>Your Order Confirmation</h2>
         <p>Thanks for shopping with us!</p>
         <h3>Order ID</h3>
-        <p>#${res.order_id}</p>
+        <p>#${result.order_id}</p>
         <h3>Shipping</h3>
-        <p>#${res.shipping_tracking_id}</p>
-        <p>${res.shipping_cost.units}.${res.shipping_cost.nanos / 10000000} ${res.shipping_cost.currency_code}</p>
-        <p>${res.shipping_address.street_address}, ${res.shipping_address.city}, ${res.shipping_address.country} ${res.shipping_address.zip_code}</p>
+        <p>#${result.shipping_tracking_id}</p>
+        <p>${result.shipping_cost.units}.${result.shipping_cost.nanos / 10000000} ${result.shipping_cost.currency_code}</p>
+        <p>${result.shipping_address.street_address}, ${result.shipping_address.city}, ${result.shipping_address.country} ${result.shipping_address.zip_code}</p>
         <h3>Items</h3>
         <table style="width:100%">
             ${items}
         </table>
-        </body>
-        `;
+        </body>`;
 
         xml page = xml `
         <html>
