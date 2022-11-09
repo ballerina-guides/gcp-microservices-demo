@@ -25,6 +25,7 @@ configurable string shippingHost = "localhost";
 configurable string paymentHost = "localhost";
 configurable string emailHost = "localhost";
 
+# The service retrieves the user cart, prepares the order, and orchestrates the payment, shipping, and email notification.
 @display {
     label: "",
     id: "checkout"
@@ -75,6 +76,10 @@ service "CheckoutService" on new grpc:Listener(9094) {
         self.emailClient = check new ("http://" + emailHost + ":9097");
     }
 
+    # Places the order and process payment, shipping and email notification.
+    #
+    # + request - `PlaceOrderRequest` containing user details
+    # + return - returns `PlaceOrderResponse` containing order details
     isolated remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|error {
         string orderId = uuid:createType1AsString();
         CartItem[] userCartItems = check self.getUserCart(request.user_id, request.user_currency);
