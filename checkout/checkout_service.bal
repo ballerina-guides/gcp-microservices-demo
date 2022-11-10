@@ -27,42 +27,42 @@ configurable string emailHost = "localhost";
 
 # The service retrieves the user cart, prepares the order, and orchestrates the payment, shipping, and email notification.
 @display {
-    label: "",
+    label: "Checkout",
     id: "checkout"
 }
 @grpc:Descriptor {value: DEMO_DESC}
 isolated service "CheckoutService" on new grpc:Listener(9094) {
     @display {
-        label: "",
+        label: "Cart",
         id: "cart"
     }
     private final CartServiceClient cartClient;
 
     @display {
-        label: "",
+        label: "Catalog",
         id: "catalog"
     }
     private final ProductCatalogServiceClient catalogClient;
 
     @display {
-        label: "",
+        label: "Currency",
         id: "currency"
     }
     private final CurrencyServiceClient currencyClient;
 
     @display {
-        label: "",
+        label: "Shipping",
         id: "shipping"
     }
     private final ShippingServiceClient shippingClient;
     @display {
-        label: "",
+        label: "Payment",
         id: "payment"
     }
     private final PaymentServiceClient paymentClient;
 
     @display {
-        label: "",
+        label: "Email",
         id: "email"
     }
     private final EmailServiceClient emailClient;

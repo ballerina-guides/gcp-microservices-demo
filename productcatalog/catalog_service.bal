@@ -21,7 +21,7 @@ configurable string productJsonPath = "./resources/products.json";
 
 # Reads a list of products from a JSON file and provides the ability to search products and get them individually.
 @display {
-    label: "",
+    label: "Catalog",
     id: "catalog"
 }
 @grpc:Descriptor {value: DEMO_DESC}

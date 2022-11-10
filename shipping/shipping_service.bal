@@ -18,7 +18,7 @@ import ballerina/grpc;
 
 # Gives the shipping cost estimates based on the shopping cart.
 @display {
-    label: "",
+    label: "Shipping",
     id: "shipping"
 }
 @grpc:Descriptor {value: DEMO_DESC}

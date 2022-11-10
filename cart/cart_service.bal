@@ -44,10 +44,11 @@ isolated service "CartService" on new grpc:Listener(9092) {
     #
     # + request - `AddItemRequest` containing the user id and the `CartItem`
     # + return - an `Empty` value or an error
-    isolated remote function AddItem(AddItemRequest request) returns error? {
+    isolated remote function AddItem(AddItemRequest request) returns Empty|error {
         lock {
             check self.store.addItem(request.user_id, request.item.product_id, request.item.quantity);
         }
+        return {};
     }
 
     # Provides the cart with items.
@@ -65,10 +66,11 @@ isolated service "CartService" on new grpc:Listener(9092) {
     #
     # + request - `EmptyCartRequest` containing the user id
     # + return - `Empty` value or an error
-    isolated remote function EmptyCart(EmptyCartRequest request) returns error? {
+    isolated remote function EmptyCart(EmptyCartRequest request) returns Empty|error {
         lock {
             check self.store.emptyCart(request.user_id);
         }
+        return {};
     }
 }
 

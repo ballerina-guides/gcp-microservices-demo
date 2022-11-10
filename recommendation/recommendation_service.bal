@@ -21,7 +21,7 @@ configurable string catalogHost = "localhost";
 
 # Recommends other products based on the items added to the user’s cart.
 @display {
-    label: "",
+    label: "Recommendation",
     id: "recommendation"
 }
 @grpc:Descriptor {value: DEMO_DESC}
