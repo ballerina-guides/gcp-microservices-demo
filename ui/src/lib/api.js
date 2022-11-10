@@ -119,3 +119,14 @@ export async function getMetadata() {
 
     return data;
 }
+
+export async function emptyCart() {
+    const response = await fetch(`${FRONTEND_SVC_URL}/cart/empty`, { credentials: 'include', method: 'POST' });
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || 'Could not fetch quotes.');
+    }
+
+    return data;
+}

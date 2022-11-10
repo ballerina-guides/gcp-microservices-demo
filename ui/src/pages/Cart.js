@@ -23,7 +23,7 @@ import CartItem from '../components/products/CartItem';
 import ExpireOptionPicker from '../components/products/ExpireOptionPicker';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
 import useHttp from '../hooks/use-http';
-import { getCartPage, checkout } from '../lib/api';
+import { getCartPage, checkout, emptyCart } from '../lib/api';
 import Recommendations from '../components/products/Recommendations';
 import Order from '../components/products/Order';
 
@@ -78,6 +78,11 @@ const CartPage = () => {
     useEffect(() => {
         sendRequest();
     }, [sendRequest]);
+
+    const handleEmptyCart = () => {
+        emptyCart();
+        sendRequest();
+    };
 
     if (status === 'pending') {
         return (
@@ -135,14 +140,12 @@ const CartPage = () => {
                                 <h3>Cart ({cart.length})</h3>
                             </div>
                             <div className="col-8 pr-md-0 text-right">
-                                <form method="POST" action="/cart/empty">
-                                    <button className="cymbal-button-secondary cart-summary-empty-cart-button" type="submit">
-                                        Empty Cart
-                                    </button>
-                                    <a className="cymbal-button-primary" href="/" role="button">
-                                        Continue Shopping
-                                    </a>
-                                </form>
+                                <button className="cymbal-button-secondary cart-summary-empty-cart-button" onClick={handleEmptyCart}>
+                                    Empty Cart
+                                </button>
+                                <a className="cymbal-button-primary" href="/" role="button">
+                                    Continue Shopping
+                                </a>
                             </div>
                         </div>
                         {cartItemsList}
