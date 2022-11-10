@@ -21,7 +21,7 @@ configurable string currencyJsonPath = "./data/currency_conversion.json";
 
 # This service is used read the exchange rates from a JSON and convert one currency value to another.
 @display {
-    label: "",
+    label: "Currency",
     id: "currency"
 }
 @grpc:Descriptor {value: DEMO_DESC}

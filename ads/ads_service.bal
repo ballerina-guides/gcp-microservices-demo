@@ -18,7 +18,7 @@ import ballerina/grpc;
 
 # Provides text advertisements based on the context of the given words.
 @display {
-    label: "",
+    label: "Ads",
     id: "ads"
 }
 @grpc:Descriptor {value: DEMO_DESC}
