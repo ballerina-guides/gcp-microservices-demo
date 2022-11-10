@@ -15,9 +15,8 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
-import { Fragment, useEffect, useRef } from 'react';
-import Header from '../components/products//Header';
+import { useEffect, useRef } from 'react';
+import Header from '../components/products/Header';
 import Footer from '../components/products/Footer';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
 import useHttp from '../hooks/use-http';
@@ -27,7 +26,6 @@ import Ad from '../components/products/Ad';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const Product = () => {
-    
     const params = useParams();
     const quantityRef = useRef();
     const navigate = useNavigate();
@@ -39,9 +37,9 @@ const Product = () => {
 
         const quantity = quantityRef.current.value;
 
-        addProductToCart({ quantity: parseInt(quantity), productId: productId }).finally(()=>{
-            navigate("/cart");
-        })
+        addProductToCart({ quantity: parseInt(quantity), productId }).finally(() => {
+            navigate('/cart');
+        });
     }
 
     const { sendRequest, status, data: loadedProduct, error } = useHttp(
@@ -65,64 +63,64 @@ const Product = () => {
         return <p className='centered focused'>{error}</p>;
     }
 
+    const data = loadedProduct;
 
+    const product = data.product;
+    const recommendations = data.recommendations;
 
-    let data = loadedProduct
+    return (
+        <>
+            <Header />
+            <div className="local">
+                <span className="platform-flag">
+                    local
+                </span>
+            </div>
+            <main role="main">
+                <div className="h-product container">
+                    <div className="row">
+                        <div className="col-md-6">
+                            <img className="product-image" alt="" src={`${process.env.PUBLIC_URL + product.picture}`} />
+                        </div>
+                        <div className="product-info col-md-5">
+                            <div className="product-wrapper">
 
-    let product = data.product;
-    let recommendations = data.recommendations;
+                                <h2>{product.id}</h2>
+                                <p className="product-price">{product.price}</p>
+                                <p>{product.description}</p>
 
-    return <Fragment>
-        <Header/>
-        <div class="local">
-            <span class="platform-flag">
-                local
-            </span>
-        </div>
-        <main role="main">
-            <div class="h-product container">
-                <div class="row">
-                    <div class="col-md-6">
-                        <img class="product-image" alt="" src={`${process.env.PUBLIC_URL + product.picture}`} />
-                    </div>
-                    <div class="product-info col-md-5">
-                        <div class="product-wrapper">
-
-                            <h2>{product.id}</h2>
-                            <p class="product-price">{product.price}</p>
-                            <p>{product.description}</p>
-
-                            <form onSubmit={submitFormHandler}>
-                                <input type="hidden" name="product_id" value={product.id} />
-                                <div class="product-quantity-dropdown">
-                                    <select name="quantity" id="quantity" ref={quantityRef}>
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                        <option>10</option>
-                                    </select>
-                                    <img src={process.env.PUBLIC_URL + "/static/icons/Hipster_DownArrow.svg"} alt="" />
-                                </div>
-                                <button type="submit" class="cymbal-button-primary">Add To Cart</button>
-                            </form>
+                                <form onSubmit={submitFormHandler}>
+                                    <input type="hidden" name="product_id" value={product.id} />
+                                    <div className="product-quantity-dropdown">
+                                        <select name="quantity" id="quantity" ref={quantityRef}>
+                                            <option>1</option>
+                                            <option>2</option>
+                                            <option>3</option>
+                                            <option>4</option>
+                                            <option>5</option>
+                                            <option>10</option>
+                                        </select>
+                                        <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_DownArrow.svg'} alt="" />
+                                    </div>
+                                    <button type="submit" className="cymbal-button-primary">Add To Cart</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div>
-                {recommendations.length > 0 &&
-                    <Recommendations values={recommendations} ></Recommendations>
-                }
-            </div>
-            <div class="ad">
-                <Ad redirect_url={data.ad.redirect_url} text={data.ad.text}></Ad>
-            </div>
-        </main>
+                <div>
+                    {recommendations.length > 0 &&
+                        <Recommendations values={recommendations} />
+                    }
+                </div>
+                <div className="ad">
+                    <Ad redirect_url={data.ad.redirect_url} text={data.ad.text} />
+                </div>
+            </main>
 
-        <Footer></Footer>
-    </Fragment>
+            <Footer />
+        </>
+    );
 };
 
 export default Product;

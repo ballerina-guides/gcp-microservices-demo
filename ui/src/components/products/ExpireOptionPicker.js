@@ -15,12 +15,16 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+import PropTypes from 'prop-types';
 
 const ExpireOption = (props) => {
     return (
-<option value={props.year}>{props.year}</option>
+        <option value={props.year}>{props.year}</option>
     );
-  };
-  
-  export default ExpireOption;
-  
+};
+
+ExpireOption.propTypes = {
+    year: PropTypes.number.isRequired
+};
+
+export default ExpireOption;
