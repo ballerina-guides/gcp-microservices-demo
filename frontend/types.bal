@@ -95,7 +95,7 @@ type CartBody record {|
 |};
 
 type CheckoutResponse record {|
-    *http:Ok;
+    *http:Created;
     CheckoutBody body;
 |};
 

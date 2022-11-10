@@ -87,10 +87,10 @@ isolated function getProducts() returns Product[]|error {
 }
 
 isolated function getProduct(string prodId) returns Product|error {
-    GetProductRequest req = {
+    GetProductRequest request = {
         id: prodId
     };
-    Product|grpc:Error product = catalogClient->GetProduct(req);
+    Product|grpc:Error product = catalogClient->GetProduct(request);
 
     if product is grpc:Error {
         log:printError("failed to call getProduct from catalog service", 'error = product);
@@ -99,10 +99,10 @@ isolated function getProduct(string prodId) returns Product|error {
 }
 
 isolated function getCart(string userId) returns Cart|error {
-    GetCartRequest req = {
+    GetCartRequest request = {
         user_id: userId
     };
-    Cart|grpc:Error cart = cartClient->GetCart(req);
+    Cart|grpc:Error cart = cartClient->GetCart(request);
 
     if cart is grpc:Error {
         log:printError("failed to call getCart from cart service", 'error = cart);
@@ -111,10 +111,10 @@ isolated function getCart(string userId) returns Cart|error {
 }
 
 isolated function emptyCart(string userId) returns error? {
-    EmptyCartRequest req = {
+    EmptyCartRequest request = {
         user_id: userId
     };
-    Empty|grpc:Error cart = cartClient->EmptyCart(req);
+    Empty|grpc:Error cart = cartClient->EmptyCart(request);
 
     if cart is grpc:Error {
         log:printError("failed to call emptyCart from cart service", 'error = cart);
@@ -123,14 +123,14 @@ isolated function emptyCart(string userId) returns error? {
 }
 
 isolated function insertCart(string userId, string productId, int quantity) returns error? {
-    AddItemRequest req = {
+    AddItemRequest request = {
         user_id: userId,
         item: {
             product_id: productId,
             quantity: quantity
         }
     };
-    Empty|grpc:Error cart = cartClient->AddItem(req);
+    Empty|grpc:Error cart = cartClient->AddItem(request);
 
     if cart is grpc:Error {
         log:printError("failed to call addItem from cart service", 'error = cart);
@@ -139,24 +139,23 @@ isolated function insertCart(string userId, string productId, int quantity) retu
 }
 
 isolated function convertCurrency(Money usd, string userCurrency) returns Money|error {
-    CurrencyConversionRequest req1 = {
+    CurrencyConversionRequest request = {
         'from: usd,
         to_code: userCurrency
     };
-    Money|grpc:Error convert = currencyClient->Convert(req1);
-    if convert is grpc:Error {
-        log:printError("failed to call convert from currency service", 'error = convert);
-        return convert;
+    Money|grpc:Error convertedCurrency = currencyClient->Convert(request);
+    if convertedCurrency is grpc:Error {
+        log:printError("failed to call convert from currency service", 'error = convertedCurrency);
     }
-    return convert;
+    return convertedCurrency;
 }
 
 isolated function getShippingQuote(CartItem[] items, string currency) returns Money|error {
-    GetQuoteRequest req1 = {
+    GetQuoteRequest request = {
         items,
         address: {}
     };
-    GetQuoteResponse|grpc:Error quote = shippingClient->GetQuote(req1);
+    GetQuoteResponse|grpc:Error quote = shippingClient->GetQuote(request);
     if quote is grpc:Error {
         log:printError("failed to call getQuote from shipping service", 'error = quote);
         return quote;
@@ -165,11 +164,11 @@ isolated function getShippingQuote(CartItem[] items, string currency) returns Mo
 }
 
 isolated function getRecommendations(string userId, string[] productIds) returns Product[]|error {
-    ListRecommendationsRequest req = {
+    ListRecommendationsRequest request = {
         user_id: userId,
         product_ids: ["2ZYFJ3GM2N", "LS4PSXUNUM"]
     };
-    ListRecommendationsResponse|grpc:Error recommendations = recommandClient->ListRecommendations(req);
+    ListRecommendationsResponse|grpc:Error recommendations = recommandClient->ListRecommendations(request);
     if recommendations is grpc:Error {
         log:printError("failed to call listRecommnadation from recommandation service", 'error = recommendations);
         return recommendations;
@@ -197,8 +196,8 @@ isolated function chooseAd(string[] ctxKeys) returns Ad|error {
     return ads[check random:createIntInRange(0, ads.length())];
 }
 
-isolated function checkoutCart(PlaceOrderRequest req) returns OrderResult|error {
-    PlaceOrderResponse|error placeOrderResponse = checkoutClient->PlaceOrder(req);
+isolated function checkoutCart(PlaceOrderRequest request) returns OrderResult|error {
+    PlaceOrderResponse|error placeOrderResponse = checkoutClient->PlaceOrder(request);
     if placeOrderResponse is error {
         log:printError("failed to call placeOrder from checkout service", 'error = placeOrderResponse);
         return placeOrderResponse;
