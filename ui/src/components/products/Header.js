@@ -16,7 +16,6 @@
  *  under the License.
  */
 
-import CurrencyOption from './CurrencyOption';
 import { useState, useEffect } from 'react';
 import { getMetadata } from '../../lib/api';
 
@@ -39,24 +38,6 @@ const Header = () => {
         image = <img src={process.env.PUBLIC_URL + '/static/icons/Cymbal_NavLogo.svg'} alt="" className="top-left-logo-cymbal" />;
     }
 
-    const items = [];
-    for (const value of myData.currencies.values()) {
-        items.push(<CurrencyOption user_currency={value} />);
-    }
-
-    const currencyInfo = (
-        <div className="h-controls">
-            <div className="h-control">
-                <span className="icon currency-icon"> {myData.user_currency}</span>
-                <form method="POST" className="controls-form" action="/setCurrency" id="currency_form" >
-                    <select name="currency_code" onChange="document.getElementById('currency_form').submit();">
-                        {items}
-                    </select>
-                </form>
-                <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_DownArrow.svg'} alt="" className="icon arrow" />
-            </div>
-        </div>
-    );
     let cartSize;
     if (myData.cart_size) {
         cartSize = <span className="cart-size-circle">{myData.cart_size}</span>;
@@ -74,7 +55,6 @@ const Header = () => {
                         {image}
                     </a>
                     <div className="controls">
-                        {currencyInfo}
                         <a href="/cart" className="cart-link">
                             <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_CartIcon.svg'} alt="Cart icon" className="logo" title="Cart" />
                             {cartSize}

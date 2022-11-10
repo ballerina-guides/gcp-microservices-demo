@@ -15,8 +15,8 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-import { Fragment, useEffect, useRef } from 'react';
-import Header from '../components/products//Header';
+import { useEffect, useRef } from 'react';
+import Header from '../components/products/Header';
 import Footer from '../components/products/Footer';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
 import useHttp from '../hooks/use-http';
