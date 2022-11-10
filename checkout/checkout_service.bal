@@ -31,7 +31,7 @@ configurable string emailHost = "localhost";
     id: "checkout"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-isolated service "CheckoutService" on new grpc:Listener(9094) {
+service "CheckoutService" on new grpc:Listener(9094) {
     @display {
         label: "Cart",
         id: "cart"
@@ -67,7 +67,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
     }
     private final EmailServiceClient emailClient;
 
-    isolated function init() returns error? {
+    function init() returns error? {
         self.cartClient = check new (string `http://${cartHost}:9092`, timeout = 3);
         self.catalogClient = check new (string `http://${catalogHost}:9091`, timeout = 3);
         self.currencyClient = check new (string `http://${currencyHost}:9093`, timeout = 3);
@@ -80,7 +80,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
     #
     # + request - `PlaceOrderRequest` containing user details
     # + return - returns `PlaceOrderResponse` containing order details
-    isolated remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|error {
+    remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|error {
         string orderId = uuid:createType1AsString();
         CartItem[] userCartItems = check self.getUserCart(request.user_id, request.user_currency);
         OrderItem[] orderItems = check self.prepOrderItems(userCartItems, request.user_currency);
@@ -120,7 +120,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
         return {'order};
     }
 
-    isolated function getUserCart(string userId, string userCurrency) returns CartItem[]|error {
+    function getUserCart(string userId, string userCurrency) returns CartItem[]|error {
         GetCartRequest getCartRequest = {user_id: userId};
         Cart|grpc:Error cartResponse = self.cartClient->GetCart(getCartRequest);
         if cartResponse is grpc:Error {
@@ -130,7 +130,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
         return cartResponse.items;
     }
 
-    isolated function prepOrderItems(CartItem[] cartItems, string userCurrency) returns OrderItem[]|error {
+    function prepOrderItems(CartItem[] cartItems, string userCurrency) returns OrderItem[]|error {
         OrderItem[] orderItems = [];
         foreach CartItem item in cartItems {
             GetProductRequest productRequest = {id: item.product_id};
@@ -159,7 +159,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
         return orderItems;
     }
 
-    isolated function quoteShipping(Address address, CartItem[] items) returns Money|error {
+    function quoteShipping(Address address, CartItem[] items) returns Money|error {
         GetQuoteRequest quoteRequest = {
             address: address,
             items
@@ -173,7 +173,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
         return getQuoteResponse.cost_usd;
     }
 
-    isolated function convertCurrency(Money usd, string userCurrency) returns Money|error {
+    function convertCurrency(Money usd, string userCurrency) returns Money|error {
         CurrencyConversionRequest conversionRequest = {
             'from: usd,
             to_code: userCurrency
@@ -187,7 +187,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
         return convertionResponse;
     }
 
-    isolated function chargeCard(Money total, CreditCardInfo card) returns string|error {
+    function chargeCard(Money total, CreditCardInfo card) returns string|error {
         ChargeRequest chargeRequest = {
             amount: total,
             credit_card: card
@@ -201,7 +201,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
         return chargeResponse.transaction_id;
     }
 
-    isolated function shipOrder(Address address, CartItem[] items) returns string|error {
+    function shipOrder(Address address, CartItem[] items) returns string|error {
         ShipOrderRequest orderRequest = {};
         ShipOrderResponse|grpc:Error shipOrderResponse = self.shippingClient->ShipOrder(orderRequest);
         if shipOrderResponse is grpc:Error {
@@ -212,7 +212,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
         return shipOrderResponse.tracking_id;
     }
 
-    isolated function emptyUserCart(string userId) returns error? {
+    function emptyUserCart(string userId) returns error? {
         EmptyCartRequest request = {
             user_id: userId
         };
@@ -224,7 +224,7 @@ isolated service "CheckoutService" on new grpc:Listener(9094) {
         }
     }
 
-    isolated function sendConfirmationMail(string email, OrderResult orderRes) returns error? {
+    function sendConfirmationMail(string email, OrderResult orderRes) returns error? {
         SendOrderConfirmationRequest orderConfirmRequest = {
             email,
             'order: orderRes

@@ -25,10 +25,10 @@ configurable string currencyJsonPath = "./data/currency_conversion.json";
     id: "currency"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-isolated service "CurrencyService" on new grpc:Listener(9093) {
+service "CurrencyService" on new grpc:Listener(9093) {
     private final map<decimal> & readonly currencyMap;
 
-    isolated function init() returns error? {
+    function init() returns error? {
         json currencyJson = check io:fileReadJson(currencyJsonPath);
         self.currencyMap = check parseCurrencyJson(currencyJson).cloneReadOnly();
     }
@@ -37,7 +37,7 @@ isolated service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - an empty request
     # + return - `GetSupportedCurrenciesResponse` containing supported currencies or else and error
-    isolated remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse|error {
+    remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse|error {
         return {currency_codes: self.currencyMap.keys()};
 
     }
@@ -46,7 +46,7 @@ isolated service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - `CurrencyConversionRequest` containing the `Money` value and the required currency
     # + return - returns the `Money` in the required currency or an error
-    isolated remote function Convert(CurrencyConversionRequest request) returns Money|error {
+    remote function Convert(CurrencyConversionRequest request) returns Money|error {
         Money moneyFrom = request.'from;
         final decimal fractionSize = 1000000000;
         //From Unit

@@ -48,7 +48,7 @@ service "EmailService" on new grpc:Listener(9097) {
         self.gmailClient = check new (gmailConfig);
     }
 
-    isolated remote function SendOrderConfirmation(SendOrderConfirmationRequest request) returns Empty|error {
+    remote function SendOrderConfirmation(SendOrderConfirmationRequest request) returns Empty|error {
         string htmlBody = self.getConfirmationHtml(request.'order).toString();
         gmail:MessageRequest messageRequest = {
             recipient: request.email,
@@ -68,7 +68,7 @@ service "EmailService" on new grpc:Listener(9097) {
         return sendMessageResponse;
     }
 
-    isolated function getConfirmationHtml(OrderResult result) returns xml {
+    function getConfirmationHtml(OrderResult result) returns xml {
         string fontUrl = "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
 
         xml items = xml `<tr>

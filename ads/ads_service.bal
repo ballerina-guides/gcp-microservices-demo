@@ -22,10 +22,10 @@ import ballerina/grpc;
     id: "ads"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-isolated service "AdService" on new grpc:Listener(9099) {
+service "AdService" on new grpc:Listener(9099) {
     private final AdStore store;
 
-    isolated function init() {
+    function init() {
         self.store = new AdStore();
     }
 
@@ -33,7 +33,7 @@ isolated service "AdService" on new grpc:Listener(9099) {
     #
     # + request - the request containing context
     # + return - the related/random ad response or else an error
-    isolated remote function GetAds(AdRequest request) returns AdResponse|error {
+    remote function GetAds(AdRequest request) returns AdResponse|error {
         Ad[] ads = [];
         foreach string category in request.context_keys {
             Ad[] availableAds = self.store.getAdsByCategory(category);
