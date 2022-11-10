@@ -17,12 +17,12 @@
 import ballerina/http;
 
 //Request Records
-type AddToCartRequest record {|
+public type AddToCartRequest record {|
     string productId;
     int quantity;
 |};
 
-type CheckoutRequest record {|
+public type CheckoutRequest record {|
     string email;
     string street_address;
     int zip_code;
