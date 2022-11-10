@@ -18,13 +18,14 @@ import ballerinax/redis;
 
 # Provides the interface for the RedisStore and InMemoryStore
 public type DataStore distinct object {
+
     # Adds an item to the store.
     #
     # + userId - user's id
     # + productId - related productId 
     # + quantity - related product quantity
     # + return - an error if an error occured while adding, else ()
-    isolated function add(string userId, string productId, int quantity) returns error?;
+    isolated function addItem(string userId, string productId, int quantity) returns error?;
 
     # Clears the cart of the related user.
     #
@@ -44,7 +45,7 @@ public isolated class InMemoryStore {
     *DataStore;
     private map<Cart> store = {};
 
-    isolated function add(string userId, string productId, int quantity) {
+    isolated function addItem(string userId, string productId, int quantity) {
         lock {
             if self.store.hasKey(userId) {
                 Cart existingCart = self.store.get(userId);
@@ -103,10 +104,10 @@ public isolated class RedisStore {
         });
     }
 
-    isolated function add(string userId, string productId, int quantity) returns error? {
+    isolated function addItem(string userId, string productId, int quantity) returns error? {
         map<any> existingItems = check self.redisClient->hMGet(userId, [productId]);
-        if existingItems.get(productId) == null {
-            map<int> itemsMap = {productId: quantity};
+        if existingItems.get(productId) is () {
+            map<int> itemsMap = {[productId] : quantity};
             _ = check self.redisClient->hMSet(userId, itemsMap);
         } else {
             int existingQuantity = check int:fromString(existingItems.get(productId).toString());
