@@ -27,9 +27,9 @@ final boolean is_cymbal_brand = os:getEnv("CYMBAL_BRANDING") == "true";
 
 service class AuthInterceptor {
     *http:RequestInterceptor;
-    resource function 'default [string... path](http:RequestContext ctx, http:Request req)
+    resource function 'default [string... path](http:RequestContext ctx, http:Request request)
         returns http:NextService|error? {
-        http:Cookie[] usernameCookie = req.getCookies().filter(cookie => cookie.name == SESSION_ID_COOKIE);
+        http:Cookie[] usernameCookie = request.getCookies().filter(cookie => cookie.name == SESSION_ID_COOKIE);
         string sessionId;
         if usernameCookie.length() == 0 {
             if os:getEnv(ENABLE_SINGLE_SHARED_SESSION) == "true" {
@@ -39,7 +39,7 @@ service class AuthInterceptor {
                 sessionId = uuid:createType1AsString();
             }
             http:Cookie cookie = new (SESSION_ID_COOKIE, sessionId, path = "/");
-            req.addCookies([cookie]);
+            request.addCookies([cookie]);
         } else {
             sessionId = usernameCookie[0].value;
         }
@@ -189,21 +189,21 @@ service / on new http:Listener(9098) {
             select item.product_id;
     }
 
-    resource function post cart(@http:Payload AddToCartRequest req, @http:Header {name: "Cookie"} string cookieHeader)
+    resource function post cart(@http:Payload AddToCartRequest request, @http:Header {name: "Cookie"} string cookieHeader)
                 returns http:Created|http:Unauthorized|http:BadRequest|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
         }
         string userId = cookie.value;
-        Product|error product = getProduct(req.productId);
+        Product|error product = getProduct(request.productId);
         if product is error {
             return <http:BadRequest>{
                 body: "invalid request" + product.message()
             };
         }
 
-        check insertCart(userId, req.productId, req.quantity);
+        check insertCart(userId, request.productId, request.quantity);
 
         return <http:Created>{
             headers: {
@@ -229,7 +229,7 @@ service / on new http:Listener(9098) {
         };
     }
 
-    resource function post cart/checkout(@http:Payload CheckoutRequest req, @http:Header {name: "Cookie"} string cookieHeader)
+    resource function post cart/checkout(@http:Payload CheckoutRequest request, @http:Header {name: "Cookie"} string cookieHeader)
                 returns CheckoutResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
@@ -238,21 +238,21 @@ service / on new http:Listener(9098) {
         string userId = cookie.value;
 
         OrderResult orderResult = check checkoutCart({
-            email: req.email,
+            email: request.email,
             address: {
-                city: req.city,
-                country: req.country,
-                state: req.state,
-                street_address: req.street_address,
-                zip_code: req.zip_code
+                city: request.city,
+                country: request.country,
+                state: request.state,
+                street_address: request.street_address,
+                zip_code: request.zip_code
             },
             user_id: userId,
             user_currency: USER_CURRENCY,
             credit_card: {
-                credit_card_cvv: req.credit_card_cvv,
-                credit_card_expiration_month: req.credit_card_expiration_month,
-                credit_card_expiration_year: req.credit_card_expiration_year,
-                credit_card_number: req.credit_card_number
+                credit_card_cvv: request.credit_card_cvv,
+                credit_card_expiration_month: request.credit_card_expiration_month,
+                credit_card_expiration_year: request.credit_card_expiration_year,
+                credit_card_number: request.credit_card_number
             }
         });
 
