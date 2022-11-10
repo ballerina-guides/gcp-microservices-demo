@@ -25,14 +25,14 @@ configurable string catalogHost = "localhost";
     id: "recommendation"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-isolated service "RecommendationService" on new grpc:Listener(9090) {
+service "RecommendationService" on new grpc:Listener(9090) {
     @display {
         label: "",
         id: "catalog"
     }
     private final ProductCatalogServiceClient catalogClient;
 
-    isolated function init() returns error? {
+    function init() returns error? {
         self.catalogClient = check new (string `http://${catalogHost}:9091`);
     }
 
@@ -40,7 +40,7 @@ isolated service "RecommendationService" on new grpc:Listener(9090) {
     #
     # + request - `ListRecommendationsRequest` containing product ids
     # + return - `ListRecommendationsResponse` containing the recommended product ids
-    isolated remote function ListRecommendations(ListRecommendationsRequest request) returns ListRecommendationsResponse|error {
+    remote function ListRecommendations(ListRecommendationsRequest request) returns ListRecommendationsResponse|error {
         ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
         if listProducts is grpc:Error {
             log:printError("failed to call ListProducts of catalog service", 'error = listProducts);

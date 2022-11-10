@@ -25,10 +25,10 @@ configurable string productJsonPath = "./resources/products.json";
     id: "catalog"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-isolated service "ProductCatalogService" on new grpc:Listener(9091) {
+service "ProductCatalogService" on new grpc:Listener(9091) {
     private final Product[] & readonly products;
 
-    isolated function init() returns error? {
+    function init() returns error? {
         json productsJson = check io:fileReadJson(productJsonPath);
         Product[] products = check parseProductJson(productsJson);
         self.products = products.cloneReadOnly();
@@ -38,7 +38,7 @@ isolated service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - an empty request
     # + return - `ListProductsResponse` containing a `Product[]`
-    isolated remote function ListProducts(Empty request) returns ListProductsResponse {
+    remote function ListProducts(Empty request) returns ListProductsResponse {
         return {products: self.products};
     }
 
@@ -46,7 +46,7 @@ isolated service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - `GetProductRequest` containing the product id
     # + return - `Product` related to the required id or an error
-    isolated remote function GetProduct(GetProductRequest request) returns Product|error {
+    remote function GetProduct(GetProductRequest request) returns Product|error {
         foreach Product product in self.products {
             if product.id == request.id {
                 return product;
@@ -59,7 +59,7 @@ isolated service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - `SearchProductsRequest` containing the search query
     # + return - `SearchProductsResponse` containing the matching products
-    isolated remote function SearchProducts(SearchProductsRequest request) returns SearchProductsResponse|error {
+    remote function SearchProducts(SearchProductsRequest request) returns SearchProductsResponse|error {
         return {
             results: from Product product in self.products
                 where isProductRelated(product, request.query)

@@ -22,14 +22,14 @@ import ballerina/grpc;
     id: "shipping"
 }
 @grpc:Descriptor {value: DEMO_DESC}
-isolated service "ShippingService" on new grpc:Listener(9095) {
+service "ShippingService" on new grpc:Listener(9095) {
     private final float SHIPPING_COST = 8.99;
 
     # Provides a quote with shipping cost.
     #
     # + request - `GetQuoteRequest` contaning the user's selected items
     # + return - `GetQuoteResponse` containing the shipping cost 
-    isolated remote function GetQuote(GetQuoteRequest request) returns GetQuoteResponse|error {
+    remote function GetQuote(GetQuoteRequest request) returns GetQuoteResponse|error {
         CartItem[] items = request.items;
         int count = 0;
         float cost = 0.0;
@@ -54,7 +54,7 @@ isolated service "ShippingService" on new grpc:Listener(9095) {
     #
     # + request - `ShipOrderRequest` containing the address and the user's order items
     # + return - `ShipOrderResponse` containing the tracking id or an error
-    isolated remote function ShipOrder(ShipOrderRequest request) returns ShipOrderResponse|error {
+    remote function ShipOrder(ShipOrderRequest request) returns ShipOrderResponse|error {
         Address address = request.address;
         return {
             tracking_id: generateTrackingId(string `${address.street_address}, ${address.city}, ${address.state}`)
