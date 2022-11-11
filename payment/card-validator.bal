@@ -17,7 +17,7 @@
 import ballerina/regex;
 import ballerina/time;
 
-type CardValidationError error;
+type CardValidationError distinct error;
 
 type CardCompany record {|
     string name;
@@ -93,7 +93,7 @@ class CardValidator {
                 return company;
             }
         }
-        return ();
+        return;
     }
 
     private isolated function isExpired() returns boolean {
