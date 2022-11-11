@@ -14,16 +14,100 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/grpc;
 import ballerina/test;
+
+@grpc:Descriptor {value: DEMO_DESC}
+service "ProductCatalogService" on new grpc:Listener(9091) {
+    remote function ListProducts(Empty value) returns ListProductsResponse {
+        return {
+            products: []
+        };
+    }
+
+    remote function GetProduct(GetProductRequest value) returns Product|error {
+        return {
+            id: "OLJCESPC7Z",
+            name: "Sunglasses",
+            description: "Add a modern touch to your outfits with these sleek aviator sunglasses.",
+            picture: "/static/img/products/sunglasses.jpg",
+            price_usd: {
+                currency_code: "USD",
+                units: 19,
+                nanos: 990000000
+            },
+            categories: ["accessories"]
+        };
+    }
+
+    remote function SearchProducts(SearchProductsRequest value) returns SearchProductsResponse|error {
+        return error("method not implemented");
+    }
+}
+
+@grpc:Descriptor {value: DEMO_DESC}
+service "CartService" on new grpc:Listener(9092) {
+    remote function AddItem(AddItemRequest request) returns Empty|error {
+        return error("method not implemented");
+    }
+
+    remote function GetCart(GetCartRequest request) returns Cart|error {
+        return {user_id: "3", items: [{product_id: "OLJCESPC7Z", quantity: 1}]};
+    }
+
+    remote function EmptyCart(EmptyCartRequest request) returns Empty|error {
+        return {};
+    }
+}
+
+@grpc:Descriptor {value: DEMO_DESC}
+service "CurrencyService" on new grpc:Listener(9093) {
+    remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse|error {
+        return error("method not implemented");
+    }
+
+    remote function Convert(CurrencyConversionRequest request) returns Money|error {
+        return {
+            currency_code: request.to_code,
+            units: request.'from.units,
+            nanos: request.'from.nanos
+        };
+    }
+}
+
+@grpc:Descriptor {value: DEMO_DESC}
+service "ShippingService" on new grpc:Listener(9095) {
+    remote function GetQuote(GetQuoteRequest request) returns GetQuoteResponse|error {
+        Money usdCost = {currency_code: "USD", nanos: 99000000, units: 8};
+        return {
+            cost_usd: usdCost
+        };
+    }
+
+    remote function ShipOrder(ShipOrderRequest request) returns ShipOrderResponse|error {
+        return {tracking_id: "AB15A51G1051A"};
+    }
+}
+
+@grpc:Descriptor {value: DEMO_DESC}
+service "PaymentService" on new grpc:Listener(9096) {
+    remote function Charge(ChargeRequest value) returns ChargeResponse|error {
+        return {
+            transaction_id: "12345678945613254689"
+        };
+    }
+}
+
+@grpc:Descriptor {value: DEMO_DESC}
+service "EmailService" on new grpc:Listener(9097) {
+    remote function SendOrderConfirmation(SendOrderConfirmationRequest request) returns Empty|error {
+        return {};
+    }
+}
 
 @test:Config {}
 function intAddTest() returns error? {
     CheckoutServiceClient ep = check new ("http://localhost:9094");
-    //Populate cart first.
-    CartServiceClient ep1 = check new ("http://localhost:9092");
-    //Add Cart
-    AddItemRequest item1 = {user_id: "3", item: {product_id: "OLJCESPC7Z", quantity: 1}};
-    _ = check ep1->AddItem(item1);
 
     PlaceOrderRequest req = {
         user_id: "3",
@@ -41,9 +125,23 @@ function intAddTest() returns error? {
             credit_card_expiration_month: 10
 
         },
-        email: "anjanasupun05@gmail.com",
+        email: "ballerina@wso2.com",
         user_currency: "USD"
     };
     PlaceOrderResponse placeOrderResponse = check ep->PlaceOrder(req);
-    test:assertTrue(placeOrderResponse.'order.length() > 1);
+    test:assertEquals(placeOrderResponse.'order.shipping_tracking_id, "AB15A51G1051A");
+    test:assertEquals(placeOrderResponse.'order.shipping_cost, {currency_code: "USD", nanos: 99000000, units: 8});
+    test:assertEquals(placeOrderResponse.'order.shipping_address, {
+        country: "Sri lanka",
+        city: "Colombo",
+        state: "Western",
+        street_address: "56,Palm Grove",
+        zip_code: 10300
+    });
+    test:assertEquals(placeOrderResponse.'order.items, [
+        {
+            item: {product_id: "OLJCESPC7Z", quantity: 1},
+            cost: {currency_code: "USD", units: 19, nanos: 990000000}
+        }
+    ]);
 }
