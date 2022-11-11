@@ -23,7 +23,6 @@ import ballerina/grpc;
 }
 @grpc:Descriptor {value: DEMO_DESC}
 service "ShippingService" on new grpc:Listener(9095) {
-    private final float SHIPPING_COST = 8.99;
 
     # Provides a quote with shipping cost.
     #
@@ -38,7 +37,7 @@ service "ShippingService" on new grpc:Listener(9095) {
         }
 
         if count != 0 {
-            cost = self.SHIPPING_COST;
+            cost = 8.99;
         }
         float cents = cost % 1;
         int dollars = <int>(cost - cents);
