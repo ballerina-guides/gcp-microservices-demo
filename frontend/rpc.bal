@@ -192,7 +192,7 @@ isolated function getAd(string[] ctxKeys) returns Ad[]|grpc:Error {
     return adResponse.ads;
 }
 
-isolated function chooseAd(string[] ctxKeys) returns Ad|error {
+isolated function chooseAd(string[] ctxKeys = []) returns Ad|error {
     Ad[] ads = check getAd(ctxKeys);
     return ads[check random:createIntInRange(0, ads.length())];
 }
