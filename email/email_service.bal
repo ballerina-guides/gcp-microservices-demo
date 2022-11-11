@@ -26,16 +26,7 @@ type GmailConfig record {|
 
 configurable GmailConfig gmail = ?;
 
-gmail:ConnectionConfig gmailConfig = {
-    auth: {
-        refreshUrl: gmail:REFRESH_URL,
-        refreshToken: gmail.refreshToken,
-        clientId: gmail.clientId,
-        clientSecret: gmail.clientSecret
-    }
-};
-
-# Used to send an order confirmation email to the user using the gmail` connector.
+# Used to send an order confirmation email to the user using the `gmail` connector.
 @display {
     label: "Email",
     id: "email"
@@ -43,10 +34,17 @@ gmail:ConnectionConfig gmailConfig = {
 @grpc:Descriptor {value: DEMO_DESC}
 service "EmailService" on new grpc:Listener(9097) {
 
-    final gmail:Client gmailClient;
+    private final gmail:Client gmailClient;
 
     function init() returns error? {
-        self.gmailClient = check new (gmailConfig);
+        self.gmailClient = check new ({
+            auth: {
+                refreshUrl: gmail:REFRESH_URL,
+                refreshToken: gmail.refreshToken,
+                clientId: gmail.clientId,
+                clientSecret: gmail.clientSecret
+            }
+        });
     }
 
     # Sends the order confirmation email containing details about the order.
@@ -54,26 +52,25 @@ service "EmailService" on new grpc:Listener(9097) {
     # + request - `SendOrderConfirmationRequest` which contains the details about the order
     # + return - `Empty` or else an error
     remote function SendOrderConfirmation(SendOrderConfirmationRequest request) returns Empty|error {
-        string htmlBody = self.getConfirmationHtml(request.'order).toString();
         gmail:MessageRequest messageRequest = {
             recipient: request.email,
             subject: "Order Confirmation",
-            messageBody: htmlBody,
+            messageBody: (check self.getConfirmationHtml(request.'order)).toString(),
             contentType: gmail:TEXT_HTML
         };
 
         gmail:Message|error sendMessageResponse = self.gmailClient->sendMessage(messageRequest);
 
         if sendMessageResponse is gmail:Message {
-            log:printInfo("Sent Message ID: " + sendMessageResponse.id);
-            log:printInfo("Sent Thread ID: " + sendMessageResponse.threadId);
+            log:printInfo(string `Sent Message ID: ${sendMessageResponse.id}`);
+            log:printInfo(string `Sent Thread ID: ${sendMessageResponse.threadId}`);
             return {};
         }
         log:printError("Error sending confirmation mail ", 'error = sendMessageResponse);
         return sendMessageResponse;
     }
 
-    function getConfirmationHtml(OrderResult result) returns xml {
+    function getConfirmationHtml(OrderResult result) returns xml|error {
         string fontUrl = "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
 
         xml items = xml `<tr>
@@ -82,14 +79,15 @@ service "EmailService" on new grpc:Listener(9097) {
           <th>Price</th>
         </tr>`;
 
-        foreach OrderItem item in result.items {
-            xml content = xml `<tr>
+        check from OrderItem item in result.items
+            let xml content = xml `<tr>
             <td>#${item.item.product_id}</td>
             <td>${item.item.quantity}</td> 
             <td>${item.cost.units}.${item.cost.nanos / 10000000} ${item.cost.currency_code}</td>
-            </tr>`;
-            items = items + content;
-        }
+            </tr>`
+            do {
+                items += content;
+            };
 
         xml body = xml `<body>
         <h2>Your Order Confirmation</h2>
@@ -106,7 +104,7 @@ service "EmailService" on new grpc:Listener(9097) {
         </table>
         </body>`;
 
-        xml page = xml `
+        return <xml>xml `
         <html>
         <head>
             <title>Your Order Confirmation</title>
@@ -119,8 +117,6 @@ service "EmailService" on new grpc:Listener(9097) {
         </style>
             ${body}
         </html>`;
-
-        return page;
     }
 }
 
