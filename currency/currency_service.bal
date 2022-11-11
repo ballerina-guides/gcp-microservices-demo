@@ -61,7 +61,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
         decimal targetRate = self.currencyMap.get(request.to_code);
         decimal targetAmount = euroAmount * targetRate;
 
-        int units = <int>targetAmount.floor();
+        int units = <int>targetAmount.floor(); // check casting(can overflow)
         int nanos = <int>decimal:floor((targetAmount - <decimal>units) * fractionSize);
 
         return {
