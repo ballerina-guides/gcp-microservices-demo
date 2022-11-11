@@ -34,8 +34,11 @@ service "PaymentService" on new grpc:Listener(9096) {
         CreditCardInfo creditCard = value.credit_card;
         CardValidator cardValidator = new (creditCard.credit_card_number, creditCard.credit_card_expiration_year, creditCard.credit_card_expiration_month);
         CardCompany|error cardValid = cardValidator.isValid();
-        if cardValid is error {
+        if cardValid is CardValidationError {
             log:printError("Credit card is not valid", 'error = cardValid);
+            return cardValid;
+        } else if cardValid is error {
+            log:printError("Error occured while validating the credit card", 'error = cardValid);
             return cardValid;
         }
         log:printInfo(string `Transaction processed: the card ending ${creditCard.credit_card_number.substring(creditCard.credit_card_number.length() - 4)}, 
