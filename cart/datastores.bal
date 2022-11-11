@@ -122,15 +122,8 @@ public isolated class RedisStore {
 
     isolated function getCart(string userId) returns Cart|error {
         map<any> userItems = check self.redisClient->hGetAll(userId);
-
-        CartItem[] items = [];
-        foreach [string, any] [productId, quantity] in userItems.entries() {
-            CartItem item = {
-                product_id: productId,
-                quantity: check int:fromString(quantity.toString())
-            };
-            items.push(item);
-        }
-        return {user_id: userId, items: items};
+        CartItem[] items = from [string, any] [productId, quantity] in userItems.entries()
+            select {product_id: productId, quantity: check int:fromString(quantity.toString())};
+        return {user_id: userId, items};
     }
 }
