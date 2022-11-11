@@ -31,7 +31,7 @@ service "CartService" on new grpc:Listener(9092) {
     private final DataStore store;
 
     function init() returns error? {
-        if datastore == "redis" {
+        if datastore is "redis" {
             log:printInfo("Redis datastore is selected");
             self.store = check new RedisStore();
         } else {
