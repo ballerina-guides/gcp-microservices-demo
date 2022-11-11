@@ -33,9 +33,9 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
     http:Cookie[] cookiesInRequest = [];
     string cookieValue = cookieStringValue;
     string[] nameValuePairs = regex:split(cookieValue, "; ");
-    foreach var item in nameValuePairs {
-        if regex:matches(item, "^([^=]+)=.*$") {
-            string[] nameValue = regex:split(item, "=");
+    foreach string pair in nameValuePairs {
+        if regex:matches(pair, "^([^=]+)=.*$") {
+            string[] nameValue = regex:split(pair, "=");
             http:Cookie cookie;
             if nameValue.length() > 1 {
                 cookie = new (nameValue[0], nameValue[1], path = "/");
@@ -44,7 +44,7 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
             }
             cookiesInRequest.push(cookie);
         } else {
-            log:printError("Invalid cookie: " + item + ", which must be in the format as [{name}=].");
+            log:printError("Invalid cookie: " + pair + ", which must be in the format as [{name}=].");
         }
     }
     return cookiesInRequest;

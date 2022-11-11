@@ -26,7 +26,7 @@ type CardCompany record {|
 
 # Class used to validate the card details.
 class CardValidator {
-    final CardCompany[] companies = [
+    private final CardCompany[] companies = [
         {
             name: "VISA",
             pattern: "^4[0-9]{12}(?:[0-9]{3})?$"
@@ -47,6 +47,8 @@ class CardValidator {
         self.expireMonth = expireMonth;
     }
 
+    # Validates the card with.
+    # + return - `CardCompany` containing details
     isolated function isValid() returns CardCompany|error {
         if (self.cardNumber.length() < 13) || (self.cardNumber.length() > 19) {
             return error CardValidationError("Credit card info is invalid: failed length check");
@@ -65,7 +67,7 @@ class CardValidator {
         return gleanCompany;
     }
 
-    isolated function isLuhnValid() returns boolean|error {
+    private isolated function isLuhnValid() returns boolean|error {
         int digits = self.cardNumber.length();
         int oddOrEven = digits & 1;
         int sum = 0;
@@ -85,7 +87,7 @@ class CardValidator {
         return sum != 0 && (sum % 10 == 0);
     }
 
-    isolated function getCompany() returns CardCompany? {
+    private isolated function getCompany() returns CardCompany? {
         foreach CardCompany company in self.companies {
             if regex:matches(self.cardNumber, company.pattern) {
                 return company;
@@ -94,7 +96,7 @@ class CardValidator {
         return ();
     }
 
-    isolated function isExpired() returns boolean {
+    private isolated function isExpired() returns boolean {
         int expireYear = self.expireYear;
         int expireMonth = self.expireMonth;
 

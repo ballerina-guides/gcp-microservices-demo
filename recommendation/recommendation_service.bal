@@ -27,7 +27,7 @@ configurable string catalogHost = "localhost";
 @grpc:Descriptor {value: DEMO_DESC}
 service "RecommendationService" on new grpc:Listener(9090) {
     @display {
-        label: "",
+        label: "Catalog",
         id: "catalog"
     }
     private final ProductCatalogServiceClient catalogClient;

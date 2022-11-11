@@ -77,8 +77,7 @@ isolated function areSameCurrency(Money l, Money r) returns boolean {
 # + r - second money object
 # + return - currency equal status
 isolated function areEquals(Money l, Money r) returns boolean {
-    return l.currency_code == r.currency_code &&
-l.units == r.units && l.nanos == r.nanos;
+    return l.currency_code == r.currency_code && l.units == r.units && l.nanos == r.nanos;
 }
 
 # Negate returns the same amount with the sign negated.
@@ -99,7 +98,6 @@ isolated function negate(Money money) returns Money {
 # + r - second money object
 # + return - sum money object
 isolated function sum(Money l, Money r) returns Money {
-
     int nanosMod = 1000000000;
 
     int units = l.units + r.units;

@@ -35,6 +35,7 @@ gmail:ConnectionConfig gmailConfig = {
     }
 };
 
+# Used to send an order confirmation email to the user using the gmail` connector.
 @display {
     label: "Email",
     id: "email"
@@ -48,6 +49,10 @@ service "EmailService" on new grpc:Listener(9097) {
         self.gmailClient = check new (gmailConfig);
     }
 
+    # Sends the order confirmation email containing details about the order.
+    #
+    # + request - `SendOrderConfirmationRequest` which contains the details about the order
+    # + return - `Empty` or else an error
     remote function SendOrderConfirmation(SendOrderConfirmationRequest request) returns Empty|error {
         string htmlBody = self.getConfirmationHtml(request.'order).toString();
         gmail:MessageRequest messageRequest = {
