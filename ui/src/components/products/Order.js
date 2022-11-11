@@ -34,7 +34,7 @@ const Order = (props) => {
                             </h3>
                         </div>
                         <div className="col-12 text-center">
-                            <p>We&aposve sent you a confirmation email.</p>
+                            <p>We&apos;ve sent you a confirmation email.</p>
                         </div>
                     </div>
                     <div className="row border-bottom-solid padding-y-24">

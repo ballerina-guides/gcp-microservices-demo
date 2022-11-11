@@ -18,7 +18,7 @@ import ballerina/test;
 import ballerina/grpc;
 
 @grpc:Descriptor {value: DEMO_DESC}
-service "ProductCatalogService" on new grpc:Listener(8989) {
+service "ProductCatalogService" on new grpc:Listener(9091) {
     remote function ListProducts(Empty value) returns ListProductsResponse {
         return {
             products: [
@@ -48,7 +48,7 @@ service "ProductCatalogService" on new grpc:Listener(8989) {
 }
 
 @test:Config {}
-function recommandTest() returns error? {
+function recommendTest() returns error? {
     RecommendationServiceClient ep = check new ("http://localhost:9090");
     ListRecommendationsRequest req = {
         user_id: "1",
