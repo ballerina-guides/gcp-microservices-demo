@@ -37,7 +37,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - an empty request
     # + return - `GetSupportedCurrenciesResponse` containing supported currencies or else and error
-    remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse|error {
+    remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse {
         return {currency_codes: self.currencyMap.keys()};
 
     }
@@ -46,7 +46,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - `CurrencyConversionRequest` containing the `Money` value and the required currency
     # + return - returns the `Money` in the required currency or an error
-    remote function Convert(CurrencyConversionRequest request) returns Money|error {
+    remote function Convert(CurrencyConversionRequest request) returns Money {
         Money moneyFrom = request.'from;
         final decimal fractionSize = 1000000000;
         //From Unit
@@ -61,7 +61,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
         decimal targetRate = self.currencyMap.get(request.to_code);
         decimal targetAmount = euroAmount * targetRate;
 
-        int units = <int>targetAmount.floor();
+        int units = <int>targetAmount.floor(); // check casting(can overflow)
         int nanos = <int>decimal:floor((targetAmount - <decimal>units) * fractionSize);
 
         return {
@@ -76,8 +76,9 @@ isolated function parseCurrencyJson(json currencyJson) returns map<decimal>|erro
     map<decimal> currencies = {};
     map<string> currencyValues = check currencyJson.cloneWithType();
 
-    foreach string key in currencyValues.keys() {
-        currencies[key] = check decimal:fromString(currencyValues.get(key));
-    }
+    check from string key in currencyValues.keys()
+        do {
+            currencies[key] = check decimal:fromString(currencyValues.get(key));
+        };
     return currencies;
 }
