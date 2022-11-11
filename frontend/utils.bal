@@ -37,11 +37,7 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
         if regex:matches(pair, "^([^=]+)=.*$") {
             string[] nameValue = regex:split(pair, "=");
             http:Cookie cookie;
-            if nameValue.length() > 1 {
-                cookie = new (nameValue[0], nameValue[1], path = "/");
-            } else {
-                cookie = new (nameValue[0], "", path = "/");
-            }
+            cookie = new (nameValue[0], nameValue.length() > 1 ? nameValue[1]: "", path = "/");
             cookiesInRequest.push(cookie);
         } else {
             log:printError("Invalid cookie: " + pair + ", which must be in the format as [{name}=].");
@@ -53,6 +49,6 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
 isolated function toProductLocalized(Product product, string price) returns ProductLocalized {
     return {
         ...product,
-        price: price
+        price
     };
 }
