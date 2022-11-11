@@ -14,19 +14,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
+type JsonProduct record {|
+    string id;
+    string name;
+    string description;
+    string picture;
+    record {|
+        string currencyCode;
+        int units;
+        int nanos;
+    |} priceUsd;
+    string[] categories;
+|};
+
 isolated function parseProductJson(json jsonContents) returns Product[]|error {
     json productsJson = check jsonContents.products;
     if productsJson !is json[] {
         return error("product array is not found");
     }
-    return from json productJson in productsJson
+
+    JsonProduct[] jsonProducts = check productsJson.fromJsonWithType();
+    return from JsonProduct jsonProduct in jsonProducts
         let Product product = {
-            id: check productJson.id,
-            name: check productJson.name,
-            description: check productJson.description,
-            picture: check productJson.picture,
-            price_usd: check parseUsdPrice(check productJson.priceUsd),
-            categories: check (check productJson.categories).cloneWithType()
+            id: jsonProduct.id,
+            name: jsonProduct.name,
+            description: jsonProduct.description,
+            picture: jsonProduct.picture,
+            price_usd: check parseUsdPrice(jsonProduct.priceUsd),
+            categories: jsonProduct.categories
         }
         select product;
 }
