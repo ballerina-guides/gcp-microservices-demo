@@ -20,18 +20,17 @@ import { useCookies } from 'react-cookie';
 
 const Footer = (props) => {
     const [userIdCookie] = useCookies(['userId']);
-    const userId = userIdCookie.userId
+    const userId = userIdCookie.userId;
 
     return (
         <footer className="py-5">
             <div className="footer-top">
                 <div className="container footer-social">
-                    <p className="footer-text">This website is hosted for demo purposes only. It is not an actual shop. This is not a Google product.</p>
-                    <p className="footer-text">© 2020 Google Inc (<a href="https://github.com/GoogleCloudPlatform/microservices-demo">Source Code</a>)</p>
+                    <p className="footer-text">This website is hosted for demo purposes only. It is not an actual shop.</p>
+                    <p className="footer-text">This demo was created based on the <a href='https://github.com/GoogleCloudPlatform/microservices-demo'>GCP microservices sample</a></p>
+                    <p className="footer-text">Please find the source code <a href='https://github.com/ballerina-guides/gcp-microservices-demo'>here</a></p>
                     <p className="footer-text">
-                        <small>
-                            session-id: {userId}
-                        </small>
+                        <small>session-id: {userId}</small>
                     </p>
                 </div>
             </div>

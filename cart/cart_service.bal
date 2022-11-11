@@ -46,7 +46,7 @@ service "CartService" on new grpc:Listener(9092) {
     # + return - an `Empty` value or an error
     remote function AddItem(AddItemRequest request) returns Empty|error {
         lock {
-            check self.store.add(request.user_id, request.item.product_id, request.item.quantity);
+            check self.store.addItem(request.user_id, request.item.product_id, request.item.quantity);
         }
         return {};
     }

@@ -15,11 +15,16 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+import PropTypes from 'prop-types';
 
 const CurrencyOption = (props) => {
-  return (
-    <option value={props.user_currency} selected="selected">{props.user_currency}</option>
-  );
+    return (
+        <option value={props.user_currency} selected="selected">{props.user_currency}</option>
+    );
+};
+
+CurrencyOption.propTypes = {
+    user_currency: PropTypes.string.isRequired
 };
 
 export default CurrencyOption;

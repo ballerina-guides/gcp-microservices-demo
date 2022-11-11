@@ -16,18 +16,25 @@
  *  under the License.
  */
 
-import { Fragment } from 'react';
+import PropTypes from 'prop-types';
 
 import classes from './Layout.module.css';
 import MainNavigation from './MainNavigation';
 
-const Layout = (props) => {
-  return (
-    <Fragment>
-      <MainNavigation />
-      <main className={classes.main}>{props.children}</main>
-    </Fragment>
-  );
+function Layout(props) {
+    return (
+        <>
+            <MainNavigation />
+            <main className={classes.main}>{props.children}</main>
+        </>
+    );
+};
+
+Layout.propTypes = {
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.node),
+        PropTypes.node
+    ])
 };
 
 export default Layout;

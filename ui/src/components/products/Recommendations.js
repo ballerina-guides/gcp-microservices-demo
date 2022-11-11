@@ -15,33 +15,43 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
+import PropTypes from 'prop-types';
 import Recommendation from './Recommendation';
 
 const Recommendations = (props) => {
-    let values = [props.values];
-    const items = []
+    console.log(props);
+    const values = [props.values];
+    const items = [];
 
     for (let index = 0; index < values[0].length; ++index) {
         const value = values[0][index];
-        items.push(<Recommendation key={index} id={value.id} picture={value.picture} name={value.name}> </Recommendation>)
+        items.push(<Recommendation key={index} id={value.id} picture={value.picture} name={value.name} />);
     }
-    
+
     return (
-    <section class="recommendations">
-        <div class="container">
-          <div class="row">
-            <div class="col-xl-10 offset-xl-1">
-              <h2>You May Also Like</h2>
-              <div class="row">
-                  {items}
-              </div>
+        <section className="recommendations">
+            <div className="container">
+                <div className="row">
+                    <div className="col-xl-10 offset-xl-1">
+                        <h2>You May Also Like</h2>
+                        <div className="row">
+                            {items}
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-    </section>
+        </section>
     );
-  };
-  
-  export default Recommendations;
-  
+};
+
+Recommendations.propTypes = {
+    values: PropTypes.arrayOf(PropTypes.shape({
+        categories: PropTypes.arrayOf(PropTypes.string).isRequired,
+        description: PropTypes.string.isRequired,
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        picture: PropTypes.string.isRequired
+    }))
+};
+
+export default Recommendations;
