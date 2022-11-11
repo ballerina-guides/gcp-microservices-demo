@@ -70,7 +70,7 @@ service / on new http:Listener(9098) {
 
         string[] supportedCurrencies = check getSupportedCurrencies();
         Cart cart = check getCart(cookie.value);
-        return <MetadataResponse>{
+        MetadataResponse metadataResponse = check {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
@@ -80,7 +80,8 @@ service / on new http:Listener(9098) {
                 cart_size: cart.items.length(),
                 is_cymbal_brand: is_cymbal_brand
             }
-        };
+        }.ensureType();
+        return metadataResponse;
     }
 
     resource function get .(@http:Header {name: "Cookie"} string cookieHeader)
@@ -97,7 +98,7 @@ service / on new http:Listener(9098) {
             productsLocalized.push(toProductLocalized(product, renderMoney(converedMoney)));
         }
 
-        return <HomeResponse>{
+        HomeResponse homeResponse = check {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
@@ -105,7 +106,8 @@ service / on new http:Listener(9098) {
                 products: productsLocalized,
                 ad: check chooseAd([])
             }
-        };
+        }.ensureType();
+        return homeResponse;
     }
 
     resource function get product/[string id](@http:Header {name: "Cookie"} string cookieHeader)
@@ -120,7 +122,7 @@ service / on new http:Listener(9098) {
         ProductLocalized productLocal = toProductLocalized(product, renderMoney(converedMoney));
         Product[] recommendations = check getRecommendations(userId, [id]);
 
-        return <ProductResponse>{
+        ProductResponse productResponse = check {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
@@ -129,7 +131,8 @@ service / on new http:Listener(9098) {
                 recommendations: recommendations,
                 ad: check chooseAd(product.categories)
             }
-        };
+        }.ensureType();
+        return productResponse;
     }
 
     resource function post setCurrency() returns json {
@@ -170,7 +173,7 @@ service / on new http:Listener(9098) {
         int year = time:utcToCivil(time:utcNow()).year;
         int[] years = [year, year + 1, year + 2, year + 3, year + 4];
 
-        return <CartResponse>{
+        CartResponse cartResponse = check {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
@@ -181,7 +184,8 @@ service / on new http:Listener(9098) {
                 items: cartItems,
                 expiration_years: years
             }
-        };
+        }.ensureType();
+        return cartResponse;
     }
 
     function getProductIdFromCart(Cart cart) returns string[] {
@@ -205,12 +209,13 @@ service / on new http:Listener(9098) {
 
         check insertCart(userId, request.productId, request.quantity);
 
-        return <http:Created>{
+        http:Created response = check {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: "item added the cart"
-        };
+        }.ensureType();
+        return response;
     }
 
     resource function post cart/empty(@http:Header {name: "Cookie"} string cookieHeader)
@@ -221,12 +226,13 @@ service / on new http:Listener(9098) {
         }
         string userId = cookie.value;
         check emptyCart(userId);
-        return <http:Created>{
+        http:Created response = check {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: "cart emptied"
-        };
+        }.ensureType();
+        return response;
     }
 
     resource function post cart/checkout(@http:Payload CheckoutRequest request, @http:Header {name: "Cookie"} string cookieHeader)
@@ -263,7 +269,7 @@ service / on new http:Listener(9098) {
             totalCost = sum(totalCost, multiplyRes);
         }
 
-        return <CheckoutResponse>{
+        CheckoutResponse checkoutResponse = check {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
@@ -272,6 +278,8 @@ service / on new http:Listener(9098) {
                 total_paid: renderMoney(totalCost),
                 recommendations: recommendations
             }
-        };
+        }.ensureType();
+
+        return checkoutResponse;
     }
 }
