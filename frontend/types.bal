@@ -17,11 +17,28 @@
 import ballerina/http;
 
 //Request Records
+
+# Record containing the details of the item
+#
+# + productId - product id
+# + quantity - product quantity
 public type AddToCartRequest record {|
     string productId;
     int quantity;
 |};
 
+# Record containing details of the user and the card
+#
+# + email - user's email
+# + street_address - user's street address
+# + zip_code - user's zip code
+# + city - user's city
+# + state - user's state
+# + country - user's country
+# + credit_card_number - credit card number
+# + credit_card_expiration_month - expiration month of the card
+# + credit_card_expiration_year - expiration year of the card
+# + credit_card_cvv - cvv of the card
 public type CheckoutRequest record {|
     string email;
     string street_address;
