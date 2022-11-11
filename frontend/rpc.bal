@@ -18,56 +18,58 @@ import ballerina/grpc;
 import ballerina/log;
 import ballerina/random;
 
-configurable string currencyHost = "localhost";
+const string LOCALHOST = "localhost";
+
+configurable string currencyHost = LOCALHOST;
 @display {
     label: "Currency",
     id: "currency"
 }
 final CurrencyServiceClient currencyClient = check new ("http://" + currencyHost + ":9093");
 
-configurable string catalogHost = "localhost";
+configurable string catalogHost = LOCALHOST;
 @display {
     label: "Catalog",
     id: "catalog"
 }
 final ProductCatalogServiceClient catalogClient = check new ("http://" + catalogHost + ":9091");
 
-configurable string cartHost = "localhost";
+configurable string cartHost = LOCALHOST;
 @display {
     label: "Cart",
     id: "cart"
 }
 final CartServiceClient cartClient = check new ("http://" + cartHost + ":9092");
 
-configurable string shippingHost = "localhost";
+configurable string shippingHost = LOCALHOST;
 @display {
     label: "Shipping",
     id: "shipping"
 }
 final ShippingServiceClient shippingClient = check new ("http://" + shippingHost + ":9095");
 
-configurable string recommandHost = "localhost";
+configurable string recommendHost = LOCALHOST;
 @display {
     label: "Recommendation",
     id: "recommendation"
 }
-final RecommendationServiceClient recommandClient = check new ("http://" + recommandHost + ":9090");
+final RecommendationServiceClient recommendClient = check new ("http://" + recommendHost + ":9090");
 
-configurable string adHost = "localhost";
+configurable string adHost = LOCALHOST;
 @display {
     label: "Ads",
     id: "ads"
 }
 final AdServiceClient adClient = check new ("http://" + adHost + ":9099");
 
-configurable string checkoutHost = "localhost";
+configurable string checkoutHost = LOCALHOST;
 @display {
     label: "Checkout",
     id: "checkout"
 }
 final CheckoutServiceClient checkoutClient = check new ("http://" + checkoutHost + ":9094");
 
-isolated function getSupportedCurrencies() returns string[]|error {
+isolated function getSupportedCurrencies() returns string[]|grpc:Error {
     GetSupportedCurrenciesResponse|grpc:Error supportedCurrencies = currencyClient->GetSupportedCurrencies({});
     if supportedCurrencies is grpc:Error {
         log:printError("failed to call getSupportedCurrencies from currency service", 'error = supportedCurrencies);
@@ -76,17 +78,17 @@ isolated function getSupportedCurrencies() returns string[]|error {
     return supportedCurrencies.currency_codes;
 }
 
-isolated function getProducts() returns Product[]|error {
-    ListProductsResponse|grpc:Error products = catalogClient->ListProducts({});
+isolated function getProducts() returns Product[]|grpc:Error {
+    ListProductsResponse|grpc:Error productsResponse = catalogClient->ListProducts({});
 
-    if products is grpc:Error {
-        log:printError("failed to call listProducts from catalog service", 'error = products);
-        return products;
+    if productsResponse is grpc:Error {
+        log:printError("failed to call listProducts from catalog service", 'error = productsResponse);
+        return productsResponse;
     }
-    return products.products;
+    return productsResponse.products;
 }
 
-isolated function getProduct(string prodId) returns Product|error {
+isolated function getProduct(string prodId) returns Product|grpc:Error {
     GetProductRequest request = {
         id: prodId
     };
@@ -98,7 +100,7 @@ isolated function getProduct(string prodId) returns Product|error {
     return product;
 }
 
-isolated function getCart(string userId) returns Cart|error {
+isolated function getCart(string userId) returns Cart|grpc:Error {
     GetCartRequest request = {
         user_id: userId
     };
@@ -110,7 +112,7 @@ isolated function getCart(string userId) returns Cart|error {
     return cart;
 }
 
-isolated function emptyCart(string userId) returns error? {
+isolated function emptyCart(string userId) returns grpc:Error? {
     EmptyCartRequest request = {
         user_id: userId
     };
@@ -122,23 +124,23 @@ isolated function emptyCart(string userId) returns error? {
     }
 }
 
-isolated function insertCart(string userId, string productId, int quantity) returns error? {
+isolated function insertCart(string userId, string productId, int quantity) returns grpc:Error? {
     AddItemRequest request = {
         user_id: userId,
         item: {
             product_id: productId,
-            quantity: quantity
+            quantity
         }
     };
-    Empty|grpc:Error cart = cartClient->AddItem(request);
+    Empty|grpc:Error response = cartClient->AddItem(request);
 
-    if cart is grpc:Error {
-        log:printError("failed to call addItem from cart service", 'error = cart);
-        return cart;
+    if response is grpc:Error {
+        log:printError("failed to call addItem from cart service", 'error = response);
+        return response;
     }
 }
 
-isolated function convertCurrency(Money usd, string userCurrency) returns Money|error {
+isolated function convertCurrency(Money usd, string userCurrency) returns Money|grpc:Error {
     CurrencyConversionRequest request = {
         'from: usd,
         to_code: userCurrency
@@ -150,10 +152,9 @@ isolated function convertCurrency(Money usd, string userCurrency) returns Money|
     return convertedCurrency;
 }
 
-isolated function getShippingQuote(CartItem[] items, string currency) returns Money|error {
+isolated function getShippingQuote(CartItem[] items, string currency) returns Money|grpc:Error {
     GetQuoteRequest request = {
-        items,
-        address: {}
+        items
     };
     GetQuoteResponse|grpc:Error quote = shippingClient->GetQuote(request);
     if quote is grpc:Error {
@@ -163,12 +164,12 @@ isolated function getShippingQuote(CartItem[] items, string currency) returns Mo
     return convertCurrency(quote.cost_usd, currency);
 }
 
-isolated function getRecommendations(string userId, string[] productIds) returns Product[]|error {
+isolated function getRecommendations(string userId, string[] productIds = []) returns Product[]|grpc:Error {
     ListRecommendationsRequest request = {
         user_id: userId,
         product_ids: ["2ZYFJ3GM2N", "LS4PSXUNUM"]
     };
-    ListRecommendationsResponse|grpc:Error recommendations = recommandClient->ListRecommendations(request);
+    ListRecommendationsResponse|grpc:Error recommendations = recommendClient->ListRecommendations(request);
     if recommendations is grpc:Error {
         log:printError("failed to call listRecommnadation from recommandation service", 'error = recommendations);
         return recommendations;
@@ -179,7 +180,7 @@ isolated function getRecommendations(string userId, string[] productIds) returns
         select check getProduct(productId);
 }
 
-isolated function getAd(string[] ctxKeys) returns Ad[]|error {
+isolated function getAd(string[] ctxKeys) returns Ad[]|grpc:Error {
     AdRequest request = {
         context_keys: ctxKeys
     };
@@ -196,9 +197,9 @@ isolated function chooseAd(string[] ctxKeys) returns Ad|error {
     return ads[check random:createIntInRange(0, ads.length())];
 }
 
-isolated function checkoutCart(PlaceOrderRequest request) returns OrderResult|error {
-    PlaceOrderResponse|error placeOrderResponse = checkoutClient->PlaceOrder(request);
-    if placeOrderResponse is error {
+isolated function checkoutCart(PlaceOrderRequest request) returns OrderResult|grpc:Error {
+    PlaceOrderResponse|grpc:Error placeOrderResponse = checkoutClient->PlaceOrder(request);
+    if placeOrderResponse is grpc:Error {
         log:printError("failed to call placeOrder from checkout service", 'error = placeOrderResponse);
         return placeOrderResponse;
     }
