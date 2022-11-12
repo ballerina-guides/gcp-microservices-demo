@@ -25,49 +25,49 @@ configurable string currencyHost = LOCALHOST;
     label: "Currency",
     id: "currency"
 }
-final CurrencyServiceClient currencyClient = check new ("http://" + currencyHost + ":9093");
+final CurrencyServiceClient currencyClient = check new (string `http://${currencyHost}:9093`);
 
 configurable string catalogHost = LOCALHOST;
 @display {
     label: "Catalog",
     id: "catalog"
 }
-final ProductCatalogServiceClient catalogClient = check new ("http://" + catalogHost + ":9091");
+final ProductCatalogServiceClient catalogClient = check new (string `http://${catalogHost}:9091`);
 
 configurable string cartHost = LOCALHOST;
 @display {
     label: "Cart",
     id: "cart"
 }
-final CartServiceClient cartClient = check new ("http://" + cartHost + ":9092");
+final CartServiceClient cartClient = check new (string `http://${cartHost}:9092`);
 
 configurable string shippingHost = LOCALHOST;
 @display {
     label: "Shipping",
     id: "shipping"
 }
-final ShippingServiceClient shippingClient = check new ("http://" + shippingHost + ":9095");
+final ShippingServiceClient shippingClient = check new (string `http://${shippingHost}:9095`);
 
 configurable string recommendHost = LOCALHOST;
 @display {
     label: "Recommendation",
     id: "recommendation"
 }
-final RecommendationServiceClient recommendClient = check new ("http://" + recommendHost + ":9090");
+final RecommendationServiceClient recommendClient = check new (string `http://${recommendHost}:9090`);
 
 configurable string adHost = LOCALHOST;
 @display {
     label: "Ads",
     id: "ads"
 }
-final AdServiceClient adClient = check new ("http://" + adHost + ":9099");
+final AdServiceClient adClient = check new (string `http://${adHost}:9099`);
 
 configurable string checkoutHost = LOCALHOST;
 @display {
     label: "Checkout",
     id: "checkout"
 }
-final CheckoutServiceClient checkoutClient = check new ("http://" + checkoutHost + ":9094");
+final CheckoutServiceClient checkoutClient = check new (string `http://${checkoutHost}:9094`);
 
 isolated function getSupportedCurrencies() returns string[]|grpc:Error {
     GetSupportedCurrenciesResponse|grpc:Error supportedCurrencies = currencyClient->GetSupportedCurrencies({});
