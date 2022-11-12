@@ -47,7 +47,7 @@ service class AuthInterceptor {
     }
 }
 
-# This service serves the data required by the UI by communicating with internal gRCP services
+# This service serves the data required by the UI by communicating with internal gRPC services
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["http://localhost:3000"],
@@ -61,10 +61,10 @@ service class AuthInterceptor {
 }
 service / on new http:Listener(9098) {
 
-    # Description
+    # GET method to get the metadata like currency and cart size.
     #
-    # + cookieHeader - Parameter Description
-    # + return - Return Value Description
+    # + cookieHeader - header containing the cookie
+    # + return - `MetadataResponse` if successful or `http:Unauthorized` or `error` if an error occurs
     resource function get metadata(@http:Header {name: "Cookie"} string cookieHeader)
                 returns MetadataResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
@@ -88,10 +88,10 @@ service / on new http:Listener(9098) {
         return metadataResponse;
     }
 
-    # Description
+    # GET method which provides products and ads.
     #
-    # + cookieHeader - Parameter Description
-    # + return - Return Value Description
+    # + cookieHeader - header containing the cookie
+    # + return - `HomeResponse` if successful or `http:Unauthorized` or `error` if an error occurs
     resource function get .(@http:Header {name: "Cookie"} string cookieHeader)
                 returns HomeResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
@@ -118,11 +118,11 @@ service / on new http:Listener(9098) {
         return homeResponse;
     }
 
-    # Description
+    # GET method providing a specific product.
     #
-    # + id - Parameter Description  
-    # + cookieHeader - Parameter Description
-    # + return - Return Value Description
+    # + id - product id
+    # + cookieHeader - header containing the cookie
+    # + return - `ProductResponse` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function get product/[string id](@http:Header {name: "Cookie"} string cookieHeader)
                 returns ProductResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
@@ -148,16 +148,14 @@ service / on new http:Listener(9098) {
         return productResponse;
     }
 
-    # Description
-    # + return - Return Value Description
     resource function post setCurrency() returns json {
         return {};
     }
 
-    # Description
+    # GET method providing the cart.
     #
-    # + cookieHeader - Parameter Description
-    # + return - Return Value Description
+    # + cookieHeader - header containing the cookie
+    # + return - `CartResponse` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function get cart(@http:Header {name: "Cookie"} string cookieHeader)
                 returns CartResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
@@ -166,7 +164,7 @@ service / on new http:Listener(9098) {
         }
         string userId = cookie.value;
         Cart cart = check getCart(userId);
-        Product[] recommandations = check getRecommendations(userId, self.getProductIdFromCart(cart));
+        Product[] recommendations = check getRecommendations(userId, self.getProductIdFromCart(cart));
         Money shippingCost = check getShippingQuote(cart.items, USER_CURRENCY);
         Money totalPrice = {
             currency_code: USER_CURRENCY,
@@ -197,7 +195,7 @@ service / on new http:Listener(9098) {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: {
-                recommendations: recommandations,
+                recommendations: recommendations,
                 shipping_cost: renderMoney(shippingCost),
                 total_cost: renderMoney(totalPrice),
                 items: cartItems,
@@ -207,11 +205,11 @@ service / on new http:Listener(9098) {
         return cartResponse;
     }
 
-    # Description
+    # POST method to update the cart with a product.
     #
-    # + request - Parameter Description  
-    # + cookieHeader - Parameter Description
-    # + return - Return Value Description
+    # + request - `AddToCartRequest` containing the product id of the product to add
+    # + cookieHeader - header containing the cookie
+    # + return - `http:Created` if successful or `http:Unauthorized` or `http:BadRequest` or `error` if an error occurs
     resource function post cart(@http:Payload AddToCartRequest request, @http:Header {name: "Cookie"} string cookieHeader)
                 returns http:Created|http:Unauthorized|http:BadRequest|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
@@ -238,10 +236,10 @@ service / on new http:Listener(9098) {
         return response;
     }
 
-    # Description
+    # POST method to empty the cart.
     #
-    # + cookieHeader - Parameter Description
-    # + return - Return Value Description
+    # + cookieHeader - header containing the cookie
+    # + return - `http:Created` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function post cart/empty(@http:Header {name: "Cookie"} string cookieHeader)
                 returns http:Created|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
@@ -259,11 +257,11 @@ service / on new http:Listener(9098) {
         return response;
     }
 
-    # Description
+    # Post method to checkout the user's cart.
     #
-    # + request - Parameter Description  
-    # + cookieHeader - Parameter Description
-    # + return - Return Value Description
+    # + request - `CheckoutRequest` containing user's details
+    # + cookieHeader - header containing the cookie
+    # + return - `CheckoutResponse` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function post cart/checkout(@http:Payload CheckoutRequest request, @http:Header {name: "Cookie"} string cookieHeader)
                 returns CheckoutResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
