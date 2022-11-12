@@ -119,7 +119,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
             items: orderItems
         };
 
-        check self.sendConfirmationMail(request.email, 'order);
+        self.sendConfirmationMail(request.email, 'order);
         return {'order};
     }
 
@@ -227,14 +227,13 @@ service "CheckoutService" on new grpc:Listener(9094) {
         }
     }
 
-    function sendConfirmationMail(string email, OrderResult orderResult) returns grpc:Error? {
+    function sendConfirmationMail(string email, OrderResult orderResult) {
         Empty|grpc:Error result = self.emailClient->SendOrderConfirmation({
             email,
             'order: orderResult
         });
         if result is grpc:Error {
             log:printWarn(string `failed to send order confirmation to ${email}`, 'error = result);
-            return result;
         }
         log:printInfo(string `order confirmation email sent to ${email}`);
     }
