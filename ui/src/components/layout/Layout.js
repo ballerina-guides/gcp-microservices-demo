@@ -16,6 +16,7 @@
  *  under the License.
  */
 
+import { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import classes from './Layout.module.css';
