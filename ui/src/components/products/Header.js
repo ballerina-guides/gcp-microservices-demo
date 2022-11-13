@@ -17,15 +17,15 @@
  */
 
 import CurrencyOption from './CurrencyOption';
-import { useState, useEffect } from 'react';
-import { getMetadata } from '../../lib/api';
+import { useState, useEffect, useRef } from 'react';
+import { getMetadata, changeCurrency } from '../../lib/api';
 
 const Header = () => {
     const [myData, setMyData] = useState({
         cart_size: 0,
-        currencies: ['USD', 'EUR'],
+        currencies: ['USD', 'CAD', 'JPY', 'TRY', 'EUR', 'GBP'],
         is_cymbal_brand: false,
-        user_currency: 'USD'
+        user_currency: ['USD', '$']
     });
 
     useEffect(() => {
@@ -44,12 +44,28 @@ const Header = () => {
         items.push(<CurrencyOption user_currency={value} />);
     }
 
+    const currencyRef = useRef();
+
+    async function changeCurrencyFormHandler(event) {
+        event.preventDefault();
+
+        const currency = currencyRef.current.value;
+
+        const data = {
+            currency
+        };
+        const data1 = await changeCurrency(data);
+        console.log(data1);
+        setMyData(data1);
+        window.location.reload(true);
+    }
+
     const currencyInfo = (
         <div className="h-controls">
             <div className="h-control">
-                <span className="icon currency-icon"> {myData.user_currency}</span>
-                <form method="POST" className="controls-form" action="/setCurrency" id="currency_form" >
-                    <select name="currency_code" onChange="document.getElementById('currency_form').submit();">
+                <span className="icon currency-icon"> {myData.user_currency[1]}</span>
+                <form method="POST" className="controls-form" id="currency_form" onChange={changeCurrencyFormHandler}>
+                    <select name="currency_code" ref={currencyRef} value={myData.user_currency[0]}>
                         {items}
                     </select>
                 </form>
