@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -85,9 +85,8 @@ isolated function areSameCurrency(Money l, Money r) returns boolean {
 # + l - first money object
 # + r - second money object
 # + return - currency equal status
-isolated function areEquals(Money l, Money r) returns boolean {
-    return l.currency_code == r.currency_code &&
-l.units == r.units && l.nanos == r.nanos;
+isolated function areEqual(Money l, Money r) returns boolean {
+    return l.currency_code == r.currency_code && l.units == r.units && l.nanos == r.nanos;
 }
 
 # Negate returns the same amount with the sign negated.
