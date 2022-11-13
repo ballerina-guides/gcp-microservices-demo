@@ -29,6 +29,17 @@ isolated function getSessionIdFromCookieHeader(string cookieStr) returns http:Co
     };
 }
 
+isolated function getCurrencyFromCookieHeader(string cookieStr) returns http:Cookie|http:Unauthorized {
+    http:Cookie[] cookies = parseCookieHeader(cookieStr);
+    http:Cookie[] currencyCookie = cookies.filter(cookie => cookie.name == CURRENCY_COOKIE);
+    if currencyCookie.length() == 1 {
+        return currencyCookie[0];
+    }
+    return {
+        body: CURRENCY_COOKIE + " cookie is not available."
+    };
+}
+
 isolated function parseCookieHeader(string cookieStringValue) returns http:Cookie[] {
     http:Cookie[] cookiesInRequest = [];
     string cookieValue = cookieStringValue;
