@@ -18,6 +18,7 @@ import ballerina/grpc;
 import ballerina/log;
 
 configurable string catalogHost = "localhost";
+configurable decimal catalogTimeout = 3;
 
 # Recommends other products based on the items added to the user’s cart.
 @display {
@@ -33,7 +34,7 @@ service "RecommendationService" on new grpc:Listener(9090) {
     private final ProductCatalogServiceClient catalogClient;
 
     function init() returns error? {
-        self.catalogClient = check new (string `http://${catalogHost}:9091`);
+        self.catalogClient = check new (string `http://${catalogHost}:9091`, timeout = catalogTimeout);
     }
 
     # Provides a product list according to the request.

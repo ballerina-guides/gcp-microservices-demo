@@ -20,54 +20,62 @@ import ballerina/random;
 
 const string LOCALHOST = "localhost";
 
+configurable decimal currencyTimeout = 3;
+configurable decimal catalogTimeout = 3;
+configurable decimal cartTimeout = 3;
+configurable decimal shippingTimeout = 3;
+configurable decimal recommendationTimeout = 3;
+configurable decimal adTimeout = 3;
+configurable decimal checkoutTimeout = 3;
+
 configurable string currencyHost = LOCALHOST;
 @display {
     label: "Currency",
     id: "currency"
 }
-final CurrencyServiceClient currencyClient = check new (string `http://${currencyHost}:9093`);
+final CurrencyServiceClient currencyClient = check new (string `http://${currencyHost}:9093`, timeout = currencyTimeout);
 
 configurable string catalogHost = LOCALHOST;
 @display {
     label: "Catalog",
     id: "catalog"
 }
-final ProductCatalogServiceClient catalogClient = check new (string `http://${catalogHost}:9091`);
+final ProductCatalogServiceClient catalogClient = check new (string `http://${catalogHost}:9091`, timeout = catalogTimeout);
 
 configurable string cartHost = LOCALHOST;
 @display {
     label: "Cart",
     id: "cart"
 }
-final CartServiceClient cartClient = check new (string `http://${cartHost}:9092`);
+final CartServiceClient cartClient = check new (string `http://${cartHost}:9092`, timeout = cartTimeout);
 
 configurable string shippingHost = LOCALHOST;
 @display {
     label: "Shipping",
     id: "shipping"
 }
-final ShippingServiceClient shippingClient = check new (string `http://${shippingHost}:9095`);
+final ShippingServiceClient shippingClient = check new (string `http://${shippingHost}:9095`, timeout = shippingTimeout);
 
 configurable string recommendHost = LOCALHOST;
 @display {
     label: "Recommendation",
     id: "recommendation"
 }
-final RecommendationServiceClient recommendClient = check new (string `http://${recommendHost}:9090`);
+final RecommendationServiceClient recommendClient = check new (string `http://${recommendHost}:9090`, timeout = recommendationTimeout);
 
 configurable string adHost = LOCALHOST;
 @display {
     label: "Ads",
     id: "ads"
 }
-final AdServiceClient adClient = check new (string `http://${adHost}:9099`);
+final AdServiceClient adClient = check new (string `http://${adHost}:9099`, timeout = adTimeout);
 
 configurable string checkoutHost = LOCALHOST;
 @display {
     label: "Checkout",
     id: "checkout"
 }
-final CheckoutServiceClient checkoutClient = check new (string `http://${checkoutHost}:9094`);
+final CheckoutServiceClient checkoutClient = check new (string `http://${checkoutHost}:9094`, timeout = checkoutTimeout);
 
 isolated function getSupportedCurrencies() returns string[]|grpc:Error {
     GetSupportedCurrenciesResponse|grpc:Error supportedCurrencies = currencyClient->GetSupportedCurrencies({});
