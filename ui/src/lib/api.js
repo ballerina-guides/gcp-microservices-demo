@@ -56,7 +56,7 @@ export async function getSingleProduct(productId) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not the product.');
+        throw new Error(data.message || 'Could not get the product.');
     }
 
     return data;
