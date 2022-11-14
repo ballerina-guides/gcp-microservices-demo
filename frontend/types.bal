@@ -66,7 +66,7 @@ type MetadataResponse record {|
 |};
 
 type MetadataBody record {|
-    string user_currency;
+    [string, string] user_currency;
     string[] currencies;
     int cart_size;
     boolean is_cymbal_brand;

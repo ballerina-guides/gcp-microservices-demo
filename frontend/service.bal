@@ -20,8 +20,8 @@ import ballerina/time;
 import ballerina/uuid;
 
 const string SESSION_ID_COOKIE = "sessionIdCookie";
+const string CURRENCY_COOKIE = "currencyCookie";
 const string SESSION_ID_KEY = "sessionId";
-const string USER_CURRENCY = "USD";
 const ENABLE_SINGLE_SHARED_SESSION = "ENABLE_SINGLE_SHARED_SESSION";
 final boolean is_cymbal_brand = os:getEnv("CYMBAL_BRANDING") == "true";
 
@@ -30,6 +30,7 @@ service class AuthInterceptor {
     resource function 'default [string... path](http:RequestContext ctx, http:Request request)
     returns http:NextService|error? {
         http:Cookie[] usernameCookie = request.getCookies().filter(cookie => cookie.name == SESSION_ID_COOKIE);
+        http:Cookie[] currencyCookie = request.getCookies().filter(cookie => cookie.name == CURRENCY_COOKIE);
         string sessionId;
         if usernameCookie.length() == 0 {
             if os:getEnv(ENABLE_SINGLE_SHARED_SESSION) == "true" {
@@ -38,10 +39,18 @@ service class AuthInterceptor {
             } else {
                 sessionId = uuid:createType1AsString();
             }
-            http:Cookie cookie = new (SESSION_ID_COOKIE, sessionId, path = "/");
-            request.addCookies([cookie]);
+            http:Cookie sessionIdCookie = new (SESSION_ID_COOKIE, sessionId, path = "/");
+            http:Cookie[] cookies = request.getCookies();
+            cookies.push(sessionIdCookie);
+            request.addCookies(cookies);
         } else {
             sessionId = usernameCookie[0].value;
+        }
+        if currencyCookie.length() == 0 {
+            http:Cookie currency = new (CURRENCY_COOKIE, "USD", path = "/");
+            http:Cookie[] cookies = request.getCookies();
+            cookies.push(currency);
+            request.addCookies(cookies);
         }
         ctx.set(SESSION_ID_KEY, sessionId);
         return ctx.next();
@@ -73,6 +82,11 @@ service / on new http:Listener(9098) {
             return cookie;
         }
 
+        http:Cookie|http:Unauthorized currencyCookie = getCurrencyFromCookieHeader(cookieHeader);
+        if currencyCookie is http:Unauthorized {
+            return currencyCookie;
+        }
+
         string[] supportedCurrencies = check getSupportedCurrencies();
         Cart cart = check getCart(cookie.value);
         MetadataResponse metadataResponse = {
@@ -80,7 +94,7 @@ service / on new http:Listener(9098) {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: {
-                user_currency: USER_CURRENCY, //Todo to cookies
+                user_currency: [currencyCookie.value, currencyLogo(currencyCookie.value)],
                 currencies: supportedCurrencies,
                 cart_size: cart.items.length(),
                 is_cymbal_brand: is_cymbal_brand
@@ -99,11 +113,15 @@ service / on new http:Listener(9098) {
         if cookie is http:Unauthorized {
             return cookie;
         }
+        http:Cookie|http:Unauthorized currencyCookie = getCurrencyFromCookieHeader(cookieHeader);
+        if currencyCookie is http:Unauthorized {
+            return currencyCookie;
+        }
         Product[] products = check getProducts();
 
         ProductLocalized[] productsLocalized = [];
         foreach Product product in products {
-            Money converedMoney = check convertCurrency(product.price_usd, USER_CURRENCY);
+            Money converedMoney = check convertCurrency(product.price_usd, currencyCookie.value);
             productsLocalized.push(toProductLocalized(product, renderMoney(converedMoney)));
         }
 
@@ -130,9 +148,13 @@ service / on new http:Listener(9098) {
         if cookie is http:Unauthorized {
             return cookie;
         }
+        http:Cookie|http:Unauthorized currencycookie = getCurrencyFromCookieHeader(cookieHeader);
+        if currencycookie is http:Unauthorized {
+            return currencycookie;
+        }
         string userId = cookie.value;
         Product product = check getProduct(id);
-        Money convertedMoney = check convertCurrency(product.price_usd, USER_CURRENCY);
+        Money convertedMoney = check convertCurrency(product.price_usd, currencycookie.value);
         ProductLocalized productLocal = toProductLocalized(product, renderMoney(convertedMoney));
         Product[] recommendations = check getRecommendations(userId, [id]);
 
@@ -149,8 +171,24 @@ service / on new http:Listener(9098) {
         return productResponse;
     }
 
-    resource function post setCurrency() returns json {
-        return {};
+    resource function post setCurrency(@http:Payload record {|string currency;|} request, @http:Header {name: "Cookie"} string cookieHeader)
+                returns http:Response|http:Unauthorized|error {
+        http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
+        if cookie is http:Unauthorized {
+            return cookie;
+        }
+        string[] supportedCurrencies = check getSupportedCurrencies();
+        Cart cart = check getCart(cookie.value);
+        http:Response response = new;
+        http:Cookie currencyCookie = new (CURRENCY_COOKIE, request.currency, path = "/");
+        response.addCookie(currencyCookie);
+        response.setJsonPayload({
+            user_currency: [request.currency, currencyLogo(request.currency)],
+            currencies: supportedCurrencies,
+            cart_size: cart.items.length(),
+            is_cymbal_brand: is_cymbal_brand
+        });
+        return response;
     }
 
     # GET method providing the cart.
@@ -163,12 +201,16 @@ service / on new http:Listener(9098) {
         if cookie is http:Unauthorized {
             return cookie;
         }
+        http:Cookie|http:Unauthorized currencyCookie = getCurrencyFromCookieHeader(cookieHeader);
+        if currencyCookie is http:Unauthorized {
+            return currencyCookie;
+        }
         string userId = cookie.value;
         Cart cart = check getCart(userId);
-        Product[] recommendations = check getRecommendations(userId, self.getProductIdFromCart(cart));
-        Money shippingCost = check getShippingQuote(cart.items, USER_CURRENCY);
+        Product[] recommandations = check getRecommendations(userId, self.getProductIdFromCart(cart));
+        Money shippingCost = check getShippingQuote(cart.items, currencyCookie.value);
         Money totalPrice = {
-            currency_code: USER_CURRENCY,
+            currency_code: currencyCookie.value,
             nanos: 0,
             units: 0
         };
@@ -176,7 +218,7 @@ service / on new http:Listener(9098) {
         foreach CartItem item in cart.items {
             Product product = check getProduct(item.product_id);
 
-            Money converedPrice = check convertCurrency(product.price_usd, USER_CURRENCY);
+            Money converedPrice = check convertCurrency(product.price_usd, currencyCookie.value);
 
             Money price = multiplySlow(converedPrice, item.quantity);
             string renderedPrice = renderMoney(price);
@@ -269,6 +311,10 @@ service / on new http:Listener(9098) {
         if cookie is http:Unauthorized {
             return cookie;
         }
+        http:Cookie|http:Unauthorized currencyCookie = getCurrencyFromCookieHeader(cookieHeader);
+        if currencyCookie is http:Unauthorized {
+            return currencyCookie;
+        }
         string userId = cookie.value;
 
         OrderResult orderResult = check checkoutCart({
@@ -281,7 +327,7 @@ service / on new http:Listener(9098) {
                 zip_code: request.zip_code
             },
             user_id: userId,
-            user_currency: USER_CURRENCY,
+            user_currency: currencyCookie.value,
             credit_card: {
                 credit_card_cvv: request.credit_card_cvv,
                 credit_card_expiration_month: request.credit_card_expiration_month,

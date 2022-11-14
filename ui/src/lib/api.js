@@ -45,7 +45,7 @@ export async function getHomePage() {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not fetch quotes.');
+        throw new Error(data.message || 'Could not get home page.');
     }
 
     return data;
@@ -56,7 +56,7 @@ export async function getSingleProduct(productId) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not fetch quote.');
+        throw new Error(data.message || 'Could not get the product.');
     }
 
     return data;
@@ -74,7 +74,7 @@ export async function addProductToCart(requestData) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not add comment.');
+        throw new Error(data.message || 'Could not product to cart.');
     }
 
     return { };
@@ -85,7 +85,7 @@ export async function getCartPage() {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not fetch quotes.');
+        throw new Error(data.message || 'Could not get the cart.');
     }
 
     return data;
@@ -103,7 +103,25 @@ export async function checkout(requestData) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not add comment.');
+        throw new Error(data.message || 'Could not checkout.');
+    }
+
+    return data;
+}
+
+export async function changeCurrency(requestData) {
+    const response = await fetch(`${FRONTEND_SVC_URL}/setCurrency`, {
+        method: 'POST',
+        body: JSON.stringify(requestData),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || 'Could not change currency.');
     }
 
     return data;
@@ -114,7 +132,7 @@ export async function getMetadata() {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not fetch quotes.');
+        throw new Error(data.message || 'Could not get metadata.');
     }
 
     return data;
@@ -125,7 +143,7 @@ export async function emptyCart() {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not fetch quotes.');
+        throw new Error(data.message || 'Could not empty the cart.');
     }
 
     return data;

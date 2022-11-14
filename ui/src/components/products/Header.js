@@ -16,15 +16,18 @@
  *  under the License.
  */
 
-import { useState, useEffect } from 'react';
-import { getMetadata } from '../../lib/api';
+import CurrencyOption from './CurrencyOption';
+import { useState, useEffect, useRef } from 'react';
+import { getMetadata, changeCurrency } from '../../lib/api';
+
+const whitelistedCurrencies = ['USD', 'CAD', 'JPY', 'TRY', 'EUR', 'GBP'];
 
 const Header = () => {
     const [myData, setMyData] = useState({
         cart_size: 0,
-        currencies: ['USD', 'EUR'],
+        currencies: whitelistedCurrencies,
         is_cymbal_brand: false,
-        user_currency: 'USD'
+        user_currency: ['USD', '$']
     });
 
     useEffect(() => {
@@ -38,6 +41,41 @@ const Header = () => {
         image = <img src={process.env.PUBLIC_URL + '/static/icons/Cymbal_NavLogo.svg'} alt="" className="top-left-logo-cymbal" />;
     }
 
+    const items = [];
+    for (const value of myData.currencies.values()) {
+        if (whitelistedCurrencies.includes(value)) {
+            items.push(<CurrencyOption user_currency={value} />);
+        }
+    }
+
+    const currencyRef = useRef();
+
+    async function changeCurrencyFormHandler(event) {
+        event.preventDefault();
+
+        const currency = currencyRef.current.value;
+
+        const data = {
+            currency
+        };
+        const response = await changeCurrency(data);
+        setMyData(response);
+        window.location.reload(true);
+    }
+
+    const currencyInfo = (
+        <div className="h-controls">
+            <div className="h-control">
+                <span className="icon currency-icon"> {myData.user_currency[1]}</span>
+                <form method="POST" className="controls-form" id="currency_form" onChange={changeCurrencyFormHandler}>
+                    <select name="currency_code" ref={currencyRef} value={myData.user_currency[0]}>
+                        {items}
+                    </select>
+                </form>
+                <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_DownArrow.svg'} alt="" className="icon arrow" />
+            </div>
+        </div>
+    );
     let cartSize;
     if (myData.cart_size) {
         cartSize = <span className="cart-size-circle">{myData.cart_size}</span>;
@@ -55,6 +93,7 @@ const Header = () => {
                         {image}
                     </a>
                     <div className="controls">
+                        {currencyInfo}
                         <a href="/cart" className="cart-link">
                             <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_CartIcon.svg'} alt="Cart icon" className="logo" title="Cart" />
                             {cartSize}
