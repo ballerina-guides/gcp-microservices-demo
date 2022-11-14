@@ -18,6 +18,8 @@ import ballerina/http;
 import ballerina/os;
 import ballerina/time;
 import ballerina/uuid;
+import ballerina/observe;
+import ballerinax/jaeger as _;
 
 const string SESSION_ID_COOKIE = "sessionIdCookie";
 const string CURRENCY_COOKIE = "currencyCookie";
@@ -144,19 +146,34 @@ service / on new http:Listener(9098) {
     # + return - `ProductResponse` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function get product/[string id](@http:Header {name: "Cookie"} string cookieHeader)
                 returns ProductResponse|http:Unauthorized|error {
+        int rootParentSpanId = observe:startRootSpan("GetProductSpan");
+        int childSpanId = check observe:startSpan("GetSessionIdFromCookieSpan", parentSpanId = rootParentSpanId);
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
         }
+        check observe:finishSpan(childSpanId);
+
+        childSpanId = check observe:startSpan("GetCurrencyFromCookieSpan", parentSpanId = rootParentSpanId);
         http:Cookie|http:Unauthorized currencycookie = getCurrencyFromCookieHeader(cookieHeader);
         if currencycookie is http:Unauthorized {
             return currencycookie;
         }
+        check observe:finishSpan(childSpanId);
+
         string userId = cookie.value;
         Product product = check getProduct(id);
+
+        childSpanId = check observe:startSpan("ConvertCurrencySpan", parentSpanId = rootParentSpanId);
         Money convertedMoney = check convertCurrency(product.price_usd, currencycookie.value);
+        check observe:finishSpan(childSpanId);
+
         ProductLocalized productLocal = toProductLocalized(product, renderMoney(convertedMoney));
+
+        childSpanId = check observe:startSpan("GetRecommendationsSpan", parentSpanId = rootParentSpanId);
         Product[] recommendations = check getRecommendations(userId, [id]);
+        check observe:finishSpan(childSpanId);
+        check observe:finishSpan(rootParentSpanId);
 
         ProductResponse productResponse = {
             headers: {
@@ -171,6 +188,11 @@ service / on new http:Listener(9098) {
         return productResponse;
     }
 
+    # POST method to change the currency.
+    # 
+    # + request - currency type to change
+    # + cookieHeader - header containing the cookie
+    # + return - `http:Response` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function post setCurrency(@http:Payload record {|string currency;|} request, @http:Header {name: "Cookie"} string cookieHeader)
                 returns http:Response|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
@@ -254,7 +276,7 @@ service / on new http:Listener(9098) {
     # + cookieHeader - header containing the cookie
     # + return - `http:Created` if successful or `http:Unauthorized` or `http:BadRequest` or `error` if an error occurs
     resource function post cart(@http:Payload AddToCartRequest request,
-    @http:Header {name: "Cookie"} string cookieHeader) returns http:Created|http:Unauthorized|http:BadRequest|error {
+            @http:Header {name: "Cookie"} string cookieHeader) returns http:Created|http:Unauthorized|http:BadRequest|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
@@ -306,7 +328,7 @@ service / on new http:Listener(9098) {
     # + cookieHeader - header containing the cookie
     # + return - `CheckoutResponse` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function post cart/checkout(@http:Payload CheckoutRequest request,
-    @http:Header {name: "Cookie"} string cookieHeader) returns CheckoutResponse|http:Unauthorized|error {
+            @http:Header {name: "Cookie"} string cookieHeader) returns CheckoutResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;

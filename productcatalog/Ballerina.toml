@@ -7,16 +7,3 @@ distribution = "2201.0.0"
 [build-options]
 observabilityIncluded = true
 cloud = "k8s"
-
-[ballerina.observe]
-tracingEnabled=true
-tracingProvider="jaeger"
-
-[ballerinax.jaeger]
-agentHostname="localhost"
-agentPort=55680
-samplerType="const"
-samplerParam=1.0
-reporterFlushInterval=2000
-reporterBufferSize=1000
-
