@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,6 +18,7 @@ import ballerina/grpc;
 import ballerina/log;
 
 configurable string catalogHost = "localhost";
+configurable decimal catalogTimeout = 3;
 
 # Recommends other products based on the items added to the user’s cart.
 @display {
@@ -27,20 +28,21 @@ configurable string catalogHost = "localhost";
 @grpc:Descriptor {value: DEMO_DESC}
 service "RecommendationService" on new grpc:Listener(9090) {
     @display {
-        label: "",
+        label: "Catalog",
         id: "catalog"
     }
     private final ProductCatalogServiceClient catalogClient;
 
     function init() returns error? {
-        self.catalogClient = check new (string `http://${catalogHost}:9091`);
+        self.catalogClient = check new (string `http://${catalogHost}:9091`, timeout = catalogTimeout);
     }
 
     # Provides a product list according to the request.
     #
     # + request - `ListRecommendationsRequest` containing product ids
     # + return - `ListRecommendationsResponse` containing the recommended product ids
-    remote function ListRecommendations(ListRecommendationsRequest request) returns ListRecommendationsResponse|error {
+    remote function ListRecommendations(ListRecommendationsRequest request)
+    returns ListRecommendationsResponse|grpc:Error {
         ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
         if listProducts is grpc:Error {
             log:printError("failed to call ListProducts of catalog service", 'error = listProducts);

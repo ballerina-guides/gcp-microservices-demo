@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,19 +14,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
+type JsonProduct record {|
+    string id;
+    string name;
+    string description;
+    string picture;
+    record {|
+        string currencyCode;
+        int units;
+        int nanos;
+    |} priceUsd;
+    string[] categories;
+|};
+
 isolated function parseProductJson(json jsonContents) returns Product[]|error {
     json productsJson = check jsonContents.products;
     if productsJson !is json[] {
         return error("product array is not found");
     }
-    return from json productJson in productsJson
+
+    JsonProduct[] jsonProducts = check productsJson.fromJsonWithType();
+    return from JsonProduct jsonProduct in jsonProducts
         let Product product = {
-            id: check productJson.id,
-            name: check productJson.name,
-            description: check productJson.description,
-            picture: check productJson.picture,
-            price_usd: check parseUsdPrice(check productJson.priceUsd),
-            categories: check (check productJson.categories).cloneWithType()
+            id: jsonProduct.id,
+            name: jsonProduct.name,
+            description: jsonProduct.description,
+            picture: jsonProduct.picture,
+            price_usd: check parseUsdPrice(jsonProduct.priceUsd),
+            categories: jsonProduct.categories
         }
         select product;
 }
@@ -41,5 +56,6 @@ isolated function parseUsdPrice(json usdPrice) returns Money|error {
 
 isolated function isProductRelated(Product product, string query) returns boolean {
     string queryLowercase = query.toLowerAscii();
-    return product.name.toLowerAscii().includes(queryLowercase) || product.description.toLowerAscii().includes(queryLowercase);
+    return product.name.toLowerAscii().includes(queryLowercase) ||
+        product.description.toLowerAscii().includes(queryLowercase);
 }

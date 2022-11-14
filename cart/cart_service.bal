@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -31,7 +31,7 @@ service "CartService" on new grpc:Listener(9092) {
     private final DataStore store;
 
     function init() returns error? {
-        if datastore == "redis" {
+        if datastore is "redis" {
             log:printInfo("Redis datastore is selected");
             self.store = check new RedisStore();
         } else {

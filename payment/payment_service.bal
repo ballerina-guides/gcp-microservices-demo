@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -32,14 +32,19 @@ service "PaymentService" on new grpc:Listener(9096) {
     # + return - `ChargeResponse` with the transaction id or an error
     remote function Charge(ChargeRequest value) returns ChargeResponse|error {
         CreditCardInfo creditCard = value.credit_card;
-        CardValidator cardValidator = new (creditCard.credit_card_number, creditCard.credit_card_expiration_year, creditCard.credit_card_expiration_month);
+        CardValidator cardValidator = new (creditCard.credit_card_number, creditCard.credit_card_expiration_year,
+            creditCard.credit_card_expiration_month);
         CardCompany|error cardValid = cardValidator.isValid();
-        if cardValid is error {
+        if cardValid is CardValidationError {
             log:printError("Credit card is not valid", 'error = cardValid);
             return cardValid;
+        } else if cardValid is error {
+            log:printError("Error occured while validating the credit card", 'error = cardValid);
+            return cardValid;
         }
-        log:printInfo(string `Transaction processed: the card ending ${creditCard.credit_card_number.substring(creditCard.credit_card_number.length() - 4)}, 
-        Amount: ${value.amount.currency_code}${value.amount.units}.${value.amount.nanos}`);
+        log:printInfo(string `Transaction processed: the card ending
+            ${creditCard.credit_card_number.substring(creditCard.credit_card_number.length() - 4)},
+                Amount: ${value.amount.currency_code}${value.amount.units}.${value.amount.nanos}`);
         return {
             transaction_id: uuid:createType1AsString()
         };
