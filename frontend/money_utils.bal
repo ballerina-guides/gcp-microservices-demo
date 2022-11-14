@@ -77,7 +77,7 @@ isolated function isNegative(Money money) returns boolean {
 # + secondValue - second money object
 # + return - currency type equal status
 isolated function areSameCurrency(Money firstValue, Money secondValue) returns boolean {
-    return firstValue.currency_code == secondValue.currency_code && firstValue.currency_code != "";
+    return firstValue.currency_code != "" && firstValue.currency_code == secondValue.currency_code;
 }
 
 # Returns true if values firstValue and secondValue are the equal, including the currency.
