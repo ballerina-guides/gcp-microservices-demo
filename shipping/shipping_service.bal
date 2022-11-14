@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,7 +23,6 @@ import ballerina/grpc;
 }
 @grpc:Descriptor {value: DEMO_DESC}
 service "ShippingService" on new grpc:Listener(9095) {
-    private final float SHIPPING_COST = 8.99;
 
     # Provides a quote with shipping cost.
     #
@@ -38,7 +37,7 @@ service "ShippingService" on new grpc:Listener(9095) {
         }
 
         if count != 0 {
-            cost = self.SHIPPING_COST;
+            cost = 8.99;
         }
         float cents = cost % 1;
         int dollars = <int>(cost - cents);

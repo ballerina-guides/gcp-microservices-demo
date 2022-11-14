@@ -1,4 +1,4 @@
-// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -25,7 +25,7 @@ isolated function getSessionIdFromCookieHeader(string cookieStr) returns http:Co
         return usernameCookie[0];
     }
     return {
-        body: SESSION_ID_COOKIE + " cookie is not available."
+        body: string `${SESSION_ID_COOKIE} cookie is not available.`
     };
 }
 
@@ -44,18 +44,14 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
     http:Cookie[] cookiesInRequest = [];
     string cookieValue = cookieStringValue;
     string[] nameValuePairs = regex:split(cookieValue, "; ");
-    foreach var item in nameValuePairs {
-        if regex:matches(item, "^([^=]+)=.*$") {
-            string[] nameValue = regex:split(item, "=");
+    foreach string pair in nameValuePairs {
+        if regex:matches(pair, "^([^=]+)=.*$") {
+            string[] nameValue = regex:split(pair, "=");
             http:Cookie cookie;
-            if nameValue.length() > 1 {
-                cookie = new (nameValue[0], nameValue[1], path = "/");
-            } else {
-                cookie = new (nameValue[0], "", path = "/");
-            }
+            cookie = new (nameValue[0], nameValue.length() > 1 ? nameValue[1]: "", path = "/");
             cookiesInRequest.push(cookie);
         } else {
-            log:printError("Invalid cookie: " + item + ", which must be in the format as [{name}=].");
+            log:printError(string `Invalid cookie: ${pair}, which must be in the format as [{name}=].`);
         }
     }
     return cookiesInRequest;
@@ -64,6 +60,6 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
 isolated function toProductLocalized(Product product, string price) returns ProductLocalized {
     return {
         ...product,
-        price: price
+        price
     };
 }

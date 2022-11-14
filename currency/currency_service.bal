@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -37,7 +37,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - an empty request
     # + return - `GetSupportedCurrenciesResponse` containing supported currencies or else and error
-    remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse|error {
+    remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse {
         return {currency_codes: self.currencyMap.keys()};
 
     }
@@ -46,7 +46,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - `CurrencyConversionRequest` containing the `Money` value and the required currency
     # + return - returns the `Money` in the required currency or an error
-    remote function Convert(CurrencyConversionRequest request) returns Money|error {
+    remote function Convert(CurrencyConversionRequest request) returns Money {
         Money moneyFrom = request.'from;
         final decimal fractionSize = 1000000000;
         //From Unit
@@ -73,11 +73,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
 }
 
 isolated function parseCurrencyJson(json currencyJson) returns map<decimal>|error {
-    map<decimal> currencies = {};
     map<string> currencyValues = check currencyJson.cloneWithType();
-
-    foreach string key in currencyValues.keys() {
-        currencies[key] = check decimal:fromString(currencyValues.get(key));
-    }
-    return currencies;
+    return map from string key in currencyValues.keys()
+        select [key, check decimal:fromString(currencyValues.get(key))];
 }

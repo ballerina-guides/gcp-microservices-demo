@@ -33,7 +33,7 @@ services:
   frontend:
     image: wso2inc/frontend-service:v0.1.0
     environment:
-      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n recommandHost="recommendation" \n currencyHost="currency" \n shippingHost="shipping" \n checkoutHost="checkout" \n adHost="ads"
+      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n recommendHost="recommendation" \n currencyHost="currency" \n shippingHost="shipping" \n checkoutHost="checkout" \n adHost="ads"
     ports:
       - 9098:9098
     links:

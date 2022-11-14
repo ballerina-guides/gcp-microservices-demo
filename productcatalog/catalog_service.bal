@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -46,7 +46,7 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - `GetProductRequest` containing the product id
     # + return - `Product` related to the required id or an error
-    remote function GetProduct(GetProductRequest request) returns Product|error {
+    remote function GetProduct(GetProductRequest request) returns Product|grpc:NotFoundError {
         foreach Product product in self.products {
             if product.id == request.id {
                 return product;
@@ -59,7 +59,7 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - `SearchProductsRequest` containing the search query
     # + return - `SearchProductsResponse` containing the matching products
-    remote function SearchProducts(SearchProductsRequest request) returns SearchProductsResponse|error {
+    remote function SearchProducts(SearchProductsRequest request) returns SearchProductsResponse {
         return {
             results: from Product product in self.products
                 where isProductRelated(product, request.query)

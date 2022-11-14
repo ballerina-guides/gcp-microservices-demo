@@ -1,1 +1,2 @@
 catalogHost="catalog-service"
+catalogTimeout=3
