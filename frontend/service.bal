@@ -16,7 +16,6 @@
 
 import ballerina/http;
 import ballerina/os;
-import ballerina/io;
 import ballerina/time;
 import ballerina/uuid;
 
@@ -73,7 +72,6 @@ service / on new http:Listener(9098) {
 
     resource function get metadata(@http:Header {name: "Cookie"} string cookieHeader)
                 returns MetadataResponse|http:Unauthorized|error {
-        io:println(cookieHeader);
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
@@ -101,7 +99,6 @@ service / on new http:Listener(9098) {
 
     resource function get .(@http:Header {name: "Cookie"} string cookieHeader)
                 returns HomeResponse|http:Unauthorized|error {
-        io:println(cookieHeader);
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
@@ -159,7 +156,6 @@ service / on new http:Listener(9098) {
 
     resource function post setCurrency(@http:Payload record {|string currency;|} request, @http:Header {name: "Cookie"} string cookieHeader)
                 returns http:Response|http:Unauthorized|error {
-        io:println(request);
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
