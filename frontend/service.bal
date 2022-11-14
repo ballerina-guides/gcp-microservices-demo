@@ -89,7 +89,7 @@ service / on new http:Listener(9098) {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: {
-                user_currency: [currencyCookie.value, currencyLogo(currencyCookie.value)], //Todo to cookies
+                user_currency: [currencyCookie.value, currencyLogo(currencyCookie.value)],
                 currencies: supportedCurrencies,
                 cart_size: cart.items.length(),
                 is_cymbal_brand: is_cymbal_brand

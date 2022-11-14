@@ -20,10 +20,12 @@ import CurrencyOption from './CurrencyOption';
 import { useState, useEffect, useRef } from 'react';
 import { getMetadata, changeCurrency } from '../../lib/api';
 
+const whitelistedCurrencies = ['USD', 'CAD', 'JPY', 'TRY', 'EUR', 'GBP'];
+
 const Header = () => {
     const [myData, setMyData] = useState({
         cart_size: 0,
-        currencies: ['USD', 'CAD', 'JPY', 'TRY', 'EUR', 'GBP'],
+        currencies: whitelistedCurrencies,
         is_cymbal_brand: false,
         user_currency: ['USD', '$']
     });
@@ -41,7 +43,9 @@ const Header = () => {
 
     const items = [];
     for (const value of myData.currencies.values()) {
-        items.push(<CurrencyOption user_currency={value} />);
+        if (whitelistedCurrencies.includes(value)) {
+            items.push(<CurrencyOption user_currency={value} />);
+        }
     }
 
     const currencyRef = useRef();
@@ -54,9 +58,8 @@ const Header = () => {
         const data = {
             currency
         };
-        const data1 = await changeCurrency(data);
-        console.log(data1);
-        setMyData(data1);
+        const response = await changeCurrency(data);
+        setMyData(response);
         window.location.reload(true);
     }
 
