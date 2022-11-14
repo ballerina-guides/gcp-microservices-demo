@@ -111,8 +111,8 @@ service / on new http:Listener(9098) {
 
         ProductLocalized[] productsLocalized = [];
         foreach Product product in products {
-            Money converedMoney = check convertCurrency(product.price_usd, currencyCookie.value);
-            productsLocalized.push(toProductLocalized(product, renderMoney(converedMoney)));
+            Money convertedMoney = check convertCurrency(product.price_usd, currencyCookie.value);
+            productsLocalized.push(toProductLocalized(product, renderMoney(convertedMoney)));
         }
 
         return <HomeResponse>{
@@ -197,9 +197,9 @@ service / on new http:Listener(9098) {
         foreach CartItem item in cart.items {
             Product product = check getProduct(item.product_id);
 
-            Money converedPrice = check convertCurrency(product.price_usd, currencyCookie.value);
+            Money convertedPrice = check convertCurrency(product.price_usd, currencyCookie.value);
 
-            Money price = multiplySlow(converedPrice, item.quantity);
+            Money price = multiplySlow(convertedPrice, item.quantity);
             string renderedPrice = renderMoney(price);
             cartItems.push({
                 product,
