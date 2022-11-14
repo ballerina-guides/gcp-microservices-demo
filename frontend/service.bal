@@ -207,7 +207,7 @@ service / on new http:Listener(9098) {
         }
         string userId = cookie.value;
         Cart cart = check getCart(userId);
-        Product[] recommandations = check getRecommendations(userId, self.getProductIdFromCart(cart));
+        Product[] recommendations = check getRecommendations(userId, self.getProductIdFromCart(cart));
         Money shippingCost = check getShippingQuote(cart.items, currencyCookie.value);
         Money totalPrice = {
             currency_code: currencyCookie.value,
@@ -238,7 +238,7 @@ service / on new http:Listener(9098) {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: {
-                recommendations: recommendations,
+                recommendations,
                 shipping_cost: renderMoney(shippingCost),
                 total_cost: renderMoney(totalPrice),
                 items: cartItems,
