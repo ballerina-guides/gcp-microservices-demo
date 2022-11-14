@@ -69,7 +69,7 @@ services:
     depends_on:
       - jaeger
     environment:
-      BAL_CONFIG_DATA: \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000 \n [ballerina.grpc.traceLogAdvancedConfig] \n host = "jaeger" \n port = 55680
+      BAL_CONFIG_DATA: \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
   recommendation:
     image: wso2inc/recommendation-service:v0.1.0
     environment:
