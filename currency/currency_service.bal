@@ -73,12 +73,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
 }
 
 isolated function parseCurrencyJson(json currencyJson) returns map<decimal>|error {
-    map<decimal> currencies = {};
     map<string> currencyValues = check currencyJson.cloneWithType();
-
-    check from string key in currencyValues.keys()
-        do {
-            currencies[key] = check decimal:fromString(currencyValues.get(key));
-        };
-    return currencies;
+    return map from string key in currencyValues.keys()
+        select [key, check decimal:fromString(currencyValues.get(key))];
 }

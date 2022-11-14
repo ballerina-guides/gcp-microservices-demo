@@ -71,7 +71,8 @@ service "EmailService" on new grpc:Listener(9097) {
     }
 
     function getConfirmationHtml(OrderResult result) returns xml|error {
-        string fontUrl = "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
+        string fontUrl =
+                    "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
 
         xml items = xml `<tr>
           <th>Item No.</th>
@@ -96,8 +97,10 @@ service "EmailService" on new grpc:Listener(9097) {
         <p>#${result.order_id}</p>
         <h3>Shipping</h3>
         <p>#${result.shipping_tracking_id}</p>
-        <p>${result.shipping_cost.units}.${result.shipping_cost.nanos / 10000000} ${result.shipping_cost.currency_code}</p>
-        <p>${result.shipping_address.street_address}, ${result.shipping_address.city}, ${result.shipping_address.country} ${result.shipping_address.zip_code}</p>
+        <p>${result.shipping_cost.units}.${result.shipping_cost.nanos / 10000000}
+                ${result.shipping_cost.currency_code}</p>
+        <p>${result.shipping_address.street_address}, ${result.shipping_address.city},
+                ${result.shipping_address.country} ${result.shipping_address.zip_code}</p>
         <h3>Items</h3>
         <table style="width:100%">
             ${items}

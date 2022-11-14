@@ -33,14 +33,16 @@ configurable string currencyHost = LOCALHOST;
     label: "Currency",
     id: "currency"
 }
-final CurrencyServiceClient currencyClient = check new (string `http://${currencyHost}:9093`, timeout = currencyTimeout);
+final CurrencyServiceClient currencyClient = check new (string `http://${currencyHost}:9093`,
+                                                timeout = currencyTimeout);
 
 configurable string catalogHost = LOCALHOST;
 @display {
     label: "Catalog",
     id: "catalog"
 }
-final ProductCatalogServiceClient catalogClient = check new (string `http://${catalogHost}:9091`, timeout = catalogTimeout);
+final ProductCatalogServiceClient catalogClient = check new (string `http://${catalogHost}:9091`,
+                                                    timeout = catalogTimeout);
 
 configurable string cartHost = LOCALHOST;
 @display {
@@ -54,14 +56,16 @@ configurable string shippingHost = LOCALHOST;
     label: "Shipping",
     id: "shipping"
 }
-final ShippingServiceClient shippingClient = check new (string `http://${shippingHost}:9095`, timeout = shippingTimeout);
+final ShippingServiceClient shippingClient = check new (string `http://${shippingHost}:9095`,
+                                                timeout = shippingTimeout);
 
 configurable string recommendHost = LOCALHOST;
 @display {
     label: "Recommendation",
     id: "recommendation"
 }
-final RecommendationServiceClient recommendClient = check new (string `http://${recommendHost}:9090`, timeout = recommendationTimeout);
+final RecommendationServiceClient recommendClient = check new (string `http://${recommendHost}:9090`,
+                                                        timeout = recommendationTimeout);
 
 configurable string adHost = LOCALHOST;
 @display {
@@ -75,7 +79,8 @@ configurable string checkoutHost = LOCALHOST;
     label: "Checkout",
     id: "checkout"
 }
-final CheckoutServiceClient checkoutClient = check new (string `http://${checkoutHost}:9094`, timeout = checkoutTimeout);
+final CheckoutServiceClient checkoutClient = check new (string `http://${checkoutHost}:9094`,
+                                                timeout = checkoutTimeout);
 
 isolated function getSupportedCurrencies() returns string[]|grpc:Error {
     GetSupportedCurrenciesResponse|grpc:Error supportedCurrencies = currencyClient->GetSupportedCurrencies({});

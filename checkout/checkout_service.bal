@@ -93,7 +93,8 @@ service "CheckoutService" on new grpc:Listener(9094) {
         string orderId = uuid:createType1AsString();
         CartItem[] userCartItems = check self.getUserCart(request.user_id, request.user_currency);
         OrderItem[] orderItems = check self.prepOrderItems(userCartItems, request.user_currency);
-        Money shippingPrice = check self.convertCurrency(check self.quoteShipping(request.address, userCartItems), request.user_currency);
+        Money shippingPrice = check self.convertCurrency(check self.quoteShipping(request.address, userCartItems),
+            request.user_currency);
 
         Money totalCost = {
             currency_code: request.user_currency,
@@ -157,7 +158,8 @@ service "CheckoutService" on new grpc:Listener(9094) {
             Money|grpc:Error conversionResponse = self.currencyClient->Convert(conversionRequest);
             if conversionResponse is grpc:Error {
                 log:printError("failed to call convert from currency service", 'error = conversionResponse);
-                return error grpc:InternalError(string `failed to convert price of ${item.product_id} to ${userCurrency}`, conversionResponse);
+                return error grpc:InternalError(string `failed to convert price of ${item.product_id} to
+                    ${userCurrency}`, conversionResponse);
             }
             orderItems.push({
                 item,

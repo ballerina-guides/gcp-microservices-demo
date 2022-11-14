@@ -58,11 +58,13 @@ class CardValidator {
         }
         CardCompany? gleanCompany = self.getCompany();
         if gleanCompany is () {
-            return error CardValidationError("Sorry, we cannot process the credit card. Only VISA or MasterCard is accepted.");
+            return error CardValidationError("Sorry, we cannot process the credit card. " +
+                "Only VISA or MasterCard is accepted.");
         }
         if self.isExpired() {
             return error CardValidationError(
-                string `Your credit card (ending ${self.cardNumber.substring(self.cardNumber.length() -4)}) expired on ${self.expireMonth}/${self.expireYear}`);
+                string `Your credit card (ending ${self.cardNumber.substring(self.cardNumber.length() -4)})
+                    expired on ${self.expireMonth}/${self.expireYear}`);
         }
         return gleanCompany;
     }

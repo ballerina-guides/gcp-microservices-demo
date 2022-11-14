@@ -56,5 +56,6 @@ isolated function parseUsdPrice(json usdPrice) returns Money|error {
 
 isolated function isProductRelated(Product product, string query) returns boolean {
     string queryLowercase = query.toLowerAscii();
-    return product.name.toLowerAscii().includes(queryLowercase) || product.description.toLowerAscii().includes(queryLowercase);
+    return product.name.toLowerAscii().includes(queryLowercase) ||
+        product.description.toLowerAscii().includes(queryLowercase);
 }

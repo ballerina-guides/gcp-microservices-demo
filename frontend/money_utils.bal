@@ -86,7 +86,8 @@ isolated function areSameCurrency(Money firstValue, Money secondValue) returns b
 # + secondValue - second money object
 # + return - currency equal status
 isolated function areEqual(Money firstValue, Money secondValue) returns boolean {
-    return firstValue.currency_code == secondValue.currency_code && firstValue.units == secondValue.units && firstValue.nanos == secondValue.nanos;
+    return firstValue.currency_code == secondValue.currency_code && 
+                firstValue.units == secondValue.units && firstValue.nanos == secondValue.nanos;
 }
 
 # Negate returns the same amount with the sign negated.
@@ -151,7 +152,8 @@ isolated function multiplySlow(Money money, int n) returns Money {
 }
 
 isolated function renderMoney(Money money) returns string {
-    return string `${currencyLogo(money.currency_code)}${money.units.toString()}.${(money.nanos / 10000000).toString()}`;
+    return string `${currencyLogo(money.currency_code)}
+                ${money.units.toString()}.${(money.nanos / 10000000).toString()}`;
 }
 
 isolated function currencyLogo(string code) returns string {

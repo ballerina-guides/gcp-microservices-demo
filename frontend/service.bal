@@ -27,7 +27,8 @@ final boolean is_cymbal_brand = os:getEnv("CYMBAL_BRANDING") == "true";
 
 service class AuthInterceptor {
     *http:RequestInterceptor;
-    resource function 'default [string... path](http:RequestContext ctx, http:Request request) returns http:NextService|error? {
+    resource function 'default [string... path](http:RequestContext ctx, http:Request request)
+    returns http:NextService|error? {
         http:Cookie[] usernameCookie = request.getCookies().filter(cookie => cookie.name == SESSION_ID_COOKIE);
         string sessionId;
         if usernameCookie.length() == 0 {
@@ -210,8 +211,8 @@ service / on new http:Listener(9098) {
     # + request - `AddToCartRequest` containing the product id of the product to add
     # + cookieHeader - header containing the cookie
     # + return - `http:Created` if successful or `http:Unauthorized` or `http:BadRequest` or `error` if an error occurs
-    resource function post cart(@http:Payload AddToCartRequest request, @http:Header {name: "Cookie"} string cookieHeader)
-                returns http:Created|http:Unauthorized|http:BadRequest|error {
+    resource function post cart(@http:Payload AddToCartRequest request,
+    @http:Header {name: "Cookie"} string cookieHeader) returns http:Created|http:Unauthorized|http:BadRequest|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
@@ -262,8 +263,8 @@ service / on new http:Listener(9098) {
     # + request - `CheckoutRequest` containing user's details
     # + cookieHeader - header containing the cookie
     # + return - `CheckoutResponse` if successful or an `http:Unauthorized` or `error` if an error occurs
-    resource function post cart/checkout(@http:Payload CheckoutRequest request, @http:Header {name: "Cookie"} string cookieHeader)
-                returns CheckoutResponse|http:Unauthorized|error {
+    resource function post cart/checkout(@http:Payload CheckoutRequest request,
+    @http:Header {name: "Cookie"} string cookieHeader) returns CheckoutResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
