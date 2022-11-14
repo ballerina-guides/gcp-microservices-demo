@@ -62,22 +62,22 @@ isolated function isNegative(Money money) returns boolean {
     return isValid(money) && money.units < 0 || (money.units == 0 && money.nanos < 0);
 }
 
-# Returns true if values l and r have a currency code and they are the same values.
+# Returns true if values firstValue and secondValue have a currency code and they are the same values.
 #
-# + l - first money object
-# + r - second money object
+# + firstValue - first money object
+# + secondValue - second money object
 # + return - currency type equal status
-isolated function areSameCurrency(Money l, Money r) returns boolean {
-    return l.currency_code == r.currency_code && l.currency_code != "";
+isolated function areSameCurrency(Money firstValue, Money secondValue) returns boolean {
+    return firstValue.currency_code == secondValue.currency_code && firstValue.currency_code != "";
 }
 
-# Returns true if values l and r are the equal, including the currency.
+# Returns true if values firstValue and secondValue are the equal, including the currency.
 #
-# + l - first money object
-# + r - second money object
+# + firstValue - first money object
+# + secondValue - second money object
 # + return - currency equal status
-isolated function areEqual(Money l, Money r) returns boolean { // change argument names
-    return l.currency_code == r.currency_code && l.units == r.units && l.nanos == r.nanos;
+isolated function areEqual(Money firstValue, Money secondValue) returns boolean {
+    return firstValue.currency_code == secondValue.currency_code && firstValue.units == secondValue.units && firstValue.nanos == secondValue.nanos;
 }
 
 # Negate returns the same amount with the sign negated.
@@ -94,14 +94,14 @@ isolated function negate(Money money) returns Money {
 
 # Sum adds two values.
 #
-# + l - first money object
-# + r - second money object
+# + firstValue - first money object
+# + secondValue - second money object
 # + return - sum money object
-isolated function sum(Money l, Money r) returns Money {
+isolated function sum(Money firstValue, Money secondValue) returns Money {
     int nanosMod = 1000000000;
 
-    int units = l.units + r.units;
-    int nanos = l.nanos + r.nanos;
+    int units = firstValue.units + secondValue.units;
+    int nanos = firstValue.nanos + secondValue.nanos;
 
     if (units == 0 && nanos == 0) || (units > 0 && nanos >= 0) || (units < 0 && nanos <= 0) {
         // same sign <units, nanos>
@@ -121,7 +121,7 @@ isolated function sum(Money l, Money r) returns Money {
     return {
         units,
         nanos,
-        currency_code: l.currency_code
+        currency_code: firstValue.currency_code
     };
 }
 
