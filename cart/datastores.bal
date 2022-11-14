@@ -45,6 +45,11 @@ public isolated class InMemoryStore {
     *DataStore;
     private map<Cart> store = {};
 
+    # Adds an item to the in-memory store.
+    #
+    # + userId - user's id
+    # + productId - related productId
+    # + quantity - related product quantity
     isolated function addItem(string userId, string productId, int quantity) {
         lock {
             if self.store.hasKey(userId) {
@@ -71,12 +76,19 @@ public isolated class InMemoryStore {
         }
     }
 
+    # Clears the cart of the related user.
+    #
+    # + userId - user id of the user
     isolated function emptyCart(string userId) {
         lock {
             _ = self.store.remove(userId);
         }
     }
 
+    # Provides the carts of specific users.
+    #
+    # + userId - user id of the user whose cart is required
+    # + return - `Cart` with the cart items
     isolated function getCart(string userId) returns Cart {
         lock {
             if self.store.hasKey(userId) {
@@ -104,6 +116,12 @@ public isolated class RedisStore {
         });
     }
 
+    # Adds an item to the redis store.
+    #
+    # + userId - user's id
+    # + productId - related productId 
+    # + quantity - related product quantity
+    # + return - an error if an error occured while adding, else ()
     isolated function addItem(string userId, string productId, int quantity) returns error? {
         map<any> existingItems = check self.redisClient->hMGet(userId, [productId]);
         if existingItems.get(productId) is () {
@@ -116,10 +134,18 @@ public isolated class RedisStore {
         }
     }
 
+    # Clears the cart of the related user.
+    #
+    # + userId - user id of the user
+    # + return - an error if an error occured while emptying, else ()
     isolated function emptyCart(string userId) returns error? {
         _ = check self.redisClient->del([userId]);
     }
 
+    # Provides the carts of specific users.
+    #
+    # + userId - user id of the user whose cart is required
+    # + return - `Cart` or an error if error occurs
     isolated function getCart(string userId) returns Cart|error {
         map<any> userItems = check self.redisClient->hGetAll(userId);
         CartItem[] items = from [string, any] [productId, quantity] in userItems.entries()
