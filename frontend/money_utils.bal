@@ -151,7 +151,7 @@ isolated function multiplySlow(Money money, int n) returns Money {
 }
 
 isolated function renderMoney(Money money) returns string {
-    return currencyLogo(money.currency_code) + money.units.toString() + "." + (money.nanos / 10000000).toString();
+    return string `${currencyLogo(money.currency_code)}${money.units.toString()}.${(money.nanos / 10000000).toString()}`;
 }
 
 isolated function currencyLogo(string code) returns string {

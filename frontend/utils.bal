@@ -25,7 +25,7 @@ isolated function getSessionIdFromCookieHeader(string cookieStr) returns http:Co
         return usernameCookie[0];
     }
     return {
-        body: SESSION_ID_COOKIE + " cookie is not available."
+        body: string `${SESSION_ID_COOKIE} cookie is not available.`
     };
 }
 
@@ -40,7 +40,7 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
             cookie = new (nameValue[0], nameValue.length() > 1 ? nameValue[1]: "", path = "/");
             cookiesInRequest.push(cookie);
         } else {
-            log:printError("Invalid cookie: " + pair + ", which must be in the format as [{name}=].");
+            log:printError(string `Invalid cookie: ${pair}, which must be in the format as [{name}=].`);
         }
     }
     return cookiesInRequest;

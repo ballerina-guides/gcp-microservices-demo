@@ -104,7 +104,7 @@ service "EmailService" on new grpc:Listener(9097) {
         </table>
         </body>`;
 
-        return <xml>xml `
+        xml emailContent = xml `
         <html>
         <head>
             <title>Your Order Confirmation</title>
@@ -117,6 +117,7 @@ service "EmailService" on new grpc:Listener(9097) {
         </style>
             ${body}
         </html>`;
+        return emailContent;
     }
 }
 

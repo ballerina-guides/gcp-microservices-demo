@@ -34,5 +34,5 @@ isolated function generateRandomNumber(int digit) returns string {
 }
 
 isolated function generateTrackingId(string baseAddress) returns string {
-    return string`${generateRandomLetter()}${generateRandomLetter()}-${baseAddress.length().toString()}${generateRandomNumber(3)}-${(baseAddress.length() / 2).toString()}${generateRandomNumber(7)}`;
+    return string `${generateRandomLetter()}${generateRandomLetter()}-${baseAddress.length().toString()}${generateRandomNumber(3)}-${(baseAddress.length() / 2).toString()}${generateRandomNumber(7)}`;
 }
