@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,12 +18,21 @@ import ballerina/grpc;
 import ballerina/uuid;
 import ballerina/log;
 
-configurable string cartHost = "localhost";
-configurable string catalogHost = "localhost";
-configurable string currencyHost = "localhost";
-configurable string shippingHost = "localhost";
-configurable string paymentHost = "localhost";
-configurable string emailHost = "localhost";
+const string LOCALHOST = "localhost";
+
+configurable string cartHost = LOCALHOST;
+configurable string catalogHost = LOCALHOST;
+configurable string currencyHost = LOCALHOST;
+configurable string shippingHost = LOCALHOST;
+configurable string paymentHost = LOCALHOST;
+configurable string emailHost = LOCALHOST;
+
+configurable decimal cartTimeout = 3;
+configurable decimal catalogTimeout = 3;
+configurable decimal currencyTimeout = 3;
+configurable decimal shippingTimeout = 3;
+configurable decimal paymentTimeout = 3;
+configurable decimal emailTimeout = 3;
 
 # The service retrieves the user cart, prepares the order, and orchestrates the payment, shipping, and email notification.
 @display {
@@ -68,23 +77,24 @@ service "CheckoutService" on new grpc:Listener(9094) {
     private final EmailServiceClient emailClient;
 
     function init() returns error? {
-        self.cartClient = check new (string `http://${cartHost}:9092`, timeout = 3);
-        self.catalogClient = check new (string `http://${catalogHost}:9091`, timeout = 3);
-        self.currencyClient = check new (string `http://${currencyHost}:9093`, timeout = 3);
-        self.shippingClient = check new (string `http://${shippingHost}:9095`, timeout = 3);
-        self.paymentClient = check new (string `http://${paymentHost}:9096`, timeout = 3);
-        self.emailClient = check new (string `http://${emailHost}:9097`, timeout = 3);
+        self.cartClient = check new (string `http://${cartHost}:9092`, timeout = cartTimeout);
+        self.catalogClient = check new (string `http://${catalogHost}:9091`, timeout = catalogTimeout);
+        self.currencyClient = check new (string `http://${currencyHost}:9093`, timeout = currencyTimeout);
+        self.shippingClient = check new (string `http://${shippingHost}:9095`, timeout = shippingTimeout);
+        self.paymentClient = check new (string `http://${paymentHost}:9096`, timeout = paymentTimeout);
+        self.emailClient = check new (string `http://${emailHost}:9097`, timeout = emailTimeout);
     }
 
     # Places the order and process payment, shipping and email notification.
     #
     # + request - `PlaceOrderRequest` containing user details
     # + return - returns `PlaceOrderResponse` containing order details
-    remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|error {
+    remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|grpc:Error {
         string orderId = uuid:createType1AsString();
         CartItem[] userCartItems = check self.getUserCart(request.user_id, request.user_currency);
         OrderItem[] orderItems = check self.prepOrderItems(userCartItems, request.user_currency);
-        Money shippingPrice = check self.convertCurrency(check self.quoteShipping(request.address, userCartItems), request.user_currency);
+        Money shippingPrice = check self.convertCurrency(check self.quoteShipping(request.address, userCartItems),
+            request.user_currency);
 
         Money totalCost = {
             currency_code: request.user_currency,
@@ -98,7 +108,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         }
 
         string transactionId = check self.chargeCard(totalCost, request.credit_card);
-        log:printInfo("payment went through " + transactionId);
+        log:printInfo(string `payment went through ${transactionId}`);
         string shippingTrackingId = check self.shipOrder(request.address, userCartItems);
         check self.emptyUserCart(request.user_id);
 
@@ -110,17 +120,16 @@ service "CheckoutService" on new grpc:Listener(9094) {
             items: orderItems
         };
 
-        error? err = self.sendConfirmationMail(request.email, 'order);
-        if err is error {
-            log:printWarn(string `failed to send order confirmation to ${request.email}`, 'error = err);
+        Empty|grpc:Error result = self.sendConfirmationMail(request.email, 'order);
+        if result is grpc:Error {
+            log:printWarn(string `failed to send order confirmation to ${request.email}`, 'error = result);
         } else {
             log:printInfo(string `order confirmation email sent to ${request.email}`);
         }
-
         return {'order};
     }
 
-    function getUserCart(string userId, string userCurrency) returns CartItem[]|error {
+    function getUserCart(string userId, string userCurrency) returns CartItem[]|grpc:Error {
         GetCartRequest getCartRequest = {user_id: userId};
         Cart|grpc:Error cartResponse = self.cartClient->GetCart(getCartRequest);
         if cartResponse is grpc:Error {
@@ -130,7 +139,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return cartResponse.items;
     }
 
-    function prepOrderItems(CartItem[] cartItems, string userCurrency) returns OrderItem[]|error {
+    function prepOrderItems(CartItem[] cartItems, string userCurrency) returns OrderItem[]|grpc:Error {
         OrderItem[] orderItems = [];
         foreach CartItem item in cartItems {
             GetProductRequest productRequest = {id: item.product_id};
@@ -149,7 +158,8 @@ service "CheckoutService" on new grpc:Listener(9094) {
             Money|grpc:Error conversionResponse = self.currencyClient->Convert(conversionRequest);
             if conversionResponse is grpc:Error {
                 log:printError("failed to call convert from currency service", 'error = conversionResponse);
-                return error grpc:InternalError(string `failed to convert price of ${item.product_id} to ${userCurrency}`, conversionResponse);
+                return error grpc:InternalError(string `failed to convert price of ${item.product_id} to
+                    ${userCurrency}`, conversionResponse);
             }
             orderItems.push({
                 item,
@@ -159,9 +169,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return orderItems;
     }
 
-    function quoteShipping(Address address, CartItem[] items) returns Money|error {
+    function quoteShipping(Address address, CartItem[] items) returns Money|grpc:InternalError {
         GetQuoteRequest quoteRequest = {
-            address: address,
+            address,
             items
         };
         GetQuoteResponse|grpc:Error getQuoteResponse = self.shippingClient->GetQuote(quoteRequest);
@@ -173,7 +183,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return getQuoteResponse.cost_usd;
     }
 
-    function convertCurrency(Money usd, string userCurrency) returns Money|error {
+    function convertCurrency(Money usd, string userCurrency) returns Money|grpc:InternalError {
         CurrencyConversionRequest conversionRequest = {
             'from: usd,
             to_code: userCurrency
@@ -187,7 +197,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return convertionResponse;
     }
 
-    function chargeCard(Money total, CreditCardInfo card) returns string|error {
+    function chargeCard(Money total, CreditCardInfo card) returns string|grpc:InternalError {
         ChargeRequest chargeRequest = {
             amount: total,
             credit_card: card
@@ -201,7 +211,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return chargeResponse.transaction_id;
     }
 
-    function shipOrder(Address address, CartItem[] items) returns string|error {
+    function shipOrder(Address address, CartItem[] items) returns string|grpc:UnavailableError {
         ShipOrderRequest orderRequest = {};
         ShipOrderResponse|grpc:Error shipOrderResponse = self.shippingClient->ShipOrder(orderRequest);
         if shipOrderResponse is grpc:Error {
@@ -212,7 +222,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return shipOrderResponse.tracking_id;
     }
 
-    function emptyUserCart(string userId) returns error? {
+    function emptyUserCart(string userId) returns grpc:InternalError? {
         EmptyCartRequest request = {
             user_id: userId
         };
@@ -224,11 +234,10 @@ service "CheckoutService" on new grpc:Listener(9094) {
         }
     }
 
-    function sendConfirmationMail(string email, OrderResult orderRes) returns error? {
-        SendOrderConfirmationRequest orderConfirmRequest = {
+    function sendConfirmationMail(string email, OrderResult orderResult) returns Empty|grpc:Error {
+        return self.emailClient->SendOrderConfirmation({
             email,
-            'order: orderRes
-        };
-        _ = check self.emailClient->SendOrderConfirmation(orderConfirmRequest);
+            'order: orderResult
+        });
     }
 }

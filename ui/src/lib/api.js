@@ -1,7 +1,7 @@
 /*
- *  Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2022, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  WSO2 LLC. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License.
  *  You may obtain a copy of the License at
@@ -45,7 +45,7 @@ export async function getHomePage() {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not fetch quotes.');
+        throw new Error(data.message || 'Could not get home page.');
     }
 
     return data;
@@ -56,7 +56,7 @@ export async function getSingleProduct(productId) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not fetch quote.');
+        throw new Error(data.message || 'Could not get the product.');
     }
 
     return data;
@@ -74,7 +74,7 @@ export async function addProductToCart(requestData) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not add comment.');
+        throw new Error(data.message || 'Could not product to cart.');
     }
 
     return { };
@@ -85,7 +85,7 @@ export async function getCartPage() {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not fetch quotes.');
+        throw new Error(data.message || 'Could not get the cart.');
     }
 
     return data;
@@ -103,7 +103,25 @@ export async function checkout(requestData) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not add comment.');
+        throw new Error(data.message || 'Could not checkout.');
+    }
+
+    return data;
+}
+
+export async function changeCurrency(requestData) {
+    const response = await fetch(`${FRONTEND_SVC_URL}/setCurrency`, {
+        method: 'POST',
+        body: JSON.stringify(requestData),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || 'Could not change currency.');
     }
 
     return data;
@@ -114,7 +132,7 @@ export async function getMetadata() {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not fetch quotes.');
+        throw new Error(data.message || 'Could not get metadata.');
     }
 
     return data;
@@ -125,7 +143,7 @@ export async function emptyCart() {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Could not fetch quotes.');
+        throw new Error(data.message || 'Could not empty the cart.');
     }
 
     return data;

@@ -1,4 +1,4 @@
-// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -20,16 +20,17 @@ import ballerina/time;
 import ballerina/uuid;
 
 const string SESSION_ID_COOKIE = "sessionIdCookie";
-const string SESSION_ID = "sessionId";
-const string USER_CURRENCY = "USD";
+const string CURRENCY_COOKIE = "currencyCookie";
+const string SESSION_ID_KEY = "sessionId";
 const ENABLE_SINGLE_SHARED_SESSION = "ENABLE_SINGLE_SHARED_SESSION";
 final boolean is_cymbal_brand = os:getEnv("CYMBAL_BRANDING") == "true";
 
 service class AuthInterceptor {
     *http:RequestInterceptor;
     resource function 'default [string... path](http:RequestContext ctx, http:Request request)
-        returns http:NextService|error? {
+    returns http:NextService|error? {
         http:Cookie[] usernameCookie = request.getCookies().filter(cookie => cookie.name == SESSION_ID_COOKIE);
+        http:Cookie[] currencyCookie = request.getCookies().filter(cookie => cookie.name == CURRENCY_COOKIE);
         string sessionId;
         if usernameCookie.length() == 0 {
             if os:getEnv(ENABLE_SINGLE_SHARED_SESSION) == "true" {
@@ -38,16 +39,25 @@ service class AuthInterceptor {
             } else {
                 sessionId = uuid:createType1AsString();
             }
-            http:Cookie cookie = new (SESSION_ID_COOKIE, sessionId, path = "/");
-            request.addCookies([cookie]);
+            http:Cookie sessionIdCookie = new (SESSION_ID_COOKIE, sessionId, path = "/");
+            http:Cookie[] cookies = request.getCookies();
+            cookies.push(sessionIdCookie);
+            request.addCookies(cookies);
         } else {
             sessionId = usernameCookie[0].value;
         }
-        ctx.set(SESSION_ID, sessionId);
+        if currencyCookie.length() == 0 {
+            http:Cookie currency = new (CURRENCY_COOKIE, "USD", path = "/");
+            http:Cookie[] cookies = request.getCookies();
+            cookies.push(currency);
+            request.addCookies(cookies);
+        }
+        ctx.set(SESSION_ID_KEY, sessionId);
         return ctx.next();
     }
 }
 
+# This service serves the data required by the UI by communicating with internal gRPC services
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["http://localhost:3000"],
@@ -61,6 +71,10 @@ service class AuthInterceptor {
 }
 service / on new http:Listener(9098) {
 
+    # GET method to get the metadata like currency and cart size.
+    #
+    # + cookieHeader - header containing the cookie
+    # + return - `MetadataResponse` if successful or `http:Unauthorized` or `error` if an error occurs
     resource function get metadata(@http:Header {name: "Cookie"} string cookieHeader)
                 returns MetadataResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
@@ -68,59 +82,83 @@ service / on new http:Listener(9098) {
             return cookie;
         }
 
+        http:Cookie|http:Unauthorized currencyCookie = getCurrencyFromCookieHeader(cookieHeader);
+        if currencyCookie is http:Unauthorized {
+            return currencyCookie;
+        }
+
         string[] supportedCurrencies = check getSupportedCurrencies();
         Cart cart = check getCart(cookie.value);
-        return <MetadataResponse>{
+        MetadataResponse metadataResponse = {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: {
-                user_currency: USER_CURRENCY, //Todo to cookies
+                user_currency: [currencyCookie.value, currencyLogo(currencyCookie.value)],
                 currencies: supportedCurrencies,
                 cart_size: cart.items.length(),
                 is_cymbal_brand: is_cymbal_brand
             }
         };
+        return metadataResponse;
     }
 
+    # GET method which provides products and ads.
+    #
+    # + cookieHeader - header containing the cookie
+    # + return - `HomeResponse` if successful or `http:Unauthorized` or `error` if an error occurs
     resource function get .(@http:Header {name: "Cookie"} string cookieHeader)
                 returns HomeResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
         }
+        http:Cookie|http:Unauthorized currencyCookie = getCurrencyFromCookieHeader(cookieHeader);
+        if currencyCookie is http:Unauthorized {
+            return currencyCookie;
+        }
         Product[] products = check getProducts();
 
         ProductLocalized[] productsLocalized = [];
         foreach Product product in products {
-            Money converedMoney = check convertCurrency(product.price_usd, USER_CURRENCY);
+            Money converedMoney = check convertCurrency(product.price_usd, currencyCookie.value);
             productsLocalized.push(toProductLocalized(product, renderMoney(converedMoney)));
         }
 
-        return <HomeResponse>{
+        HomeResponse homeResponse = {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: {
                 products: productsLocalized,
-                ad: check chooseAd([])
+                ad: check chooseAd()
             }
         };
+        return homeResponse;
     }
 
+    # GET method providing a specific product.
+    #
+    # + id - product id
+    # + cookieHeader - header containing the cookie
+    # + return - `ProductResponse` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function get product/[string id](@http:Header {name: "Cookie"} string cookieHeader)
                 returns ProductResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
         }
+        http:Cookie|http:Unauthorized currencycookie = getCurrencyFromCookieHeader(cookieHeader);
+        if currencycookie is http:Unauthorized {
+            return currencycookie;
+        }
         string userId = cookie.value;
         Product product = check getProduct(id);
-        Money converedMoney = check convertCurrency(product.price_usd, USER_CURRENCY);
-        ProductLocalized productLocal = toProductLocalized(product, renderMoney(converedMoney));
+        Money convertedMoney = check convertCurrency(product.price_usd, currencycookie.value);
+        ProductLocalized productLocal = toProductLocalized(product, renderMoney(convertedMoney));
         Product[] recommendations = check getRecommendations(userId, [id]);
 
-        return <ProductResponse>{
+        ProductResponse productResponse = {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
@@ -130,24 +168,49 @@ service / on new http:Listener(9098) {
                 ad: check chooseAd(product.categories)
             }
         };
+        return productResponse;
     }
 
-    resource function post setCurrency() returns json {
-        return {};
+    resource function post setCurrency(@http:Payload record {|string currency;|} request, @http:Header {name: "Cookie"} string cookieHeader)
+                returns http:Response|http:Unauthorized|error {
+        http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
+        if cookie is http:Unauthorized {
+            return cookie;
+        }
+        string[] supportedCurrencies = check getSupportedCurrencies();
+        Cart cart = check getCart(cookie.value);
+        http:Response response = new;
+        http:Cookie currencyCookie = new (CURRENCY_COOKIE, request.currency, path = "/");
+        response.addCookie(currencyCookie);
+        response.setJsonPayload({
+            user_currency: [request.currency, currencyLogo(request.currency)],
+            currencies: supportedCurrencies,
+            cart_size: cart.items.length(),
+            is_cymbal_brand: is_cymbal_brand
+        });
+        return response;
     }
 
+    # GET method providing the cart.
+    #
+    # + cookieHeader - header containing the cookie
+    # + return - `CartResponse` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function get cart(@http:Header {name: "Cookie"} string cookieHeader)
                 returns CartResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
         }
+        http:Cookie|http:Unauthorized currencyCookie = getCurrencyFromCookieHeader(cookieHeader);
+        if currencyCookie is http:Unauthorized {
+            return currencyCookie;
+        }
         string userId = cookie.value;
         Cart cart = check getCart(userId);
-        Product[] recommandations = check getRecommendations(userId, self.getProductIdFromCart(cart));
-        Money shippingCost = check getShippingQuote(cart.items, USER_CURRENCY);
+        Product[] recommendations = check getRecommendations(userId, self.getProductIdFromCart(cart));
+        Money shippingCost = check getShippingQuote(cart.items, currencyCookie.value);
         Money totalPrice = {
-            currency_code: USER_CURRENCY,
+            currency_code: currencyCookie.value,
             nanos: 0,
             units: 0
         };
@@ -155,7 +218,7 @@ service / on new http:Listener(9098) {
         foreach CartItem item in cart.items {
             Product product = check getProduct(item.product_id);
 
-            Money converedPrice = check convertCurrency(product.price_usd, USER_CURRENCY);
+            Money converedPrice = check convertCurrency(product.price_usd, currencyCookie.value);
 
             Money price = multiplySlow(converedPrice, item.quantity);
             string renderedPrice = renderMoney(price);
@@ -170,27 +233,28 @@ service / on new http:Listener(9098) {
         int year = time:utcToCivil(time:utcNow()).year;
         int[] years = [year, year + 1, year + 2, year + 3, year + 4];
 
-        return <CartResponse>{
+        CartResponse cartResponse = {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: {
-                recommendations: recommandations,
+                recommendations,
                 shipping_cost: renderMoney(shippingCost),
                 total_cost: renderMoney(totalPrice),
                 items: cartItems,
                 expiration_years: years
             }
         };
+        return cartResponse;
     }
 
-    function getProductIdFromCart(Cart cart) returns string[] {
-        return from CartItem item in cart.items
-            select item.product_id;
-    }
-
-    resource function post cart(@http:Payload AddToCartRequest request, @http:Header {name: "Cookie"} string cookieHeader)
-                returns http:Created|http:Unauthorized|http:BadRequest|error {
+    # POST method to update the cart with a product.
+    #
+    # + request - `AddToCartRequest` containing the product id of the product to add
+    # + cookieHeader - header containing the cookie
+    # + return - `http:Created` if successful or `http:Unauthorized` or `http:BadRequest` or `error` if an error occurs
+    resource function post cart(@http:Payload AddToCartRequest request,
+    @http:Header {name: "Cookie"} string cookieHeader) returns http:Created|http:Unauthorized|http:BadRequest|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
@@ -198,21 +262,27 @@ service / on new http:Listener(9098) {
         string userId = cookie.value;
         Product|error product = getProduct(request.productId);
         if product is error {
-            return <http:BadRequest>{
-                body: "invalid request" + product.message()
+            http:BadRequest badRequest = {
+                body: string `invalid request ${product.message()}`
             };
+            return badRequest;
         }
 
         check insertCart(userId, request.productId, request.quantity);
 
-        return <http:Created>{
+        http:Created response = {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: "item added the cart"
         };
+        return response;
     }
 
+    # POST method to empty the cart.
+    #
+    # + cookieHeader - header containing the cookie
+    # + return - `http:Created` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function post cart/empty(@http:Header {name: "Cookie"} string cookieHeader)
                 returns http:Created|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
@@ -221,19 +291,29 @@ service / on new http:Listener(9098) {
         }
         string userId = cookie.value;
         check emptyCart(userId);
-        return <http:Created>{
+        http:Created response = {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: "cart emptied"
         };
+        return response;
     }
 
-    resource function post cart/checkout(@http:Payload CheckoutRequest request, @http:Header {name: "Cookie"} string cookieHeader)
-                returns CheckoutResponse|http:Unauthorized|error {
+    # Post method to checkout the user's cart.
+    #
+    # + request - `CheckoutRequest` containing user's details
+    # + cookieHeader - header containing the cookie
+    # + return - `CheckoutResponse` if successful or an `http:Unauthorized` or `error` if an error occurs
+    resource function post cart/checkout(@http:Payload CheckoutRequest request,
+    @http:Header {name: "Cookie"} string cookieHeader) returns CheckoutResponse|http:Unauthorized|error {
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
+        }
+        http:Cookie|http:Unauthorized currencyCookie = getCurrencyFromCookieHeader(cookieHeader);
+        if currencyCookie is http:Unauthorized {
+            return currencyCookie;
         }
         string userId = cookie.value;
 
@@ -247,7 +327,7 @@ service / on new http:Listener(9098) {
                 zip_code: request.zip_code
             },
             user_id: userId,
-            user_currency: USER_CURRENCY,
+            user_currency: currencyCookie.value,
             credit_card: {
                 credit_card_cvv: request.credit_card_cvv,
                 credit_card_expiration_month: request.credit_card_expiration_month,
@@ -256,14 +336,14 @@ service / on new http:Listener(9098) {
             }
         });
 
-        Product[] recommendations = check getRecommendations(userId, []);
+        Product[] recommendations = check getRecommendations(userId);
         Money totalCost = orderResult.shipping_cost;
         foreach OrderItem item in orderResult.items {
             Money multiplyRes = multiplySlow(item.cost, item.item.quantity);
             totalCost = sum(totalCost, multiplyRes);
         }
 
-        return <CheckoutResponse>{
+        CheckoutResponse checkoutResponse = {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
@@ -273,5 +353,12 @@ service / on new http:Listener(9098) {
                 recommendations: recommendations
             }
         };
+
+        return checkoutResponse;
+    }
+
+    function getProductIdFromCart(Cart cart) returns string[] {
+        return from CartItem item in cart.items
+            select item.product_id;
     }
 }

@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 import ballerina/regex;
 import ballerina/time;
 
-type CardValidationError error;
+type CardValidationError distinct error;
 
 type CardCompany record {|
     string name;
@@ -26,7 +26,7 @@ type CardCompany record {|
 
 # Class used to validate the card details.
 class CardValidator {
-    final CardCompany[] companies = [
+    private final CardCompany[] companies = [
         {
             name: "VISA",
             pattern: "^4[0-9]{12}(?:[0-9]{3})?$"
@@ -47,6 +47,8 @@ class CardValidator {
         self.expireMonth = expireMonth;
     }
 
+    # Validates the card with.
+    # + return - `CardCompany` containing details
     isolated function isValid() returns CardCompany|error {
         if (self.cardNumber.length() < 13) || (self.cardNumber.length() > 19) {
             return error CardValidationError("Credit card info is invalid: failed length check");
@@ -56,16 +58,18 @@ class CardValidator {
         }
         CardCompany? gleanCompany = self.getCompany();
         if gleanCompany is () {
-            return error CardValidationError("Sorry, we cannot process the credit card. Only VISA or MasterCard is accepted.");
+            return error CardValidationError("Sorry, we cannot process the credit card. " +
+                "Only VISA or MasterCard is accepted.");
         }
         if self.isExpired() {
             return error CardValidationError(
-                string `Your credit card (ending ${self.cardNumber.substring(self.cardNumber.length() -4)}) expired on ${self.expireMonth}/${self.expireYear}`);
+                string `Your credit card (ending ${self.cardNumber.substring(self.cardNumber.length() -4)})
+                    expired on ${self.expireMonth}/${self.expireYear}`);
         }
         return gleanCompany;
     }
 
-    isolated function isLuhnValid() returns boolean|error {
+    private isolated function isLuhnValid() returns boolean|error {
         int digits = self.cardNumber.length();
         int oddOrEven = digits & 1;
         int sum = 0;
@@ -85,16 +89,16 @@ class CardValidator {
         return sum != 0 && (sum % 10 == 0);
     }
 
-    isolated function getCompany() returns CardCompany? {
+    private isolated function getCompany() returns CardCompany? {
         foreach CardCompany company in self.companies {
             if regex:matches(self.cardNumber, company.pattern) {
                 return company;
             }
         }
-        return ();
+        return;
     }
 
-    isolated function isExpired() returns boolean {
+    private isolated function isExpired() returns boolean {
         int expireYear = self.expireYear;
         int expireMonth = self.expireMonth;
 
