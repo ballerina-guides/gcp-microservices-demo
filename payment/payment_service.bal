@@ -32,15 +32,14 @@ service "PaymentService" on new grpc:Listener(9096) {
     # + return - `ChargeResponse` with the transaction id or an error
     remote function Charge(ChargeRequest value) returns ChargeResponse|error {
         CreditCardInfo creditCard = value.credit_card;
-        CardValidator cardValidator = new (creditCard.credit_card_number, creditCard.credit_card_expiration_year,
+        CardCompany|error cardCompany = getCardCompany(creditCard.credit_card_number, creditCard.credit_card_expiration_year, 
             creditCard.credit_card_expiration_month);
-        CardCompany|error cardValid = cardValidator.isValid();
-        if cardValid is CardValidationError {
-            log:printError("Credit card is not valid", 'error = cardValid);
-            return cardValid;
-        } else if cardValid is error {
-            log:printError("Error occured while validating the credit card", 'error = cardValid);
-            return cardValid;
+        if cardCompany is CardValidationError {
+            log:printError("Credit card is not valid", 'error = cardCompany);
+            return cardCompany;
+        } else if cardCompany is error {
+            log:printError("Error occured while validating the credit card", 'error = cardCompany);
+            return cardCompany;
         }
         log:printInfo(string `Transaction processed: the card ending
             ${creditCard.credit_card_number.substring(creditCard.credit_card_number.length() - 4)},
