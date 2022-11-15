@@ -8,7 +8,6 @@ on:
 
 jobs:
   build:
-    if: github.repository_owner == 'ballerina-guides'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -22,24 +21,20 @@ jobs:
       id: testname
       run: |
         echo "::set-output name=test-name::${TEST_NAME}"
+    - uses: hasithaa/setup-ballerina@v1
+      name: Install Ballerina
+      with:
+        version: 2201.2.3
+
     - name: Pack gRPC Stub Module
-      uses: ballerina-platform/ballerina-action@master
       env:
         WORKING_DIR: "gcp.client.stub"
-      with:
-        args:
-          pack
+      run: bal pack
     - name: Push gRPC Stub Module
-      uses: ballerina-platform/ballerina-action@master
       env:
         WORKING_DIR: "gcp.client.stub"
-      with:
-        args:
-          push --repository=local
+      run: bal push --repository=local
     - name: Ballerina Build
-      uses: ballerina-platform/ballerina-action@master
       env:
         WORKING_DIR: ${{ steps.testname.outputs.test-name }}
-      with:
-        args:
-          build --cloud=k8s
+      run: bal build --cloud=k8s
