@@ -43,7 +43,7 @@ service "ShippingService" on new grpc:Listener(9095) {
         float cents = cost % 1;
         int dollars = <int>(cost - cents);
 
-        Money usdCost = {currency_code: "USD", nanos: <int>cents * 10000000, units: dollars};
+        Money usdCost = {currency_code: "USD", nanos: <int>(cents * 1000000000), units: dollars};
 
         return {
             cost_usd: usdCost

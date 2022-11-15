@@ -92,7 +92,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
     # + return - returns `PlaceOrderResponse` containing order details
     remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|grpc:Error {
         string orderId = uuid:createType1AsString();
-        CartItem[] userCartItems = check self.getUserCart(request.user_id, request.user_currency);
+        CartItem[] userCartItems = check self.getUserCartItems(request.user_id, request.user_currency);
         OrderItem[] orderItems = check self.prepOrderItems(userCartItems, request.user_currency);
         Money shippingPrice = check self.convertCurrency(check self.quoteShipping(request.address, userCartItems),
             request.user_currency);
@@ -130,7 +130,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return {'order};
     }
 
-    function getUserCart(string userId, string userCurrency) returns CartItem[]|grpc:Error {
+    function getUserCartItems(string userId, string userCurrency) returns CartItem[]|grpc:Error {
         GetCartRequest getCartRequest = {user_id: userId};
         Cart|grpc:Error cartResponse = self.cartClient->GetCart(getCartRequest);
         if cartResponse is grpc:Error {

@@ -26,4 +26,4 @@ jobs:
         WORKING_DIR: ${{ steps.testname.outputs.test-name }}
       with:
         args:
-          build
+          build --cloud=k8s
