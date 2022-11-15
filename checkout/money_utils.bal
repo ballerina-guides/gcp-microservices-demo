@@ -13,7 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import wso2/gcp.'client.stub as stub;
+import wso2/client_stubs as stub;
 # Checks if specified value has a valid units/nanos signs and ranges.
 #
 # + money - object to be validated

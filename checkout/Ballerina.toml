@@ -9,6 +9,6 @@ observabilityIncluded = true
 
 [[dependency]]
 org = "wso2"
-name = "gcp.client.stub"
+name = "client_stubs"
 version = "0.1.0"
 repository = "local"

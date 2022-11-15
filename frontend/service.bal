@@ -21,7 +21,7 @@ import ballerina/uuid;
 import ballerina/observe;
 import ballerinax/jaeger as _;
 import ballerina/log;
-import wso2/gcp.'client.stub as stub;
+import wso2/client_stubs as stub;
 
 const string SESSION_ID_COOKIE = "sessionIdCookie";
 const string CURRENCY_COOKIE = "currencyCookie";
