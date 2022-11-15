@@ -24,12 +24,12 @@ enum CardType {
     MASTER_CARD = "MASTERCARD"
 }
 
-type CardCompany record {|
+type CardTypeInfo record {|
     CardType cardType;
     string pattern;
 |};
 
-final CardCompany[] & readonly companies = [
+final CardTypeInfo[] & readonly cardDetails = [
     {
         cardType: VISA,
         pattern: "^4[0-9]{12}(?:[0-9]{3})?$"
@@ -40,7 +40,7 @@ final CardCompany[] & readonly companies = [
     }
 ];
 
-isolated function getCardDetails(string cardNumber, int expireYear, int expireMonth) returns CardType|error {
+isolated function getCardType(string cardNumber) returns CardType|error {
     string formattedCardNumber = regex:replaceAll(cardNumber, "[^0-9]+", "");
     if (formattedCardNumber.length() < 13) || (formattedCardNumber.length() > 19) {
         return error CardValidationError("Credit card info is invalid: failed length check");
@@ -50,18 +50,16 @@ isolated function getCardDetails(string cardNumber, int expireYear, int expireMo
         return error CardValidationError("Credit card info is invalid: failed luhn check");
     }
 
-    CardType? cardType = getCardType(formattedCardNumber);
-    if cardType is () {
+    CardType[] cardTypes = from var cardTypeInfo in cardDetails
+        where regex:matches(cardNumber, cardTypeInfo.pattern)
+        limit 1
+        select cardTypeInfo.cardType;
+
+    if cardTypes.length() == 0 {
         return error CardValidationError("Sorry, we cannot process the credit card. " +
                 "Only VISA or MasterCard is accepted.");
     }
-
-    if isExpired(expireYear, expireMonth) {
-        return error CardValidationError(
-                string `Your credit card (ending ${formattedCardNumber.substring(formattedCardNumber.length() - 4)})
-                    expired on ${expireMonth}/${expireYear}`);
-    }
-    return cardType;
+    return cardTypes[0];
 }
 
 isolated function isLuhnValid(string cardNumber) returns boolean|error {
@@ -84,13 +82,12 @@ isolated function isLuhnValid(string cardNumber) returns boolean|error {
     return sum != 0 && (sum % 10 == 0);
 }
 
-isolated function getCardType(string cardNumber) returns CardType? {
-    foreach CardCompany company in companies {
-        if regex:matches(cardNumber, company.pattern) {
-            return company.cardType;
-        }
+isolated function validateCardExpiration(string cardNumber, int year, int month) returns error? {
+    if isExpired(year, month) {
+        return error CardValidationError(
+                string `Your credit card (ending ${cardNumber.substring(cardNumber.length() - 4)})
+                    expired on ${month}/${year}`);
     }
-    return;
 }
 
 isolated function isExpired(int expireYear, int expireMonth) returns boolean {

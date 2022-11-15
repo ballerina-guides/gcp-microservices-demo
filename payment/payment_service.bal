@@ -42,21 +42,15 @@ service "PaymentService" on new grpc:Listener(9096) {
         int rootParentSpanId = observe:startRootSpan("PaymentSpan");
         int childSpanId = check observe:startSpan("PaymentFromClientSpan", parentSpanId = rootParentSpanId);
 
-        var {credit_card_number: cardNumber, credit_card_expiration_year: expirationYear,
-                credit_card_expiration_month: expirationMonth} = request.credit_card;
-        CardType|error cardType = getCardDetails(cardNumber, expirationYear, expirationMonth);
-        if cardType is CardValidationError {
-            log:printError("Credit card is not valid", 'error = cardType);
-            return cardType;
-        } else if cardType is error {
-            log:printError("Error occured while validating the credit card", 'error = cardType);
-            return cardType;
-        } else {
-            string lastFourDigits = cardNumber.substring(cardNumber.length() - 4);
-            string amount = let var {currency_code, units, nanos} = request.amount in
+        var {credit_card_number: cardNumber, credit_card_expiration_year: year,
+                credit_card_expiration_month: month} = request.credit_card;
+        CardType cardType = check getCardType(cardNumber);
+        check validateCardExpiration(cardNumber, year, month);
+
+        string lastFourDigits = cardNumber.substring(cardNumber.length() - 4);
+        string amount = let var {currency_code, units, nanos} = request.amount in
                     string `${currency_code}${units}.${nanos}`;
-            log:printInfo(string `Transaction processed: ${cardType} ending ${lastFourDigits}, Amount: ${amount}`);
-        }
+        log:printInfo(string `Transaction processed: ${cardType} ending ${lastFourDigits}, Amount: ${amount}`);
 
         check observe:finishSpan(childSpanId);
         check observe:finishSpan(rootParentSpanId);
