@@ -19,42 +19,49 @@ import ballerina/time;
 
 type CardValidationError distinct error;
 
+enum CardType {
+    VISA = "VISA",
+    MASTER_CARD = "MASTERCARD"
+}
+
 type CardCompany record {|
-    string name;
+    CardType cardType;
     string pattern;
 |};
 
 final CardCompany[] & readonly companies = [
     {
-        name: "VISA",
+        cardType: VISA,
         pattern: "^4[0-9]{12}(?:[0-9]{3})?$"
     },
     {
-        name: "MASTERCARD",
+        cardType: MASTER_CARD,
         pattern: "^5[1-5][0-9]{14}$"
-
     }
 ];
 
-isolated function getCardCompany(string cardNumber, int expireYear, int expireMonth) returns CardCompany|error {
+isolated function getCardDetails(string cardNumber, int expireYear, int expireMonth) returns CardType|error {
     string formattedCardNumber = regex:replaceAll(cardNumber, "[^0-9]+", "");
     if (formattedCardNumber.length() < 13) || (formattedCardNumber.length() > 19) {
         return error CardValidationError("Credit card info is invalid: failed length check");
     }
+
     if !check isLuhnValid(formattedCardNumber) {
         return error CardValidationError("Credit card info is invalid: failed luhn check");
     }
-    CardCompany? gleanCompany = getCompany(formattedCardNumber);
-    if gleanCompany is () {
+
+    CardType? cardType = getCardType(formattedCardNumber);
+    if cardType is () {
         return error CardValidationError("Sorry, we cannot process the credit card. " +
                 "Only VISA or MasterCard is accepted.");
     }
+
     if isExpired(expireYear, expireMonth) {
         return error CardValidationError(
                 string `Your credit card (ending ${formattedCardNumber.substring(formattedCardNumber.length() - 4)})
                     expired on ${expireMonth}/${expireYear}`);
     }
-    return gleanCompany;
+    return cardType;
 }
 
 isolated function isLuhnValid(string cardNumber) returns boolean|error {
@@ -77,10 +84,10 @@ isolated function isLuhnValid(string cardNumber) returns boolean|error {
     return sum != 0 && (sum % 10 == 0);
 }
 
-isolated function getCompany(string cardNumber) returns CardCompany? {
+isolated function getCardType(string cardNumber) returns CardType? {
     foreach CardCompany company in companies {
         if regex:matches(cardNumber, company.pattern) {
-            return company;
+            return company.cardType;
         }
     }
     return;
