@@ -4,6 +4,9 @@ The online boutique is a cloud-native microservices demo application written by 
 # Architecture
 ![image info](architecture-diagram.png)
 
+And also following is the automatically generated Ballerina design view of the demo application.
+![image info](project-design.png)
+
 # Microservices description
 
 |Service name | Description |
