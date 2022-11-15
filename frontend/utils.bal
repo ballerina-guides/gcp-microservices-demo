@@ -58,9 +58,9 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
     return cookiesInRequest;
 }
 
-isolated function getCartSize(Cart cart) returns int|error {
+isolated function getCartSize(stub:Cart cart) returns int|error {
     int cartsize = 0;
-    check from CartItem item in cart.items
+    check from stub:CartItem item in cart.items
         do {
             cartsize += item.quantity;
         };
