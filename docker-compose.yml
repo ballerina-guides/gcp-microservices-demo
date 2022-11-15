@@ -9,12 +9,24 @@ services:
       - 55680:55680
   ads:
     image: wso2inc/ads-service:v0.1.0
+    environment:
+      BAL_CONFIG_DATA: [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    links:
+      - jaeger
+    depends_on:
+      - jaeger
   cart:
     image: wso2inc/cart-service:v0.1.0 #add redis
+    environment:
+      BAL_CONFIG_DATA: [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    links:
+      - jaeger
+    depends_on:
+      - jaeger
   checkout:
     image: wso2inc/checkout-service:v0.1.0
     environment:
-      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n currencyHost="currency" \n shippingHost="shipping" \n paymentHost="payment" \n emailHost="email"
+      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n currencyHost="currency" \n shippingHost="shipping" \n paymentHost="payment" \n emailHost="email" \n \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
     links:
       - catalog
       - cart
@@ -22,6 +34,7 @@ services:
       - shipping
       - payment
       - email
+      - jaeger
     depends_on:
       - catalog
       - cart
@@ -29,13 +42,26 @@ services:
       - shipping
       - payment
       - email
+      - jaeger
   currency:
     image: wso2inc/currency-service:v0.1.0
+    environment:
+      BAL_CONFIG_DATA: [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    links:
+      - jaeger
+    depends_on:
+      - jaeger
   email:
     image: wso2inc/email-service:v0.1.0
     secrets:
       - source: email_config  
         target: /home/ballerina/Config.toml
+    environment:
+      BAL_CONFIG_DATA: [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    links:
+      - jaeger
+    depends_on:
+      - jaeger
   frontend:
     image: wso2inc/frontend-service:v0.1.0
     environment:
@@ -62,8 +88,20 @@ services:
       - jaeger
   payment:
     image: wso2inc/payment-service:v0.1.0
+    environment:
+      BAL_CONFIG_DATA: [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    links:
+      - jaeger
+    depends_on:
+      - jaeger
   catalog:
     image: wso2inc/catalog-service:v0.1.0
+    environment:
+      BAL_CONFIG_DATA: [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    links:
+      - jaeger
+    depends_on:
+      - jaeger
   recommendation:
     image: wso2inc/recommendation-service:v0.1.0
     environment:
@@ -76,6 +114,12 @@ services:
       - jaeger
   shipping:
     image: wso2inc/shipping-service:v0.1.0
+    environment:
+      BAL_CONFIG_DATA: [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    links:
+      - jaeger
+    depends_on:
+      - jaeger
 secrets:
     email_config:
       file: ./email/Config.toml
