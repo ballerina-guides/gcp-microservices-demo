@@ -25,16 +25,12 @@ jobs:
       name: Install Ballerina
       with:
         version: 2201.2.3
-
     - name: Pack gRPC Stub Module
-      env:
-        WORKING_DIR: "gcp.client.stub"
+      working-directory: "gcp.client.stub"
       run: bal pack
     - name: Push gRPC Stub Module
-      env:
-        WORKING_DIR: "gcp.client.stub"
+      working-directory: "gcp.client.stub"
       run: bal push --repository=local
     - name: Ballerina Build
-      env:
-        WORKING_DIR: ${{ steps.testname.outputs.test-name }}
+      working-directory: ${{ steps.testname.outputs.test-name }}
       run: bal build --cloud=k8s
