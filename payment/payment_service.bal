@@ -26,12 +26,17 @@ import ballerina/uuid;
 @grpc:Descriptor {value: DEMO_DESC}
 service "PaymentService" on new grpc:Listener(9096) {
 
+    function init() {
+        log:printInfo(string `PaymentService gRPC server started.`);
+    }
+
     # Validate and charge the amount from the card.
     #
-    # + value - `ChargeRequest` containing the card details and the amount to charge
+    # + request - `ChargeRequest` containing the card details and the amount to charge
     # + return - `ChargeResponse` with the transaction id or an error
-    remote function Charge(ChargeRequest value) returns ChargeResponse|error {
-        CreditCardInfo creditCard = value.credit_card;
+    remote function Charge(ChargeRequest request) returns ChargeResponse|error {
+        log:printInfo(string `PaymentService#Charge invoked with request ${request.toString()}`);
+        CreditCardInfo creditCard = request.credit_card;
         CardValidator cardValidator = new (creditCard.credit_card_number, creditCard.credit_card_expiration_year,
             creditCard.credit_card_expiration_month);
         CardCompany|error cardValid = cardValidator.isValid();
@@ -44,7 +49,7 @@ service "PaymentService" on new grpc:Listener(9096) {
         }
         log:printInfo(string `Transaction processed: the card ending
             ${creditCard.credit_card_number.substring(creditCard.credit_card_number.length() - 4)},
-                Amount: ${value.amount.currency_code}${value.amount.units}.${value.amount.nanos}`);
+                Amount: ${request.amount.currency_code}${request.amount.units}.${request.amount.nanos}`);
         return {
             transaction_id: uuid:createType1AsString()
         };

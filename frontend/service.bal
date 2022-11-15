@@ -20,6 +20,7 @@ import ballerina/time;
 import ballerina/uuid;
 import ballerina/observe;
 import ballerinax/jaeger as _;
+import ballerina/log;
 
 const string SESSION_ID_COOKIE = "sessionIdCookie";
 const string CURRENCY_COOKIE = "currencyCookie";
@@ -72,6 +73,10 @@ service class AuthInterceptor {
     id: "frontend"
 }
 service / on new http:Listener(9098) {
+
+    function init() {
+        log:printInfo(string `Frontend server started.`);
+    }
 
     # GET method to get the metadata like currency and cart size.
     #

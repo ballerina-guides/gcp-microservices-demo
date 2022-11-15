@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/grpc;
+import ballerina/log;
 
 # Provides text advertisements based on the context of the given words.
 @display {
@@ -27,6 +28,7 @@ service "AdService" on new grpc:Listener(9099) {
 
     function init() {
         self.store = new AdStore();
+        log:printInfo("AdService gRPC server started.");
     }
 
     # Retrieves ads based on context provided in the request.
@@ -34,6 +36,7 @@ service "AdService" on new grpc:Listener(9099) {
     # + request - the request containing context
     # + return - the related/random ad response or else an error
     remote function GetAds(AdRequest request) returns AdResponse|error {
+        log:printInfo(string `received ad request (context_words=${request.context_keys.toString()})`);
         Ad[] ads = [];
         foreach string category in request.context_keys {
             Ad[] availableAds = self.store.getAdsByCategory(category);

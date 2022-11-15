@@ -45,6 +45,7 @@ service "EmailService" on new grpc:Listener(9097) {
                 clientSecret: gmail.clientSecret
             }
         });
+        log:printInfo(string `EmailService gRPC server started.`);
     }
 
     # Sends the order confirmation email containing details about the order.
@@ -52,6 +53,7 @@ service "EmailService" on new grpc:Listener(9097) {
     # + request - `SendOrderConfirmationRequest` which contains the details about the order
     # + return - `Empty` or else an error
     remote function SendOrderConfirmation(SendOrderConfirmationRequest request) returns Empty|error {
+        log:printInfo(string `A request to send order confirmation email to ${request.email} has been received.`);
         gmail:MessageRequest messageRequest = {
             recipient: request.email,
             subject: "Order Confirmation",
