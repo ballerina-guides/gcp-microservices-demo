@@ -14,7 +14,7 @@ services:
   checkout:
     image: wso2inc/checkout-service:v0.1.0
     environment:
-      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n currencyHost="currency" \n shippingHost="shipping" \n paymentHost="payment" \n emailHost="email" catalogTimeout=3.0 \n cartTimeout=3.0 \n currencyTimeout=3.0 \n shippingTimeout=3.0 \n paymentTimeout=3.0 \n emailTimeout=3.0
+      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n currencyHost="currency" \n shippingHost="shipping" \n paymentHost="payment" \n emailHost="email"
     links:
       - catalog
       - cart
@@ -39,7 +39,7 @@ services:
   frontend:
     image: wso2inc/frontend-service:v0.1.0
     environment:
-      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n recommendHost="recommendation" \n currencyHost="currency" \n shippingHost="shipping" \n checkoutHost="checkout" \n adHost="ads" currencyTimeout=3.0 \n catalogTimeout=3.0 \n cartTimeout=3.0 \n shippingTimeout=3.0 \n recommendationTimeout=3.0 \n adTimeout=3.0 \n checkoutTimeout=3.0 \n  \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n recommendHost="recommendation" \n currencyHost="currency" \n shippingHost="shipping" \n checkoutHost="checkout" \n adHost="ads" \n \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
     ports:
       - 9098:9098
     links:
@@ -67,7 +67,7 @@ services:
   recommendation:
     image: wso2inc/recommendation-service:v0.1.0
     environment:
-      BAL_CONFIG_DATA: catalogHost="catalog" \n catalogTimeout=3.0 \n \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+      BAL_CONFIG_DATA: catalogHost="catalog" \n \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
     links:
       - catalog
       - jaeger
