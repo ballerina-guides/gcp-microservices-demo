@@ -34,14 +34,14 @@ isolated function parseProductJson(json jsonContents) returns Product[]|error {
     }
 
     JsonProduct[] jsonProducts = check productsJson.fromJsonWithType();
-    return from JsonProduct jsonProduct in jsonProducts
+    return from var {id, name, description, picture, priceUsd, categories} in jsonProducts
         let Product product = {
-            id: jsonProduct.id,
-            name: jsonProduct.name,
-            description: jsonProduct.description,
-            picture: jsonProduct.picture,
-            price_usd: check parseUsdPrice(jsonProduct.priceUsd),
-            categories: jsonProduct.categories
+            id,
+            name,
+            description,
+            picture,
+            price_usd: check parseUsdPrice(priceUsd),
+            categories
         }
         select product;
 }
