@@ -6,3 +6,10 @@ distribution = "2201.2.3"
 
 [build-options]
 observabilityIncluded = true
+
+[[dependency]]
+org = "wso2"
+name = "gcp.client.stub"
+version = "0.1.0"
+repository = "local"
+

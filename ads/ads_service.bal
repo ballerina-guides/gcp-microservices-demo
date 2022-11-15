@@ -19,10 +19,11 @@ import ballerinax/jaeger as _;
 import ballerina/log;
 import ballerina/observe;
 import ballerina/random;
+import wso2/gcp.'client.stub as stub;
 
 type AdCategory record {|
     readonly string category;
-    Ad[] ads;
+    stub:Ad[] ads;
 |};
 
 # Provides text advertisements based on the context of the given words.
@@ -30,17 +31,17 @@ type AdCategory record {|
     label: "Ads",
     id: "ads"
 }
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "AdService" on new grpc:Listener(9099) {
 
     private final readonly & table<AdCategory> key(category) adCategories;
-    private final readonly & Ad[] allAds;
+    private final readonly & stub:Ad[] allAds;
     private final int MAX_ADS_TO_SERVE = 2;
 
     function init() {
         self.adCategories = loadAds().cloneReadOnly();
 
-        Ad[] ads = [];
+        stub:Ad[] ads = [];
         foreach var category in self.adCategories {
             ads.push(...category.ads);
         }
@@ -52,11 +53,12 @@ service "AdService" on new grpc:Listener(9099) {
     #
     # + request - the request containing context
     # + return - the related/random ad response or else an error
-    remote function GetAds(AdRequest request) returns AdResponse|error {
+    remote function GetAds(stub:AdRequest request) returns stub:AdResponse|error {
         log:printInfo(string `received ad request (context_words=${request.context_keys.toString()})`);
         int rootParentSpanId = observe:startRootSpan("GetAdsSpan");
         int childSpanId = check observe:startSpan("GetAdsFromClientSpan", parentSpanId = rootParentSpanId);
-        Ad[] ads = [];
+
+        stub:Ad[] ads = [];
         foreach var category in request.context_keys {
             AdCategory? adCategory = self.adCategories[category];
             if adCategory !is () {
@@ -73,8 +75,8 @@ service "AdService" on new grpc:Listener(9099) {
         return {ads};
     }
 
-    isolated function getRandomAds() returns Ad[]|error {
-        Ad[] randomAds = [];
+    isolated function getRandomAds() returns stub:Ad[]|error {
+        stub:Ad[] randomAds = [];
         foreach int i in 0 ..< self.MAX_ADS_TO_SERVE {
             int rIndex = check random:createIntInRange(0, self.allAds.length());
             randomAds.push(self.allAds[rIndex]);
@@ -84,31 +86,31 @@ service "AdService" on new grpc:Listener(9099) {
 }
 
 isolated function loadAds() returns table<AdCategory> key(category) {
-    Ad hairdryer = {
+    stub:Ad hairdryer = {
         redirect_url: "/product/2ZYFJ3GM2N",
         text: "Hairdryer for sale. 50% off."
     };
-    Ad tankTop = {
+    stub:Ad tankTop = {
         redirect_url: "/product/66VCHSJNUP",
         text: "Tank top for sale. 20% off."
     };
-    Ad candleHolder = {
+    stub:Ad candleHolder = {
         redirect_url: "/product/0PUK6V6EV0",
         text: "Candle holder for sale. 30% off."
     };
-    Ad bambooGlassJar = {
+    stub:Ad bambooGlassJar = {
         redirect_url: "/product/9SIQT8TOJO",
         text: "Bamboo glass jar for sale. 10% off."
     };
-    Ad watch = {
+    stub:Ad watch = {
         redirect_url: "/product/1YMWWN1N4O",
         text: "Watch for sale. Buy one, get second kit for free"
     };
-    Ad mug = {
+    stub:Ad mug = {
         redirect_url: "/product/6E92ZMYYFZ",
         text: "Mug for sale. Buy two, get third one for free"
     };
-    Ad loafers = {
+    stub:Ad loafers = {
         redirect_url: "/product/L9ECAV7KIM",
         text: "Loafers for sale. Buy one, get second one for free"
     };

@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerinax/redis;
+import wso2/gcp.'client.stub as stub;
 
 # Provides the interface for the RedisStore and InMemoryStore
 public type DataStore distinct object {
@@ -37,13 +38,13 @@ public type DataStore distinct object {
     #
     # + userId - user id of the user whose cart is required
     # + return - `Cart` or an error if error occurs
-    isolated function getCart(string userId) returns Cart|error;
+    isolated function getCart(string userId) returns stub:Cart|error;
 };
 
 # Provides in-memory functionalities by using a `map<Cart>`.
 public isolated class InMemoryStore {
     *DataStore;
-    private map<Cart> store = {};
+    private map<stub:Cart> store = {};
 
     # Adds an item to the in-memory store.
     #
@@ -53,21 +54,21 @@ public isolated class InMemoryStore {
     isolated function addItem(string userId, string productId, int quantity) {
         lock {
             if self.store.hasKey(userId) {
-                Cart existingCart = self.store.get(userId);
-                CartItem[] existingItems = existingCart.items;
-                CartItem[] matchedItem = from CartItem item in existingItems
+                stub:Cart existingCart = self.store.get(userId);
+                stub:CartItem[] existingItems = existingCart.items;
+                stub:CartItem[] matchedItem = from stub:CartItem item in existingItems
                     where item.product_id == productId
                     limit 1
                     select item;
                 if matchedItem.length() == 1 {
-                    CartItem item = matchedItem[0];
+                    stub:CartItem item = matchedItem[0];
                     item.quantity = item.quantity + quantity;
                 } else {
-                    CartItem newItem = {product_id: productId, quantity: quantity};
+                    stub:CartItem newItem = {product_id: productId, quantity: quantity};
                     existingItems.push(newItem);
                 }
             } else {
-                Cart newItem = {
+                stub:Cart newItem = {
                     user_id: userId,
                     items: [{product_id: productId, quantity: quantity}]
                 };
@@ -89,12 +90,12 @@ public isolated class InMemoryStore {
     #
     # + userId - user id of the user whose cart is required
     # + return - `Cart` with the cart items
-    isolated function getCart(string userId) returns Cart {
+    isolated function getCart(string userId) returns stub:Cart {
         lock {
             if self.store.hasKey(userId) {
                 return self.store.get(userId).cloneReadOnly();
             }
-            Cart newItem = {
+            stub:Cart newItem = {
                 user_id: userId,
                 items: []
             };
@@ -146,9 +147,9 @@ public isolated class RedisStore {
     #
     # + userId - user id of the user whose cart is required
     # + return - `Cart` or an error if error occurs
-    isolated function getCart(string userId) returns Cart|error {
+    isolated function getCart(string userId) returns stub:Cart|error {
         map<any> userItems = check self.redisClient->hGetAll(userId);
-        CartItem[] items = from [string, any] [productId, quantity] in userItems.entries()
+        stub:CartItem[] items = from [string, any] [productId, quantity] in userItems.entries()
             select {product_id: productId, quantity: check int:fromString(quantity.toString())};
         return {user_id: userId, items};
     }

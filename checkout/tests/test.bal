@@ -16,16 +16,17 @@
 
 import ballerina/grpc;
 import ballerina/test;
+import wso2/gcp.'client.stub as stub;
 
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "ProductCatalogService" on new grpc:Listener(9091) {
-    remote function ListProducts(Empty value) returns ListProductsResponse {
+    remote function ListProducts(stub:Empty value) returns stub:ListProductsResponse {
         return {
             products: []
         };
     }
 
-    remote function GetProduct(GetProductRequest value) returns Product|error {
+    remote function GetProduct(stub:GetProductRequest value) returns stub:Product|error {
         return {
             id: "OLJCESPC7Z",
             name: "Sunglasses",
@@ -40,33 +41,33 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
         };
     }
 
-    remote function SearchProducts(SearchProductsRequest value) returns SearchProductsResponse|error {
+    remote function SearchProducts(stub:SearchProductsRequest value) returns stub:SearchProductsResponse|error {
         return error("method not implemented");
     }
 }
 
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "CartService" on new grpc:Listener(9092) {
-    remote function AddItem(AddItemRequest request) returns Empty|error {
+    remote function AddItem(stub:AddItemRequest request) returns stub:Empty|error {
         return error("method not implemented");
     }
 
-    remote function GetCart(GetCartRequest request) returns Cart|error {
+    remote function GetCart(stub:GetCartRequest request) returns stub:Cart|error {
         return {user_id: "3", items: [{product_id: "OLJCESPC7Z", quantity: 1}]};
     }
 
-    remote function EmptyCart(EmptyCartRequest request) returns Empty|error {
+    remote function EmptyCart(stub:EmptyCartRequest request) returns stub:Empty|error {
         return {};
     }
 }
 
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "CurrencyService" on new grpc:Listener(9093) {
-    remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse|error {
+    remote function GetSupportedCurrencies(stub:Empty request) returns stub:GetSupportedCurrenciesResponse|error {
         return error("method not implemented");
     }
 
-    remote function Convert(CurrencyConversionRequest request) returns Money|error {
+    remote function Convert(stub:CurrencyConversionRequest request) returns stub:Money|error {
         return {
             currency_code: request.to_code,
             units: request.'from.units,
@@ -75,41 +76,41 @@ service "CurrencyService" on new grpc:Listener(9093) {
     }
 }
 
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "ShippingService" on new grpc:Listener(9095) {
-    remote function GetQuote(GetQuoteRequest request) returns GetQuoteResponse|error {
-        Money usdCost = {currency_code: "USD", nanos: 99000000, units: 8};
+    remote function GetQuote(stub:GetQuoteRequest request) returns stub:GetQuoteResponse|error {
+       stub:Money usdCost = {currency_code: "USD", nanos: 99000000, units: 8};
         return {
             cost_usd: usdCost
         };
     }
 
-    remote function ShipOrder(ShipOrderRequest request) returns ShipOrderResponse|error {
+    remote function ShipOrder(stub:ShipOrderRequest request) returns stub:ShipOrderResponse|error {
         return {tracking_id: "AB15A51G1051A"};
     }
 }
 
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "PaymentService" on new grpc:Listener(9096) {
-    remote function Charge(ChargeRequest value) returns ChargeResponse|error {
+    remote function Charge(stub:ChargeRequest value) returns stub:ChargeResponse|error {
         return {
             transaction_id: "12345678945613254689"
         };
     }
 }
 
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "EmailService" on new grpc:Listener(9097) {
-    remote function SendOrderConfirmation(SendOrderConfirmationRequest request) returns Empty|error {
+    remote function SendOrderConfirmation(stub:SendOrderConfirmationRequest request) returns stub:Empty|error {
         return {};
     }
 }
 
 @test:Config {}
 function intAddTest() returns error? {
-    CheckoutServiceClient ep = check new ("http://localhost:9094");
+    stub:CheckoutServiceClient ep = check new ("http://localhost:9094");
 
-    PlaceOrderRequest req = {
+    stub:PlaceOrderRequest req = {
         user_id: "3",
         address: {
             country: "Sri lanka",
@@ -128,7 +129,7 @@ function intAddTest() returns error? {
         email: "ballerina@wso2.com",
         user_currency: "USD"
     };
-    PlaceOrderResponse placeOrderResponse = check ep->PlaceOrder(req);
+    stub:PlaceOrderResponse placeOrderResponse = check ep->PlaceOrder(req);
     test:assertEquals(placeOrderResponse.'order.shipping_tracking_id, "AB15A51G1051A");
     test:assertEquals(placeOrderResponse.'order.shipping_cost, {currency_code: "USD", nanos: 99000000, units: 8});
     test:assertEquals(placeOrderResponse.'order.shipping_address, {

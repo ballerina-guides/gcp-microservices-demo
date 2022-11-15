@@ -19,6 +19,7 @@ import ballerina/io;
 import ballerina/log;
 import ballerina/observe;
 import ballerinax/jaeger as _;
+import wso2/gcp.'client.stub as stub;
 
 configurable string productJsonPath = "./resources/products.json";
 
@@ -27,9 +28,9 @@ configurable string productJsonPath = "./resources/products.json";
     label: "Catalog",
     id: "catalog"
 }
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "ProductCatalogService" on new grpc:Listener(9091) {
-    private final Product[] & readonly products;
+    private final stub:Product[] & readonly products;
 
     function init() returns error? {
         json|error productsJson = io:fileReadJson(productJsonPath);
@@ -38,7 +39,7 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
             return productsJson;
         }
         log:printInfo("successfully parsed product catalog json");
-        Product[] products = check parseProductJson(productsJson);
+        stub:Product[] products = check parseProductJson(productsJson);
         self.products = products.cloneReadOnly();
         log:printInfo(string `Catalog service gRPC server started.`);
     }
@@ -47,7 +48,7 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - an empty request
     # + return - `ListProductsResponse` containing a `Product[]`
-    remote function ListProducts(Empty request) returns ListProductsResponse {
+    remote function ListProducts(stub:Empty request) returns stub:ListProductsResponse {
         return {products: self.products};
     }
 
@@ -55,11 +56,11 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - `GetProductRequest` containing the product id
     # + return - `Product` related to the required id or an error
-    remote function GetProduct(GetProductRequest request) returns Product|grpc:NotFoundError|error {
+    remote function GetProduct(stub:GetProductRequest request) returns stub:Product|grpc:NotFoundError|error {
         int rootParentSpanId = observe:startRootSpan("GetProductSpan");
         int childSpanId = check observe:startSpan("GetProductFromClientSpan", parentSpanId = rootParentSpanId);
 
-        foreach Product product in self.products {
+        foreach stub:Product product in self.products {
             if product.id == request.id {
                 return product;
             }
@@ -75,9 +76,9 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - `SearchProductsRequest` containing the search query
     # + return - `SearchProductsResponse` containing the matching products
-    remote function SearchProducts(SearchProductsRequest request) returns SearchProductsResponse {
+    remote function SearchProducts(stub:SearchProductsRequest request) returns stub:SearchProductsResponse {
         return {
-            results: from Product product in self.products
+            results: from stub:Product product in self.products
                 where isProductRelated(product, request.query)
                 select product
         };

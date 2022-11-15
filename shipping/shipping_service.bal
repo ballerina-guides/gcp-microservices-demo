@@ -18,13 +18,14 @@ import ballerina/grpc;
 import ballerina/log;
 import ballerina/observe;
 import ballerinax/jaeger as _;
+import wso2/gcp.'client.stub as stub;
 
 # Gives the shipping cost estimates based on the shopping cart.
 @display {
     label: "Shipping",
     id: "shipping"
 }
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "ShippingService" on new grpc:Listener(9095) {
 
     function init() {
@@ -35,15 +36,15 @@ service "ShippingService" on new grpc:Listener(9095) {
     #
     # + request - `GetQuoteRequest` contaning the user's selected items
     # + return - `GetQuoteResponse` containing the shipping cost 
-    remote function GetQuote(GetQuoteRequest request) returns GetQuoteResponse|error {
+    remote function GetQuote(stub:GetQuoteRequest request) returns stub:GetQuoteResponse|error {
         log:printInfo("[GetQuote] received request");
         int rootParentSpanId = observe:startRootSpan("GetQuoteSpan");
         int childSpanId = check observe:startSpan("GetQuoteFromClientSpan", parentSpanId = rootParentSpanId);
 
-        CartItem[] items = request.items;
+        stub:CartItem[] items = request.items;
         int count = 0;
         float cost = 0.0;
-        foreach CartItem item in items {
+        foreach stub:CartItem item in items {
             count += item.quantity;
         }
 
@@ -53,7 +54,7 @@ service "ShippingService" on new grpc:Listener(9095) {
         float cents = cost % 1;
         int dollars = <int>(cost - cents);
 
-        Money usdCost = {currency_code: "USD", nanos: <int>(cents * 1000000000), units: dollars};
+        stub:Money usdCost = {currency_code: "USD", nanos: <int>(cents * 1000000000), units: dollars};
 
         check observe:finishSpan(childSpanId);
         check observe:finishSpan(rootParentSpanId);
@@ -67,9 +68,9 @@ service "ShippingService" on new grpc:Listener(9095) {
     #
     # + request - `ShipOrderRequest` containing the address and the user's order items
     # + return - `ShipOrderResponse` containing the tracking id or an error
-    remote function ShipOrder(ShipOrderRequest request) returns ShipOrderResponse|error {
+    remote function ShipOrder(stub:ShipOrderRequest request) returns stub:ShipOrderResponse|error {
         log:printInfo("[GetQuote] received request");
-        Address address = request.address;
+        stub:Address address = request.address;
         return {
             tracking_id: generateTrackingId(string `${address.street_address}, ${address.city}, ${address.state}`)
         };
