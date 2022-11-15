@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/grpc;
+import ballerina/observe;
 import ballerinax/jaeger as _;
 
 # Gives the shipping cost estimates based on the shopping cart.
@@ -30,6 +31,9 @@ service "ShippingService" on new grpc:Listener(9095) {
     # + request - `GetQuoteRequest` contaning the user's selected items
     # + return - `GetQuoteResponse` containing the shipping cost 
     remote function GetQuote(GetQuoteRequest request) returns GetQuoteResponse|error {
+        int rootParentSpanId = observe:startRootSpan("GetQuoteSpan");
+        int childSpanId = check observe:startSpan("GetQuoteFromClientSpan", parentSpanId = rootParentSpanId);
+
         CartItem[] items = request.items;
         int count = 0;
         float cost = 0.0;
@@ -44,6 +48,9 @@ service "ShippingService" on new grpc:Listener(9095) {
         int dollars = <int>(cost - cents);
 
         Money usdCost = {currency_code: "USD", nanos: <int>cents * 10000000, units: dollars};
+
+        check observe:finishSpan(childSpanId);
+        check observe:finishSpan(rootParentSpanId);
 
         return {
             cost_usd: usdCost

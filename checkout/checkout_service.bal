@@ -17,6 +17,7 @@
 import ballerina/grpc;
 import ballerina/uuid;
 import ballerina/log;
+import ballerina/observe;
 import ballerinax/jaeger as _;
 
 const string LOCALHOST = "localhost";
@@ -91,6 +92,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
     # + request - `PlaceOrderRequest` containing user details
     # + return - returns `PlaceOrderResponse` containing order details
     remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|grpc:Error {
+        int rootParentSpanId = observe:startRootSpan("PlaceOrderSpan");
+        int childSpanId = check observe:startSpan("PlaceOrderFromClientSpan", parentSpanId = rootParentSpanId);
+
         string orderId = uuid:createType1AsString();
         CartItem[] userCartItems = check self.getUserCart(request.user_id, request.user_currency);
         OrderItem[] orderItems = check self.prepOrderItems(userCartItems, request.user_currency);
@@ -127,6 +131,10 @@ service "CheckoutService" on new grpc:Listener(9094) {
         } else {
             log:printInfo(string `order confirmation email sent to ${request.email}`);
         }
+
+        check observe:finishSpan(childSpanId);
+        check observe:finishSpan(rootParentSpanId);
+
         return {'order};
     }
 

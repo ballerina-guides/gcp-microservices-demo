@@ -17,6 +17,7 @@
 import ballerina/grpc;
 import ballerina/log;
 import ballerina/uuid;
+import ballerina/observe;
 import ballerinax/jaeger as _;
 
 # This service validates the card details (using the Luhn algorithm) against the supported card providers and charges the card.
@@ -32,6 +33,9 @@ service "PaymentService" on new grpc:Listener(9096) {
     # + value - `ChargeRequest` containing the card details and the amount to charge
     # + return - `ChargeResponse` with the transaction id or an error
     remote function Charge(ChargeRequest value) returns ChargeResponse|error {
+        int rootParentSpanId = observe:startRootSpan("PaymentSpan");
+        int childSpanId = check observe:startSpan("PaymentFromClientSpan", parentSpanId = rootParentSpanId);
+
         CreditCardInfo creditCard = value.credit_card;
         CardValidator cardValidator = new (creditCard.credit_card_number, creditCard.credit_card_expiration_year,
             creditCard.credit_card_expiration_month);
@@ -46,6 +50,10 @@ service "PaymentService" on new grpc:Listener(9096) {
         log:printInfo(string `Transaction processed: the card ending
             ${creditCard.credit_card_number.substring(creditCard.credit_card_number.length() - 4)},
                 Amount: ${value.amount.currency_code}${value.amount.units}.${value.amount.nanos}`);
+        
+        check observe:finishSpan(childSpanId);
+        check observe:finishSpan(rootParentSpanId);
+
         return {
             transaction_id: uuid:createType1AsString()
         };

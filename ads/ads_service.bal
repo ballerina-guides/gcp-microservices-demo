@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/grpc;
+import ballerina/observe;
 import ballerinax/jaeger as _;
 
 # Provides text advertisements based on the context of the given words.
@@ -35,6 +36,9 @@ service "AdService" on new grpc:Listener(9099) {
     # + request - the request containing context
     # + return - the related/random ad response or else an error
     remote function GetAds(AdRequest request) returns AdResponse|error {
+        int rootParentSpanId = observe:startRootSpan("GetAdsSpan");
+        int childSpanId = check observe:startSpan("GetAdsFromClientSpan", parentSpanId = rootParentSpanId);
+
         Ad[] ads = [];
         foreach string category in request.context_keys {
             Ad[] availableAds = self.store.getAdsByCategory(category);
@@ -43,6 +47,9 @@ service "AdService" on new grpc:Listener(9099) {
         if ads.length() == 0 {
             ads = check self.store.getRandomAds();
         }
+        check observe:finishSpan(childSpanId);
+        check observe:finishSpan(rootParentSpanId);
+
         return {ads};
     }
 }

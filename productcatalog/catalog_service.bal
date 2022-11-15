@@ -16,6 +16,7 @@
 
 import ballerina/grpc;
 import ballerina/io;
+import ballerina/observe;
 import ballerinax/jaeger as _;
 
 configurable string productJsonPath = "./resources/products.json";
