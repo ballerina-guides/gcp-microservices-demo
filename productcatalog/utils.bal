@@ -1,4 +1,3 @@
-import ballerina/log;
 // Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
@@ -14,6 +13,8 @@ import ballerina/log;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
+import ballerina/log;
 
 type JsonProduct record {|
     string id;
