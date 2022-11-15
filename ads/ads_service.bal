@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/grpc;
+import ballerinax/jaeger as _;
 
 # Provides text advertisements based on the context of the given words.
 @display {

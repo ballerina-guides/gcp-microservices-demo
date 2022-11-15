@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/grpc;
+import ballerinax/jaeger as _;
 
 # Gives the shipping cost estimates based on the shopping cart.
 @display {
