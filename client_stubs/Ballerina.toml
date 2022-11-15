@@ -1,6 +1,6 @@
 [package]
 org = "wso2"
-name = "client.stub"
+name = "client_stubs"
 version = "0.1.0"
 distribution = "2201.2.3"
 

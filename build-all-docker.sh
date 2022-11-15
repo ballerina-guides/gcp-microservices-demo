@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-( cd gcp.client.stub ; bal pack ; bal push --repository local)
+( cd client_stubs ; bal pack ; bal push --repository local)
 ( cd cart ; bal build --cloud=docker)
 ( cd currency ; bal build --cloud=docker)
 ( cd email ; bal build --cloud=docker)

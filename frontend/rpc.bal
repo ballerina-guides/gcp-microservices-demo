@@ -17,7 +17,7 @@
 import ballerina/grpc;
 import ballerina/log;
 import ballerina/random;
-import wso2/'client.stub;
+import wso2/client_stubs as stub;
 
 const string LOCALHOST = "localhost";
 

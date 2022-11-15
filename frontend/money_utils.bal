@@ -13,7 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import wso2/'client.stub;
+import wso2/client_stubs as stub;
 
 const map<string> logos = {
     "USD": "$",

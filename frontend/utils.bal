@@ -17,7 +17,7 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/regex;
-import wso2/'client.stub;
+import wso2/client_stubs as stub;
 
 isolated function getSessionIdFromCookieHeader(string cookieStr) returns http:Cookie|http:Unauthorized {
     http:Cookie[] cookies = parseCookieHeader(cookieStr);

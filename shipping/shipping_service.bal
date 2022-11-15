@@ -18,7 +18,7 @@ import ballerina/grpc;
 import ballerina/log;
 import ballerina/observe;
 import ballerinax/jaeger as _;
-import wso2/'client.stub;
+import wso2/client_stubs as stub;
 
 # Gives the shipping cost estimates based on the shopping cart.
 @display {

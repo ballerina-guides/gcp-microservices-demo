@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/test;
-import wso2/'client.stub;
+import wso2/client_stubs as stub;
 
 @test:Config {}
 function listProductsTest() returns error? {
