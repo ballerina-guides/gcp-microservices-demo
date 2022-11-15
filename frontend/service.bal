@@ -295,7 +295,7 @@ service / on new http:Listener(9098) {
             return badRequest;
         }
 
-        check insertCart(userId, request.productId, request.quantity);
+        check insertItemToCart(userId, request.productId, request.quantity);
 
         http:Created response = {
             headers: {

@@ -24,91 +24,75 @@ type CardCompany record {|
     string pattern;
 |};
 
-# Class used to validate the card details.
-class CardValidator {
-    private final CardCompany[] companies = [
-        {
-            name: "VISA",
-            pattern: "^4[0-9]{12}(?:[0-9]{3})?$"
-        },
-        {
-            name: "MASTERCARD",
-            pattern: "^5[1-5][0-9]{14}$"
+final CardCompany[] & readonly companies = [
+    {
+        name: "VISA",
+        pattern: "^4[0-9]{12}(?:[0-9]{3})?$"
+    },
+    {
+        name: "MASTERCARD",
+        pattern: "^5[1-5][0-9]{14}$"
 
-        }
-    ];
-    private final string cardNumber;
-    private final int expireYear;
-    private final int expireMonth;
-
-    isolated function init(string cardNumber, int expireYear, int expireMonth) {
-        self.cardNumber = regex:replaceAll(cardNumber, "[^0-9]+", "");
-        self.expireYear = expireYear;
-        self.expireMonth = expireMonth;
     }
+];
 
-    # Validates the card with.
-    # + return - `CardCompany` containing details
-    isolated function isValid() returns CardCompany|error {
-        if (self.cardNumber.length() < 13) || (self.cardNumber.length() > 19) {
-            return error CardValidationError("Credit card info is invalid: failed length check");
-        }
-        if !check self.isLuhnValid() {
-            return error CardValidationError("Credit card info is invalid: failed luhn check");
-        }
-        CardCompany? gleanCompany = self.getCompany();
-        if gleanCompany is () {
-            return error CardValidationError("Sorry, we cannot process the credit card. " +
+isolated function getCardCompany(string cardNumber, int expireYear, int expireMonth) returns CardCompany|error {
+    string formattedCardNumber = regex:replaceAll(cardNumber, "[^0-9]+", "");
+    if (formattedCardNumber.length() < 13) || (formattedCardNumber.length() > 19) {
+        return error CardValidationError("Credit card info is invalid: failed length check");
+    }
+    if !check isLuhnValid(formattedCardNumber) {
+        return error CardValidationError("Credit card info is invalid: failed luhn check");
+    }
+    CardCompany? gleanCompany = getCompany(formattedCardNumber);
+    if gleanCompany is () {
+        return error CardValidationError("Sorry, we cannot process the credit card. " +
                 "Only VISA or MasterCard is accepted.");
-        }
-        if self.isExpired() {
-            return error CardValidationError(
-                string `Your credit card (ending ${self.cardNumber.substring(self.cardNumber.length() -4)})
-                    expired on ${self.expireMonth}/${self.expireYear}`);
-        }
-        return gleanCompany;
     }
-
-    private isolated function isLuhnValid() returns boolean|error {
-        int digits = self.cardNumber.length();
-        int oddOrEven = digits & 1;
-        int sum = 0;
-
-        foreach int count in 0 ..< digits {
-            int digit = 0;
-            digit = check int:fromString(self.cardNumber[count]);
-
-            if ((count & 1) ^ oddOrEven) == 0 {
-                digit *= 2;
-                if digit > 9 {
-                    digit -= 9;
-                }
-            }
-            sum += digit;
-        }
-        return sum != 0 && (sum % 10 == 0);
+    if isExpired(expireYear, expireMonth) {
+        return error CardValidationError(
+                string `Your credit card (ending ${formattedCardNumber.substring(formattedCardNumber.length() - 4)})
+                    expired on ${expireMonth}/${expireYear}`);
     }
+    return gleanCompany;
+}
 
-    private isolated function getCompany() returns CardCompany? {
-        foreach CardCompany company in self.companies {
-            if regex:matches(self.cardNumber, company.pattern) {
-                return company;
+isolated function isLuhnValid(string cardNumber) returns boolean|error {
+    int digits = cardNumber.length();
+    int oddOrEven = digits & 1;
+    int sum = 0;
+
+    foreach int count in 0 ..< digits {
+        int digit = 0;
+        digit = check int:fromString(cardNumber[count]);
+
+        if ((count & 1) ^ oddOrEven) == 0 {
+            digit *= 2;
+            if digit > 9 {
+                digit -= 9;
             }
         }
-        return;
+        sum += digit;
     }
+    return sum != 0 && (sum % 10 == 0);
+}
 
-    private isolated function isExpired() returns boolean {
-        int expireYear = self.expireYear;
-        int expireMonth = self.expireMonth;
-
-        time:Civil currentTime = time:utcToCivil(time:utcNow());
-        int month = currentTime.month;
-        int year = currentTime.year;
-
-        if year > expireYear {
-            return true;
+isolated function getCompany(string cardNumber) returns CardCompany? {
+    foreach CardCompany company in companies {
+        if regex:matches(cardNumber, company.pattern) {
+            return company;
         }
-        return year == expireYear && month > expireMonth;
     }
+    return;
+}
+
+isolated function isExpired(int expireYear, int expireMonth) returns boolean {
+    time:Civil currentTime = time:utcToCivil(time:utcNow());
+    int month = currentTime.month;
+    int year = currentTime.year;
+
+    if year > expireYear {
+        return true;
+    }
+    return year == expireYear && month > expireMonth;
 }
