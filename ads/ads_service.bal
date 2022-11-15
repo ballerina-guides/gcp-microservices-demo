@@ -15,6 +15,8 @@
 // under the License.
 
 import ballerina/grpc;
+import ballerina/observe;
+import ballerinax/jaeger as _;
 import ballerina/random;
 
 type AdCategory record {|
@@ -49,6 +51,9 @@ service "AdService" on new grpc:Listener(9099) {
     # + request - the request containing context
     # + return - the related/random ad response or else an error
     remote function GetAds(AdRequest request) returns AdResponse|error {
+        int rootParentSpanId = observe:startRootSpan("GetAdsSpan");
+        int childSpanId = check observe:startSpan("GetAdsFromClientSpan", parentSpanId = rootParentSpanId);
+
         Ad[] ads = [];
         foreach var category in request.context_keys {
             AdCategory? adCategory = self.adCategories[category];
@@ -60,6 +65,9 @@ service "AdService" on new grpc:Listener(9099) {
         if ads.length() == 0 {
             ads = check self.getRandomAds();
         }
+        check observe:finishSpan(childSpanId);
+        check observe:finishSpan(rootParentSpanId);
+
         return {ads};
     }
 

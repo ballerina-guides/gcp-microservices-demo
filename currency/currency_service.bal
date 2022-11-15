@@ -16,6 +16,8 @@
 
 import ballerina/grpc;
 import ballerina/io;
+import ballerina/observe;
+import ballerinax/jaeger as _;
 
 configurable string currencyJsonPath = "./data/currency_conversion.json";
 
@@ -46,7 +48,10 @@ service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - `CurrencyConversionRequest` containing the `Money` value and the required currency
     # + return - returns the `Money` in the required currency or an error
-    remote function Convert(CurrencyConversionRequest request) returns Money {
+    remote function Convert(CurrencyConversionRequest request) returns Money|error {
+        int rootParentSpanId = observe:startRootSpan("CurrencyConvertSpan");
+        int childSpanId = check observe:startSpan("CurrencyConvertFromClientSpan", parentSpanId = rootParentSpanId);
+
         Money moneyFrom = request.'from;
         final decimal fractionSize = 1000000000;
         //From Unit
@@ -63,6 +68,9 @@ service "CurrencyService" on new grpc:Listener(9093) {
 
         int units = <int>targetAmount.floor();
         int nanos = <int>decimal:floor((targetAmount - <decimal>units) * fractionSize);
+
+        check observe:finishSpan(childSpanId);
+        check observe:finishSpan(rootParentSpanId);
 
         return {
             currency_code: request.to_code,

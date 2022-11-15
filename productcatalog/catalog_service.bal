@@ -16,6 +16,8 @@
 
 import ballerina/grpc;
 import ballerina/io;
+import ballerina/observe;
+import ballerinax/jaeger as _;
 
 configurable string productJsonPath = "./resources/products.json";
 
@@ -47,11 +49,18 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     # + request - `GetProductRequest` containing the product id
     # + return - `Product` related to the required id or an error
     remote function GetProduct(GetProductRequest request) returns Product|grpc:NotFoundError|error {
+        int rootParentSpanId = observe:startRootSpan("GetProductSpan");
+        int childSpanId = check observe:startSpan("GetProductFromClientSpan", parentSpanId = rootParentSpanId);
+
         foreach Product product in self.products {
             if product.id == request.id {
                 return product;
             }
         }
+
+        check observe:finishSpan(childSpanId);
+        check observe:finishSpan(rootParentSpanId);
+
         return error grpc:NotFoundError(string `no product with ID ${request.id}`);
     }
 
