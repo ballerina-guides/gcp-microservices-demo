@@ -14,13 +14,13 @@
 # limitations under the License.
 #
 
-( cd cart ; bal build)
-( cd currency ; bal build)
-( cd email ; bal build)
-( cd payment ; bal build)
-( cd productcatalog ; bal build)
-( cd recommendation ; bal build)
-( cd shipping ; bal build)
-( cd ads ; bal build)
-( cd checkout ; bal build)
-( cd frontend ; bal build)
+( cd cart ; bal build --cloud=docker)
+( cd currency ; bal build --cloud=docker)
+( cd email ; bal build --cloud=docker)
+( cd payment ; bal build --cloud=docker)
+( cd productcatalog ; bal build --cloud=docker)
+( cd recommendation ; bal build --cloud=docker)
+( cd shipping ; bal build --cloud=docker)
+( cd ads ; bal build --cloud=docker)
+( cd checkout ; bal build --cloud=docker)
+( cd frontend ; bal build --cloud=docker)
