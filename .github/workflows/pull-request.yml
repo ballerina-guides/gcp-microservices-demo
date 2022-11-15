@@ -26,9 +26,10 @@ jobs:
       uses: ballerina-platform/ballerina-action@master
       env:
         WORKING_DIR: "gcp.client.stub"
-      run: |
-        pack
-        push --repository=local
+      with:
+        args:
+          pack
+          push --repository=local
     - name: Ballerina Build
       uses: ballerina-platform/ballerina-action@master
       env:
