@@ -22,13 +22,19 @@ jobs:
       id: testname
       run: |
         echo "::set-output name=test-name::${TEST_NAME}"
-    - name: Build gRPC Stub Module
+    - name: Pack gRPC Stub Module
       uses: ballerina-platform/ballerina-action@master
       env:
         WORKING_DIR: "gcp.client.stub"
       with:
         args:
           pack
+    - name: Push gRPC Stub Module
+      uses: ballerina-platform/ballerina-action@master
+      env:
+        WORKING_DIR: "gcp.client.stub"
+      with:
+        args:
           push --repository=local
     - name: Ballerina Build
       uses: ballerina-platform/ballerina-action@master
