@@ -16,7 +16,7 @@
 
 import ballerina/grpc;
 import ballerina/log;
-import ballerina/observe;
+
 import ballerinax/jaeger as _;
 import wso2/gcp.'client.stub as stub;
 
@@ -49,15 +49,11 @@ service "RecommendationService" on new grpc:Listener(9090) {
     remote function ListRecommendations(stub:ListRecommendationsRequest request)
     returns stub:ListRecommendationsResponse|error {
         log:printInfo(string `[Recv ListRecommendations] product_ids=${request.product_ids.toString()}`);
-        int rootParentSpanId = observe:startRootSpan("ListProductsSpan");
-        int childSpanId = check observe:startSpan("ListProductsFromClientSpan", parentSpanId = rootParentSpanId);
         stub:ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
         if listProducts is grpc:Error {
             log:printError("failed to call ListProducts of catalog service", 'error = listProducts);
             return error grpc:InternalError("failed to get list of products from catalog service", listProducts);
         }
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
 
         return {
             product_ids: from stub:Product product in listProducts.products

@@ -16,7 +16,7 @@
 
 import ballerina/grpc;
 import ballerina/log;
-import ballerina/observe;
+
 import ballerinax/jaeger as _;
 import wso2/gcp.'client.stub as stub;
 
@@ -48,15 +48,9 @@ service "CartService" on new grpc:Listener(9092) {
     # + request - `AddItemRequest` containing the user id and the `CartItem`
     # + return - an `Empty` value or an error
     remote function AddItem(stub:AddItemRequest request) returns stub:Empty|error {
-        int rootParentSpanId = observe:startRootSpan("AddItemSpan");
-        int childSpanId = check observe:startSpan("AddItemFromClientSpan", parentSpanId = rootParentSpanId);
-
         lock {
             check self.store.addItem(request.user_id, request.item.product_id, request.item.quantity);
         }
-
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
 
         return {};
     }

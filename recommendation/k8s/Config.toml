@@ -1,5 +1,5 @@
 catalogHost="catalog-service"
-catalogTimeout=3
+catalogTimeout=3.0
 
 [ballerina.observe]
 tracingEnabled=true

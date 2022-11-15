@@ -18,7 +18,6 @@ import ballerina/http;
 import ballerina/os;
 import ballerina/time;
 import ballerina/uuid;
-import ballerina/observe;
 import ballerinax/jaeger as _;
 import ballerina/log;
 import wso2/gcp.'client.stub as stub;
@@ -152,34 +151,24 @@ service / on new http:Listener(9098) {
     # + return - `ProductResponse` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function get product/[string id](@http:Header {name: "Cookie"} string cookieHeader)
                 returns ProductResponse|http:Unauthorized|error {
-        int rootParentSpanId = observe:startRootSpan("GetProductSpan");
-        int childSpanId = check observe:startSpan("GetSessionIdFromCookieSpan", parentSpanId = rootParentSpanId);
         http:Cookie|http:Unauthorized cookie = getSessionIdFromCookieHeader(cookieHeader);
         if cookie is http:Unauthorized {
             return cookie;
         }
-        check observe:finishSpan(childSpanId);
 
-        childSpanId = check observe:startSpan("GetCurrencyFromCookieSpan", parentSpanId = rootParentSpanId);
         http:Cookie|http:Unauthorized currencycookie = getCurrencyFromCookieHeader(cookieHeader);
         if currencycookie is http:Unauthorized {
             return currencycookie;
         }
-        check observe:finishSpan(childSpanId);
 
         string userId = cookie.value;
         stub:Product product = check getProduct(id);
 
-        childSpanId = check observe:startSpan("ConvertCurrencySpan", parentSpanId = rootParentSpanId);
         stub:Money convertedMoney = check convertCurrency(product.price_usd, currencycookie.value);
-        check observe:finishSpan(childSpanId);
 
         ProductLocalized productLocal = toProductLocalized(product, renderMoney(convertedMoney));
 
-        childSpanId = check observe:startSpan("GetRecommendationsSpan", parentSpanId = rootParentSpanId);
         stub:Product[] recommendations = check getRecommendations(userId, [id]);
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
 
         ProductResponse productResponse = {
             headers: {

@@ -17,7 +17,7 @@
 import ballerina/grpc;
 import ballerinax/jaeger as _;
 import ballerina/log;
-import ballerina/observe;
+
 import ballerina/random;
 import wso2/gcp.'client.stub as stub;
 
@@ -55,8 +55,6 @@ service "AdService" on new grpc:Listener(9099) {
     # + return - the related/random ad response or else an error
     remote function GetAds(stub:AdRequest request) returns stub:AdResponse|error {
         log:printInfo(string `received ad request (context_words=${request.context_keys.toString()})`);
-        int rootParentSpanId = observe:startRootSpan("GetAdsSpan");
-        int childSpanId = check observe:startSpan("GetAdsFromClientSpan", parentSpanId = rootParentSpanId);
 
         stub:Ad[] ads = [];
         foreach var category in request.context_keys {
@@ -69,8 +67,6 @@ service "AdService" on new grpc:Listener(9099) {
         if ads.length() == 0 {
             ads = check self.getRandomAds();
         }
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
 
         return {ads};
     }
