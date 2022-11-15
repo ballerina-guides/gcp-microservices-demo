@@ -46,7 +46,7 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - `GetProductRequest` containing the product id
     # + return - `Product` related to the required id or an error
-    remote function GetProduct(GetProductRequest request) returns Product|grpc:NotFoundError {
+    remote function GetProduct(GetProductRequest request) returns Product|grpc:NotFoundError|error {
         foreach Product product in self.products {
             if product.id == request.id {
                 return product;
