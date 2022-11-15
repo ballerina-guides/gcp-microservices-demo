@@ -16,7 +16,6 @@
 
 import ballerina/grpc;
 import ballerina/log;
-import ballerina/observe;
 import ballerinax/jaeger as _;
 
 configurable string catalogHost = "localhost";
@@ -45,15 +44,11 @@ service "RecommendationService" on new grpc:Listener(9090) {
     # + return - `ListRecommendationsResponse` containing the recommended product ids
     remote function ListRecommendations(ListRecommendationsRequest request)
     returns ListRecommendationsResponse|error {
-        int rootParentSpanId = observe:startRootSpan("ListProductsSpan");
-        int childSpanId = check observe:startSpan("ListProductsFromClientSpan", parentSpanId = rootParentSpanId);
         ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
         if listProducts is grpc:Error {
             log:printError("failed to call ListProducts of catalog service", 'error = listProducts);
             return error grpc:InternalError("failed to get list of products from catalog service", listProducts);
         }
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
 
         return {
             product_ids: from Product product in listProducts.products
