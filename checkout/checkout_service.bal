@@ -17,6 +17,7 @@
 import ballerina/grpc;
 import ballerina/uuid;
 import ballerina/log;
+import ballerinax/jaeger as _;
 
 const string LOCALHOST = "localhost";
 

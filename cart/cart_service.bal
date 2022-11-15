@@ -16,6 +16,7 @@
 
 import ballerina/grpc;
 import ballerina/log;
+import ballerinax/jaeger as _;
 
 configurable string datastore = "";
 configurable string redisHost = "";
