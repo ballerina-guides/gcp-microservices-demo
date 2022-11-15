@@ -96,7 +96,7 @@ service / on new http:Listener(9098) {
 
         string[] supportedCurrencies = check getSupportedCurrencies();
         Cart cart = check getCart(cookie.value);
-                MetadataResponse metadataResponse = {
+        MetadataResponse metadataResponse = {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
@@ -194,7 +194,7 @@ service / on new http:Listener(9098) {
     }
 
     # POST method to change the currency.
-    # 
+    #
     # + request - currency type to change
     # + cookieHeader - header containing the cookie
     # + return - `http:Response` if successful or an `http:Unauthorized` or `error` if an error occurs
