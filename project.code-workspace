@@ -31,7 +31,7 @@
 			"path": "shipping"
 		},
 		{
-			"path": "gcp.client.stub"
+			"path": "client_stubs"
 		},
 		{
 			"path": "ui"
