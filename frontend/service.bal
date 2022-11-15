@@ -20,6 +20,7 @@ import ballerina/time;
 import ballerina/uuid;
 import ballerina/observe;
 import ballerinax/jaeger as _;
+import ballerina/log;
 import wso2/gcp.'client.stub as stub;
 
 const string SESSION_ID_COOKIE = "sessionIdCookie";
@@ -74,6 +75,10 @@ service class AuthInterceptor {
 }
 service / on new http:Listener(9098) {
 
+    function init() {
+        log:printInfo(string `Frontend server started.`);
+    }
+
     # GET method to get the metadata like currency and cart size.
     #
     # + cookieHeader - header containing the cookie
@@ -99,7 +104,7 @@ service / on new http:Listener(9098) {
             body: {
                 user_currency: [currencyCookie.value, currencyLogo(currencyCookie.value)],
                 currencies: supportedCurrencies,
-                cart_size: cart.items.length(),
+                cart_size: check getCartSize(cart),
                 is_cymbal_brand: is_cymbal_brand
             }
         };
@@ -190,7 +195,7 @@ service / on new http:Listener(9098) {
     }
 
     # POST method to change the currency.
-    # 
+    #
     # + request - currency type to change
     # + cookieHeader - header containing the cookie
     # + return - `http:Response` if successful or an `http:Unauthorized` or `error` if an error occurs
@@ -208,7 +213,7 @@ service / on new http:Listener(9098) {
         response.setJsonPayload({
             user_currency: [request.currency, currencyLogo(request.currency)],
             currencies: supportedCurrencies,
-            cart_size: cart.items.length(),
+            cart_size: check getCartSize(cart),
             is_cymbal_brand: is_cymbal_brand
         });
         return response;

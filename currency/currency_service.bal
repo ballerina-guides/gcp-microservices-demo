@@ -16,6 +16,7 @@
 
 import ballerina/grpc;
 import ballerina/io;
+import ballerina/log;
 import ballerina/observe;
 import ballerinax/jaeger as _;
 import wso2/gcp.'client.stub as stub;
@@ -32,8 +33,10 @@ service "CurrencyService" on new grpc:Listener(9093) {
     private final map<decimal> & readonly currencyMap;
 
     function init() returns error? {
+        log:printInfo("Starting gRPC server");
         json currencyJson = check io:fileReadJson(currencyJsonPath);
         self.currencyMap = check parseCurrencyJson(currencyJson).cloneReadOnly();
+        log:printInfo(string `Currency service gRPC server started.`);
     }
 
     # Provides the set of supported currencies.
@@ -41,6 +44,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
     # + request - an empty request
     # + return - `GetSupportedCurrenciesResponse` containing supported currencies or else and error
     remote function GetSupportedCurrencies(stub:Empty request) returns stub:GetSupportedCurrenciesResponse {
+        log:printInfo("Getting supported currencies.");
         return {currency_codes: self.currencyMap.keys()};
 
     }

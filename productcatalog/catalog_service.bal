@@ -16,6 +16,7 @@
 
 import ballerina/grpc;
 import ballerina/io;
+import ballerina/log;
 import ballerina/observe;
 import ballerinax/jaeger as _;
 import wso2/gcp.'client.stub as stub;
@@ -32,9 +33,15 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     private final stub:Product[] & readonly products;
 
     function init() returns error? {
-        json productsJson = check io:fileReadJson(productJsonPath);
+        json|error productsJson = io:fileReadJson(productJsonPath);
+        if productsJson is error {
+            log:printInfo("failed to open product catalog json file: ", 'error = productsJson);
+            return productsJson;
+        }
+        log:printInfo("successfully parsed product catalog json");
         stub:Product[] products = check parseProductJson(productsJson);
         self.products = products.cloneReadOnly();
+        log:printInfo(string `Catalog service gRPC server started.`);
     }
 
     # Provides a set of products.

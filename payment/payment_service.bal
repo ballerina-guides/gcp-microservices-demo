@@ -29,15 +29,20 @@ import wso2/gcp.'client.stub as stub;
 @grpc:Descriptor {value: stub:DEMO_DESC}
 service "PaymentService" on new grpc:Listener(9096) {
 
+    function init() {
+        log:printInfo(string `Payment service gRPC server started.`);
+    }
+
     # Validate and charge the amount from the card.
     #
-    # + value - `ChargeRequest` containing the card details and the amount to charge
+    # + request - `ChargeRequest` containing the card details and the amount to charge
     # + return - `ChargeResponse` with the transaction id or an error
-    remote function Charge(stub:ChargeRequest value) returns stub:ChargeResponse|error {
+    remote function Charge(stub:ChargeRequest request) returns stub:ChargeResponse|error {
+        log:printInfo(string `PaymentService#Charge invoked with request ${request.toString()}`);
         int rootParentSpanId = observe:startRootSpan("PaymentSpan");
         int childSpanId = check observe:startSpan("PaymentFromClientSpan", parentSpanId = rootParentSpanId);
 
-        stub:CreditCardInfo creditCard = value.credit_card;
+        stub:CreditCardInfo creditCard = request.credit_card;
         CardCompany|error cardCompany = getCardCompany(creditCard.credit_card_number, creditCard.credit_card_expiration_year,
             creditCard.credit_card_expiration_month);
         if cardCompany is CardValidationError {
@@ -49,8 +54,7 @@ service "PaymentService" on new grpc:Listener(9096) {
         }
         log:printInfo(string `Transaction processed: the card ending
             ${creditCard.credit_card_number.substring(creditCard.credit_card_number.length() - 4)},
-                Amount: ${value.amount.currency_code}${value.amount.units}.${value.amount.nanos}`);
-
+                Amount: ${request.amount.currency_code}${request.amount.units}.${request.amount.nanos}`);
         check observe:finishSpan(childSpanId);
         check observe:finishSpan(rootParentSpanId);
 

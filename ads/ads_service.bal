@@ -15,8 +15,9 @@
 // under the License.
 
 import ballerina/grpc;
-import ballerina/observe;
 import ballerinax/jaeger as _;
+import ballerina/log;
+import ballerina/observe;
 import ballerina/random;
 import wso2/gcp.'client.stub as stub;
 
@@ -45,6 +46,7 @@ service "AdService" on new grpc:Listener(9099) {
             ads.push(...category.ads);
         }
         self.allAds = ads.cloneReadOnly();
+        log:printInfo("Ad service gRPC server started.");
     }
 
     # Retrieves ads based on context provided in the request.
@@ -52,6 +54,7 @@ service "AdService" on new grpc:Listener(9099) {
     # + request - the request containing context
     # + return - the related/random ad response or else an error
     remote function GetAds(stub:AdRequest request) returns stub:AdResponse|error {
+        log:printInfo(string `received ad request (context_words=${request.context_keys.toString()})`);
         int rootParentSpanId = observe:startRootSpan("GetAdsSpan");
         int childSpanId = check observe:startSpan("GetAdsFromClientSpan", parentSpanId = rootParentSpanId);
 
