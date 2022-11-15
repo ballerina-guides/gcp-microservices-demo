@@ -91,7 +91,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
     #
     # + request - `PlaceOrderRequest` containing user details
     # + return - returns `PlaceOrderResponse` containing order details
-    remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|grpc:Error {
+    remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|grpc:Error|error {
         int rootParentSpanId = observe:startRootSpan("PlaceOrderSpan");
         int childSpanId = check observe:startSpan("PlaceOrderFromClientSpan", parentSpanId = rootParentSpanId);
 

@@ -48,7 +48,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - `CurrencyConversionRequest` containing the `Money` value and the required currency
     # + return - returns the `Money` in the required currency or an error
-    remote function Convert(CurrencyConversionRequest request) returns Money {
+    remote function Convert(CurrencyConversionRequest request) returns Money|error {
         int rootParentSpanId = observe:startRootSpan("CurrencyConvertSpan");
         int childSpanId = check observe:startSpan("CurrencyConvertFromClientSpan", parentSpanId = rootParentSpanId);
 
