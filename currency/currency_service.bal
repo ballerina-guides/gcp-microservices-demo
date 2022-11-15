@@ -16,6 +16,7 @@
 
 import ballerina/grpc;
 import ballerina/io;
+import wso2/gcp.'client.stub as stub;
 
 configurable string currencyJsonPath = "./data/currency_conversion.json";
 
@@ -24,7 +25,7 @@ configurable string currencyJsonPath = "./data/currency_conversion.json";
     label: "Currency",
     id: "currency"
 }
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "CurrencyService" on new grpc:Listener(9093) {
     private final map<decimal> & readonly currencyMap;
 
@@ -37,7 +38,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - an empty request
     # + return - `GetSupportedCurrenciesResponse` containing supported currencies or else and error
-    remote function GetSupportedCurrencies(Empty request) returns GetSupportedCurrenciesResponse {
+    remote function GetSupportedCurrencies(stub:Empty request) returns stub:GetSupportedCurrenciesResponse {
         return {currency_codes: self.currencyMap.keys()};
 
     }
@@ -46,8 +47,8 @@ service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - `CurrencyConversionRequest` containing the `Money` value and the required currency
     # + return - returns the `Money` in the required currency or an error
-    remote function Convert(CurrencyConversionRequest request) returns Money {
-        Money moneyFrom = request.'from;
+    remote function Convert(stub:CurrencyConversionRequest request) returns stub:Money {
+        stub:Money moneyFrom = request.'from;
         final decimal fractionSize = 1000000000;
         //From Unit
         decimal pennies = <decimal>moneyFrom.nanos / fractionSize;

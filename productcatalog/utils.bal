@@ -13,6 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import wso2/gcp.'client.stub as stub;
 
 type JsonProduct record {|
     string id;
@@ -27,7 +28,7 @@ type JsonProduct record {|
     string[] categories;
 |};
 
-isolated function parseProductJson(json jsonContents) returns Product[]|error {
+isolated function parseProductJson(json jsonContents) returns stub:Product[]|error {
     json productsJson = check jsonContents.products;
     if productsJson !is json[] {
         return error("product array is not found");
@@ -35,7 +36,7 @@ isolated function parseProductJson(json jsonContents) returns Product[]|error {
 
     JsonProduct[] jsonProducts = check productsJson.fromJsonWithType();
     return from JsonProduct jsonProduct in jsonProducts
-        let Product product = {
+        let stub:Product product = {
             id: jsonProduct.id,
             name: jsonProduct.name,
             description: jsonProduct.description,
@@ -46,7 +47,7 @@ isolated function parseProductJson(json jsonContents) returns Product[]|error {
         select product;
 }
 
-isolated function parseUsdPrice(json usdPrice) returns Money|error {
+isolated function parseUsdPrice(json usdPrice) returns stub:Money|error {
     return {
         currency_code: check usdPrice.currencyCode,
         units: check usdPrice.units,
@@ -54,7 +55,7 @@ isolated function parseUsdPrice(json usdPrice) returns Money|error {
     };
 }
 
-isolated function isProductRelated(Product product, string query) returns boolean {
+isolated function isProductRelated(stub:Product product, string query) returns boolean {
     string queryLowercase = query.toLowerAscii();
     return product.name.toLowerAscii().includes(queryLowercase) ||
         product.description.toLowerAscii().includes(queryLowercase);

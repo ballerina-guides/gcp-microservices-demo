@@ -15,11 +15,12 @@
 // under the License.
 
 import ballerina/random;
+import wso2/gcp.'client.stub as stub;
 
 # Class used to provide ads by category or by random.
 readonly class AdStore {
 
-    private final map<Ad[]> & readonly ads;
+    private final map<stub:Ad[]> & readonly ads;
     private final int MAX_ADS_TO_SERVE = 2;
 
     isolated function init() {
@@ -28,12 +29,12 @@ readonly class AdStore {
 
     # Returns a set of random ads
     # + return - an `Ad[]` or an error
-    public isolated function getRandomAds() returns Ad[]|error {
-        Ad[] allAds = [];
-        foreach Ad[] ads in self.ads {
+    public isolated function getRandomAds() returns stub:Ad[]|error {
+       stub:Ad[] allAds = [];
+        foreach stub:Ad[] ads in self.ads {
             allAds.push(...ads);
         }
-        Ad[] randomAds = [];
+        stub:Ad[] randomAds = [];
         foreach int i in 0 ..< self.MAX_ADS_TO_SERVE {
             randomAds.push(allAds[check random:createIntInRange(0, allAds.length())]);
         }
@@ -44,7 +45,7 @@ readonly class AdStore {
     #
     # + category - related ad category
     # + return - returns an `Ad[]`
-    public isolated function getAdsByCategory(string category) returns Ad[] {
+    public isolated function getAdsByCategory(string category) returns stub:Ad[] {
         if !self.ads.hasKey(category) {
             return [];
         }
@@ -52,32 +53,32 @@ readonly class AdStore {
     }
 }
 
-isolated function getAds() returns map<Ad[]> {
-    Ad hairdryer = {
+isolated function getAds() returns map<stub:Ad[]> {
+    stub:Ad hairdryer = {
         redirect_url: "/product/2ZYFJ3GM2N",
         text: "Hairdryer for sale. 50% off."
     };
-    Ad tankTop = {
+    stub:Ad tankTop = {
         redirect_url: "/product/66VCHSJNUP",
         text: "Tank top for sale. 20% off."
     };
-    Ad candleHolder = {
+    stub:Ad candleHolder = {
         redirect_url: "/product/0PUK6V6EV0",
         text: "Candle holder for sale. 30% off."
     };
-    Ad bambooGlassJar = {
+    stub:Ad bambooGlassJar = {
         redirect_url: "/product/9SIQT8TOJO",
         text: "Bamboo glass jar for sale. 10% off."
     };
-    Ad watch = {
+    stub:Ad watch = {
         redirect_url: "/product/1YMWWN1N4O",
         text: "Watch for sale. Buy one, get second kit for free"
     };
-    Ad mug = {
+    stub:Ad mug = {
         redirect_url: "/product/6E92ZMYYFZ",
         text: "Mug for sale. Buy two, get third one for free"
     };
-    Ad loafers = {
+    stub:Ad loafers = {
         redirect_url: "/product/L9ECAV7KIM",
         text: "Loafers for sale. Buy one, get second one for free"
     };

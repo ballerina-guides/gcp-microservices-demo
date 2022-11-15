@@ -16,10 +16,11 @@
 
 import ballerina/test;
 import ballerina/grpc;
+import wso2/gcp.'client.stub as stub;
 
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "ProductCatalogService" on new grpc:Listener(9091) {
-    remote function ListProducts(Empty value) returns ListProductsResponse {
+    remote function ListProducts(stub:Empty value) returns stub:ListProductsResponse {
         return {
             products: [
                 {
@@ -38,22 +39,22 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
         };
     }
 
-    remote function GetProduct(GetProductRequest value) returns Product|error {
+    remote function GetProduct(stub:GetProductRequest value) returns stub:Product|error {
         return error("method not implemented");
     }
 
-    remote function SearchProducts(SearchProductsRequest value) returns SearchProductsResponse|error {
+    remote function SearchProducts(stub:SearchProductsRequest value) returns stub:SearchProductsResponse|error {
         return error("method not implemented");
     }
 }
 
 @test:Config {}
 function recommendTest() returns error? {
-    RecommendationServiceClient ep = check new ("http://localhost:9090");
-    ListRecommendationsRequest req = {
+    stub:RecommendationServiceClient ep = check new ("http://localhost:9090");
+    stub:ListRecommendationsRequest req = {
         user_id: "1",
         product_ids: ["2ZYFJ3GM2N", "LS4PSXUNUM"]
     };
-    ListRecommendationsResponse listProducts = check ep->ListRecommendations(req);
+    stub:ListRecommendationsResponse listProducts = check ep->ListRecommendations(req);
     test:assertEquals(listProducts.product_ids.length(), 1);
 }

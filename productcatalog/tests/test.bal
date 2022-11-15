@@ -15,11 +15,12 @@
 // under the License.
 
 import ballerina/test;
+import wso2/gcp.'client.stub as stub;
 
 @test:Config {}
 function catalogTest() returns error? {
-    ProductCatalogServiceClient ep = check new ("http://localhost:9091");
-    Empty req = {};
-    ListProductsResponse listProducts = check ep->ListProducts(req);
+    stub:ProductCatalogServiceClient ep = check new ("http://localhost:9091");
+    stub:Empty req = {};
+    stub:ListProductsResponse listProducts = check ep->ListProducts(req);
     test:assertEquals(listProducts.products.length(), 9);
 }

@@ -15,21 +15,22 @@
 // under the License.
 
 import ballerina/test;
+import wso2/gcp.'client.stub as stub;
 
 @test:Config {}
 function listProductsTest() returns error? {
-    AdServiceClient adClient = check new ("http://localhost:9099");
-    AdRequest request = {
+    stub:AdServiceClient adClient = check new ("http://localhost:9099");
+    stub:AdRequest request = {
         context_keys: ["accessories"]
     };
 
-    AdResponse response = check adClient->GetAds(request);
-    Ad[] expectedAds = [{
+    stub:AdResponse response = check adClient->GetAds(request);
+    stub:Ad[] expectedAds = [{
         redirect_url: "/product/1YMWWN1N4O",
         text: "Watch for sale. Buy one, get second kit for free"
     }];
-    Ad[] receivedAds = [];
-    response.ads.forEach(function (Ad ad) {
+    stub:Ad[] receivedAds = [];
+    response.ads.forEach(function (stub:Ad ad) {
         receivedAds.push(ad);
     });
     test:assertEquals(receivedAds, expectedAds);

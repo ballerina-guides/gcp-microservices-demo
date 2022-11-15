@@ -13,6 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import wso2/gcp.'client.stub as stub;
 
 const map<string> logos = {
     "USD": "$",
@@ -27,7 +28,7 @@ const map<string> logos = {
 #
 # + money - object to be validated
 # + return - Validity
-isolated function isValid(Money money) returns boolean {
+isolated function isValid(stub:Money money) returns boolean {
     return signMatches(money) && validNanos(money.nanos);
 }
 
@@ -35,7 +36,7 @@ isolated function isValid(Money money) returns boolean {
 #
 # + money - object to be validated
 # + return - validity status
-isolated function signMatches(Money money) returns boolean {
+isolated function signMatches(stub:Money money) returns boolean {
     return money.nanos == 0 || money.units == 0 || (money.nanos < 0) == (money.units < 0);
 }
 
@@ -51,7 +52,7 @@ isolated function validNanos(int nanos) returns boolean {
 #
 # + money - object to be validated
 # + return - zero status
-isolated function isZero(Money money) returns boolean {
+isolated function isZero(stub:Money money) returns boolean {
     return money.units == 0 && money.nanos == 0;
 }
 
@@ -59,7 +60,7 @@ isolated function isZero(Money money) returns boolean {
 #
 # + money - object to the validated
 # + return - positive status
-isolated function isPositive(Money money) returns boolean {
+isolated function isPositive(stub:Money money) returns boolean {
     return isValid(money) && money.units > 0 || (money.units == 0 && money.nanos > 0);
 }
 
@@ -67,7 +68,7 @@ isolated function isPositive(Money money) returns boolean {
 #
 # + money - object to the validated
 # + return - negative status
-isolated function isNegative(Money money) returns boolean {
+isolated function isNegative(stub:Money money) returns boolean {
     return isValid(money) && money.units < 0 || (money.units == 0 && money.nanos < 0);
 }
 
@@ -76,7 +77,7 @@ isolated function isNegative(Money money) returns boolean {
 # + firstValue - first money object
 # + secondValue - second money object
 # + return - currency type equal status
-isolated function areSameCurrency(Money firstValue, Money secondValue) returns boolean {
+isolated function areSameCurrency(stub:Money firstValue, stub:Money secondValue) returns boolean {
     return firstValue.currency_code != "" && firstValue.currency_code == secondValue.currency_code;
 }
 
@@ -85,7 +86,7 @@ isolated function areSameCurrency(Money firstValue, Money secondValue) returns b
 # + firstValue - first money object
 # + secondValue - second money object
 # + return - currency equal status
-isolated function areEqual(Money firstValue, Money secondValue) returns boolean {
+isolated function areEqual(stub:Money firstValue, stub:Money secondValue) returns boolean {
     return firstValue.currency_code == secondValue.currency_code && 
                 firstValue.units == secondValue.units && firstValue.nanos == secondValue.nanos;
 }
@@ -94,7 +95,7 @@ isolated function areEqual(Money firstValue, Money secondValue) returns boolean 
 #
 # + money - object to be negated
 # + return - negated money object
-isolated function negate(Money money) returns Money {
+isolated function negate(stub:Money money) returns stub:Money {
     return {
         units: -money.units,
         nanos: -money.nanos,
@@ -107,7 +108,7 @@ isolated function negate(Money money) returns Money {
 # + firstValue - first money object
 # + secondValue - second money object
 # + return - sum money object
-isolated function sum(Money firstValue, Money secondValue) returns Money {
+isolated function sum(stub:Money firstValue, stub:Money secondValue) returns stub:Money {
 
     int nanosMod = 1000000000;
 
@@ -141,9 +142,9 @@ isolated function sum(Money firstValue, Money secondValue) returns Money {
 # + money - money object to be multiplied
 # + n - multiply factor
 # + return - multiplied money object
-isolated function multiplySlow(Money money, int n) returns Money {
+isolated function multiplySlow(stub:Money money, int n) returns stub:Money {
     int t = n;
-    Money out = money;
+    stub:Money out = money;
     while t > 1 {
         out = sum(out, money);
         t = t - 1;
@@ -151,7 +152,7 @@ isolated function multiplySlow(Money money, int n) returns Money {
     return out;
 }
 
-isolated function renderMoney(Money money) returns string {
+isolated function renderMoney(stub:Money money) returns string {
     return string `${currencyLogo(money.currency_code)}
                 ${money.units.toString()}.${(money.nanos / 10000000).toString()}`;
 }

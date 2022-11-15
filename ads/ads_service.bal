@@ -15,13 +15,14 @@
 // under the License.
 
 import ballerina/grpc;
+import wso2/gcp.'client.stub as stub;
 
 # Provides text advertisements based on the context of the given words.
 @display {
     label: "Ads",
     id: "ads"
 }
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "AdService" on new grpc:Listener(9099) {
     private final AdStore store;
 
@@ -33,10 +34,10 @@ service "AdService" on new grpc:Listener(9099) {
     #
     # + request - the request containing context
     # + return - the related/random ad response or else an error
-    remote function GetAds(AdRequest request) returns AdResponse|error {
-        Ad[] ads = [];
+    remote function GetAds(stub:AdRequest request) returns stub:AdResponse|error {
+        stub:Ad[] ads = [];
         foreach string category in request.context_keys {
-            Ad[] availableAds = self.store.getAdsByCategory(category);
+            stub:Ad[] availableAds = self.store.getAdsByCategory(category);
             ads.push(...availableAds);
         }
         if ads.length() == 0 {

@@ -16,6 +16,7 @@
 
 import ballerina/grpc;
 import ballerina/log;
+import wso2/gcp.'client.stub as stub;
 
 configurable string datastore = "";
 configurable string redisHost = "";
@@ -26,7 +27,7 @@ configurable string redisPassword = "";
     label: "Cart",
     id: "cart"
 }
-@grpc:Descriptor {value: DEMO_DESC}
+@grpc:Descriptor {value: stub:DEMO_DESC}
 service "CartService" on new grpc:Listener(9092) {
     private final DataStore store;
 
@@ -44,7 +45,7 @@ service "CartService" on new grpc:Listener(9092) {
     #
     # + request - `AddItemRequest` containing the user id and the `CartItem`
     # + return - an `Empty` value or an error
-    remote function AddItem(AddItemRequest request) returns Empty|error {
+    remote function AddItem(stub:AddItemRequest request) returns stub:Empty|error {
         lock {
             check self.store.addItem(request.user_id, request.item.product_id, request.item.quantity);
         }
@@ -55,9 +56,9 @@ service "CartService" on new grpc:Listener(9092) {
     #
     # + request - `GetCartRequest` containing the user id
     # + return - `Cart` containing the items or an error
-    remote function GetCart(GetCartRequest request) returns Cart|error {
+    remote function GetCart(stub:GetCartRequest request) returns stub:Cart|error {
         lock {
-            Cart cart = check self.store.getCart(request.user_id);
+            stub:Cart cart = check self.store.getCart(request.user_id);
             return cart.cloneReadOnly();
         }
     }
@@ -66,7 +67,7 @@ service "CartService" on new grpc:Listener(9092) {
     #
     # + request - `EmptyCartRequest` containing the user id
     # + return - `Empty` value or an error
-    remote function EmptyCart(EmptyCartRequest request) returns Empty|error {
+    remote function EmptyCart(stub:EmptyCartRequest request) returns stub:Empty|error {
         lock {
             check self.store.emptyCart(request.user_id);
         }
