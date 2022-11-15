@@ -16,7 +16,7 @@
 
 import ballerina/grpc;
 import ballerina/test;
-import wso2/gcp.'client.stub as stub;
+import wso2/'client.stub;
 
 @grpc:Descriptor {value: stub:DEMO_DESC}
 service "ProductCatalogService" on new grpc:Listener(9091) {

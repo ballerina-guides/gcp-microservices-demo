@@ -30,7 +30,7 @@ jobs:
         cd ..
         wget https://github.com/ballerina-platform/ballerina-distribution/releases/download/v2201.2.3/ballerina-2201.2.3-swan-lake.zip
         unzip ballerina-2201.2.3-swan-lake.zip
-        cd gcp.client.stub
+        cd client.stub
         ../ballerina-2201.2.3-swan-lake/bin/bal pack
         ../ballerina-2201.2.3-swan-lake/bin/bal push --repository=local
         cd ${{ steps.testname.outputs.test-name }}

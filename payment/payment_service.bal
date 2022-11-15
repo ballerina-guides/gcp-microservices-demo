@@ -19,7 +19,7 @@ import ballerina/log;
 import ballerina/uuid;
 import ballerina/observe;
 import ballerinax/jaeger as _;
-import wso2/gcp.'client.stub as stub;
+import wso2/'client.stub;
 
 # This service validates the card details (using the Luhn algorithm) against the supported card providers and charges the card.
 @display {
