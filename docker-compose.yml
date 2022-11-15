@@ -1,6 +1,12 @@
 version: '3.1'
 
 services:
+  jaeger:
+    image: jaegertracing/opentelemetry-all-in-one:latest
+    ports:
+      - 16686:16686
+      - 13133:13133
+      - 55680:55680
   ads:
     image: wso2inc/ads-service:v0.1.0
   cart:
@@ -33,7 +39,7 @@ services:
   frontend:
     image: wso2inc/frontend-service:v0.1.0
     environment:
-      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n recommendHost="recommendation" \n currencyHost="currency" \n shippingHost="shipping" \n checkoutHost="checkout" \n adHost="ads"
+      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n recommendHost="recommendation" \n currencyHost="currency" \n shippingHost="shipping" \n checkoutHost="checkout" \n adHost="ads" \n \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
     ports:
       - 9098:9098
     links:
@@ -44,6 +50,7 @@ services:
       - shipping
       - checkout
       - ads
+      - jaeger
     depends_on:
       - catalog
       - cart
@@ -52,6 +59,7 @@ services:
       - shipping
       - checkout
       - ads
+      - jaeger
   payment:
     image: wso2inc/payment-service:v0.1.0
   catalog:
@@ -59,11 +67,13 @@ services:
   recommendation:
     image: wso2inc/recommendation-service:v0.1.0
     environment:
-      BAL_CONFIG_DATA: catalogHost="catalog"
+      BAL_CONFIG_DATA: catalogHost="catalog" \n \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
     links:
       - catalog
+      - jaeger
     depends_on:
       - catalog
+      - jaeger
   shipping:
     image: wso2inc/shipping-service:v0.1.0
 secrets:
