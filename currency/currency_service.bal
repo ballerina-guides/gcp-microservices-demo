@@ -33,7 +33,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
         log:printInfo("Starting gRPC server");
         json currencyJson = check io:fileReadJson(currencyJsonPath);
         self.currencyMap = check parseCurrencyJson(currencyJson).cloneReadOnly();
-        log:printInfo(string `CurrencyService gRPC server started.`);
+        log:printInfo(string `Currency service gRPC server started.`);
     }
 
     # Provides the set of supported currencies.

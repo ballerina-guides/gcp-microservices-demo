@@ -83,7 +83,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         self.shippingClient = check new (string `http://${shippingHost}:9095`, timeout = shippingTimeout);
         self.paymentClient = check new (string `http://${paymentHost}:9096`, timeout = paymentTimeout);
         self.emailClient = check new (string `http://${emailHost}:9097`, timeout = emailTimeout);
-        log:printInfo("CheckoutService gRPC server started.");
+        log:printInfo("Checkout service gRPC server started.");
     }
 
     # Places the order and process payment, shipping and email notification.

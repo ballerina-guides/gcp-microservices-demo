@@ -43,7 +43,7 @@ service "AdService" on new grpc:Listener(9099) {
             ads.push(...category.ads);
         }
         self.allAds = ads.cloneReadOnly();
-        log:printInfo("AdService gRPC server started.");
+        log:printInfo("Ad service gRPC server started.");
     }
 
     # Retrieves ads based on context provided in the request.

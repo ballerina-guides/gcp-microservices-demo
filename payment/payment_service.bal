@@ -27,7 +27,7 @@ import ballerina/uuid;
 service "PaymentService" on new grpc:Listener(9096) {
 
     function init() {
-        log:printInfo(string `PaymentService gRPC server started.`);
+        log:printInfo(string `Payment service gRPC server started.`);
     }
 
     # Validate and charge the amount from the card.

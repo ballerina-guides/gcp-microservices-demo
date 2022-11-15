@@ -45,7 +45,7 @@ service "EmailService" on new grpc:Listener(9097) {
                 clientSecret: gmail.clientSecret
             }
         });
-        log:printInfo(string `EmailService gRPC server started.`);
+        log:printInfo(string `Email service gRPC server started.`);
     }
 
     # Sends the order confirmation email containing details about the order.

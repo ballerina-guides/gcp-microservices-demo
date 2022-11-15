@@ -1,3 +1,4 @@
+import ballerina/log;
 // Copyright (c) 2022 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
@@ -28,7 +29,11 @@ type JsonProduct record {|
 |};
 
 isolated function parseProductJson(json jsonContents) returns Product[]|error {
-    json productsJson = check jsonContents.products;
+    json|error productsJson = jsonContents.products;
+    if productsJson is error {
+        log:printInfo("failed to parse the catalog JSON: ", 'error = productsJson);
+        return productsJson;
+    }
     if productsJson !is json[] {
         return error("product array is not found");
     }
