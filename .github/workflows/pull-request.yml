@@ -22,24 +22,17 @@ jobs:
       id: testname
       run: |
         echo "::set-output name=test-name::${TEST_NAME}"
-    - name: Pack gRPC Stub Module
-      uses: ballerina-platform/ballerina-action@master
+
+    - name: Build module using Ballerina zip
       env:
         WORKING_DIR: "gcp.client.stub"
-      with:
-        args:
-          pack
-    - name: Push gRPC Stub Module
-      uses: ballerina-platform/ballerina-action@master
-      env:
-        WORKING_DIR: "gcp.client.stub"
-      with:
-        args:
-          push --repository=local
-    - name: Ballerina Build
-      uses: ballerina-platform/ballerina-action@master
-      env:
-        WORKING_DIR: ${{ steps.testname.outputs.test-name }}
-      with:
-        args:
-          build --cloud=k8s
+      run: |
+        cd ..
+        wget https://github.com/ballerina-platform/ballerina-distribution/releases/download/v2201.2.3/ballerina-2201.2.3-swan-lake.zip
+        unzip ballerina-2201.2.3-swan-lake.zip
+        cd gcp.client.stub
+        ../ballerina-2201.2.3-swan-lake/bin/bal pack
+        ../ballerina-2201.2.3-swan-lake/bin/bal push --repository=local
+        cd ${{ steps.testname.outputs.test-name }}
+        ../ballerina-2201.2.3-swan-lake/bin/bal build --cloud=k8s
+
