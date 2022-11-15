@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/grpc;
+import ballerina/log;
 import ballerina/observe;
 import ballerinax/jaeger as _;
 
@@ -26,11 +27,16 @@ import ballerinax/jaeger as _;
 @grpc:Descriptor {value: DEMO_DESC}
 service "ShippingService" on new grpc:Listener(9095) {
 
+    function init() {
+        log:printInfo(string `Shipping service gRPC server started.`);
+    }
+
     # Provides a quote with shipping cost.
     #
     # + request - `GetQuoteRequest` contaning the user's selected items
     # + return - `GetQuoteResponse` containing the shipping cost 
     remote function GetQuote(GetQuoteRequest request) returns GetQuoteResponse|error {
+        log:printInfo("[GetQuote] received request");
         int rootParentSpanId = observe:startRootSpan("GetQuoteSpan");
         int childSpanId = check observe:startSpan("GetQuoteFromClientSpan", parentSpanId = rootParentSpanId);
 
@@ -62,6 +68,7 @@ service "ShippingService" on new grpc:Listener(9095) {
     # + request - `ShipOrderRequest` containing the address and the user's order items
     # + return - `ShipOrderResponse` containing the tracking id or an error
     remote function ShipOrder(ShipOrderRequest request) returns ShipOrderResponse|error {
+        log:printInfo("[GetQuote] received request");
         Address address = request.address;
         return {
             tracking_id: generateTrackingId(string `${address.street_address}, ${address.city}, ${address.state}`)

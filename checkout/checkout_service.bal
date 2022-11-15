@@ -85,6 +85,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         self.shippingClient = check new (string `http://${shippingHost}:9095`, timeout = shippingTimeout);
         self.paymentClient = check new (string `http://${paymentHost}:9096`, timeout = paymentTimeout);
         self.emailClient = check new (string `http://${emailHost}:9097`, timeout = emailTimeout);
+        log:printInfo("Checkout service gRPC server started.");
     }
 
     # Places the order and process payment, shipping and email notification.
@@ -92,6 +93,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
     # + request - `PlaceOrderRequest` containing user details
     # + return - returns `PlaceOrderResponse` containing order details
     remote function PlaceOrder(PlaceOrderRequest request) returns PlaceOrderResponse|grpc:Error|error {
+        log:printInfo(string `[PlaceOrder] user_id=${request.user_id} user_currency=${request.user_currency}`);
         int rootParentSpanId = observe:startRootSpan("PlaceOrderSpan");
         int childSpanId = check observe:startSpan("PlaceOrderFromClientSpan", parentSpanId = rootParentSpanId);
 

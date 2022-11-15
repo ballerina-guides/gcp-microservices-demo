@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/log;
+
 type JsonProduct record {|
     string id;
     string name;
@@ -28,7 +30,11 @@ type JsonProduct record {|
 |};
 
 isolated function parseProductJson(json jsonContents) returns Product[]|error {
-    json productsJson = check jsonContents.products;
+    json|error productsJson = jsonContents.products;
+    if productsJson is error {
+        log:printInfo("failed to parse the catalog JSON: ", 'error = productsJson);
+        return productsJson;
+    }
     if productsJson !is json[] {
         return error("product array is not found");
     }

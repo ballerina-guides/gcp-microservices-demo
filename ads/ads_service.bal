@@ -15,8 +15,9 @@
 // under the License.
 
 import ballerina/grpc;
-import ballerina/observe;
 import ballerinax/jaeger as _;
+import ballerina/log;
+import ballerina/observe;
 import ballerina/random;
 
 type AdCategory record {|
@@ -44,6 +45,7 @@ service "AdService" on new grpc:Listener(9099) {
             ads.push(...category.ads);
         }
         self.allAds = ads.cloneReadOnly();
+        log:printInfo("Ad service gRPC server started.");
     }
 
     # Retrieves ads based on context provided in the request.
@@ -51,9 +53,9 @@ service "AdService" on new grpc:Listener(9099) {
     # + request - the request containing context
     # + return - the related/random ad response or else an error
     remote function GetAds(AdRequest request) returns AdResponse|error {
+        log:printInfo(string `received ad request (context_words=${request.context_keys.toString()})`);
         int rootParentSpanId = observe:startRootSpan("GetAdsSpan");
         int childSpanId = check observe:startSpan("GetAdsFromClientSpan", parentSpanId = rootParentSpanId);
-
         Ad[] ads = [];
         foreach var category in request.context_keys {
             AdCategory? adCategory = self.adCategories[category];
