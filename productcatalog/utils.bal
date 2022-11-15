@@ -35,14 +35,14 @@ isolated function parseProductJson(json jsonContents) returns stub:Product[]|err
     }
 
     JsonProduct[] jsonProducts = check productsJson.fromJsonWithType();
-    return from JsonProduct jsonProduct in jsonProducts
+    return from var {id, name, description, picture, priceUsd, categories} in jsonProducts
         let stub:Product product = {
-            id: jsonProduct.id,
-            name: jsonProduct.name,
-            description: jsonProduct.description,
-            picture: jsonProduct.picture,
-            price_usd: check parseUsdPrice(jsonProduct.priceUsd),
-            categories: jsonProduct.categories
+            id,
+            name,
+            description,
+            picture,
+            price_usd: check parseUsdPrice(priceUsd),
+            categories
         }
         select product;
 }

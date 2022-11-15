@@ -17,6 +17,8 @@
 import ballerina/grpc;
 import ballerina/log;
 import ballerinax/googleapis.gmail as gmail;
+import ballerina/observe;
+import ballerinax/jaeger as _;
 import wso2/gcp.'client.stub as stub;
 
 type GmailConfig record {|
@@ -53,6 +55,9 @@ service "EmailService" on new grpc:Listener(9097) {
     # + request - `SendOrderConfirmationRequest` which contains the details about the order
     # + return - `Empty` or else an error
     remote function SendOrderConfirmation(stub:SendOrderConfirmationRequest request) returns stub:Empty|error {
+        int rootParentSpanId = observe:startRootSpan("OrderConfirmationSpan");
+        int childSpanId = check observe:startSpan("OrderConfirmationFromClientSpan", parentSpanId = rootParentSpanId);
+
         gmail:MessageRequest messageRequest = {
             recipient: request.email,
             subject: "Order Confirmation",
@@ -68,6 +73,10 @@ service "EmailService" on new grpc:Listener(9097) {
             return {};
         }
         log:printError("Error sending confirmation mail ", 'error = sendMessageResponse);
+
+        check observe:finishSpan(childSpanId);
+        check observe:finishSpan(rootParentSpanId);
+
         return sendMessageResponse;
     }
 

@@ -17,6 +17,8 @@
 import ballerina/grpc;
 import ballerina/uuid;
 import ballerina/log;
+import ballerina/observe;
+import ballerinax/jaeger as _;
 import wso2/gcp.'client.stub as stub;
 
 const string LOCALHOST = "localhost";
@@ -90,9 +92,12 @@ service "CheckoutService" on new grpc:Listener(9094) {
     #
     # + request - `PlaceOrderRequest` containing user details
     # + return - returns `PlaceOrderResponse` containing order details
-    remote function PlaceOrder(stub:PlaceOrderRequest request) returns stub:PlaceOrderResponse|grpc:Error {
+    remote function PlaceOrder(stub:PlaceOrderRequest request) returns stub:PlaceOrderResponse|grpc:Error|error {
+        int rootParentSpanId = observe:startRootSpan("PlaceOrderSpan");
+        int childSpanId = check observe:startSpan("PlaceOrderFromClientSpan", parentSpanId = rootParentSpanId);
+
         string orderId = uuid:createType1AsString();
-        stub:CartItem[] userCartItems = check self.getUserCart(request.user_id, request.user_currency);
+        stub:CartItem[] userCartItems = check self.getUserCartItems(request.user_id, request.user_currency);
         stub:OrderItem[] orderItems = check self.prepOrderItems(userCartItems, request.user_currency);
         stub:Money shippingPrice = check self.convertCurrency(check self.quoteShipping(request.address, userCartItems),
             request.user_currency);
@@ -127,10 +132,14 @@ service "CheckoutService" on new grpc:Listener(9094) {
         } else {
             log:printInfo(string `order confirmation email sent to ${request.email}`);
         }
+
+        check observe:finishSpan(childSpanId);
+        check observe:finishSpan(rootParentSpanId);
+
         return {'order};
     }
 
-    function getUserCart(string userId, string userCurrency) returns stub:CartItem[]|grpc:Error {
+    function getUserCartItems(string userId, string userCurrency) returns stub:CartItem[]|grpc:Error {
         stub:GetCartRequest getCartRequest = {user_id: userId};
         stub:Cart|grpc:Error cartResponse = self.cartClient->GetCart(getCartRequest);
         if cartResponse is grpc:Error {

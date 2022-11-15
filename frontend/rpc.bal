@@ -138,7 +138,7 @@ isolated function emptyCart(string userId) returns grpc:Error? {
     }
 }
 
-isolated function insertCart(string userId, string productId, int quantity) returns grpc:Error? {
+isolated function insertItemToCart(string userId, string productId, int quantity) returns grpc:Error? {
     stub:AddItemRequest request = {
         user_id: userId,
         item: {
@@ -194,7 +194,7 @@ isolated function getRecommendations(string userId, string[] productIds = []) re
         select check getProduct(productId);
 }
 
-isolated function getAd(string[] ctxKeys) returns stub:Ad[]|grpc:Error {
+isolated function getAds(string[] ctxKeys) returns stub:Ad[]|grpc:Error {
     stub:AdRequest request = {
         context_keys: ctxKeys
     };
@@ -207,7 +207,7 @@ isolated function getAd(string[] ctxKeys) returns stub:Ad[]|grpc:Error {
 }
 
 isolated function chooseAd(string[] ctxKeys = []) returns stub:Ad|error {
-    stub:Ad[] ads = check getAd(ctxKeys);
+    stub:Ad[] ads = check getAds(ctxKeys);
     return ads[check random:createIntInRange(0, ads.length())];
 }
 

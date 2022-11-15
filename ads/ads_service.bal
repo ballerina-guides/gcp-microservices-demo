@@ -15,7 +15,15 @@
 // under the License.
 
 import ballerina/grpc;
+import ballerina/observe;
+import ballerinax/jaeger as _;
+import ballerina/random;
 import wso2/gcp.'client.stub as stub;
+
+type AdCategory record {|
+    readonly string category;
+    stub:Ad[] ads;
+|};
 
 # Provides text advertisements based on the context of the given words.
 @display {
@@ -24,10 +32,19 @@ import wso2/gcp.'client.stub as stub;
 }
 @grpc:Descriptor {value: stub:DEMO_DESC}
 service "AdService" on new grpc:Listener(9099) {
-    private final AdStore store;
+
+    private final readonly & table<AdCategory> key(category) adCategories;
+    private final readonly & stub:Ad[] allAds;
+    private final int MAX_ADS_TO_SERVE = 2;
 
     function init() {
-        self.store = new AdStore();
+        self.adCategories = loadAds().cloneReadOnly();
+
+        stub:Ad[] ads = [];
+        foreach var category in self.adCategories {
+            ads.push(...category.ads);
+        }
+        self.allAds = ads.cloneReadOnly();
     }
 
     # Retrieves ads based on context provided in the request.
@@ -35,14 +52,72 @@ service "AdService" on new grpc:Listener(9099) {
     # + request - the request containing context
     # + return - the related/random ad response or else an error
     remote function GetAds(stub:AdRequest request) returns stub:AdResponse|error {
+        int rootParentSpanId = observe:startRootSpan("GetAdsSpan");
+        int childSpanId = check observe:startSpan("GetAdsFromClientSpan", parentSpanId = rootParentSpanId);
+
         stub:Ad[] ads = [];
-        foreach string category in request.context_keys {
-            stub:Ad[] availableAds = self.store.getAdsByCategory(category);
-            ads.push(...availableAds);
+        foreach var category in request.context_keys {
+            AdCategory? adCategory = self.adCategories[category];
+            if adCategory !is () {
+                ads.push(...adCategory.ads);
+            }
         }
+
         if ads.length() == 0 {
-            ads = check self.store.getRandomAds();
+            ads = check self.getRandomAds();
         }
+        check observe:finishSpan(childSpanId);
+        check observe:finishSpan(rootParentSpanId);
+
         return {ads};
     }
+
+    isolated function getRandomAds() returns stub:Ad[]|error {
+        stub:Ad[] randomAds = [];
+        foreach int i in 0 ..< self.MAX_ADS_TO_SERVE {
+            int rIndex = check random:createIntInRange(0, self.allAds.length());
+            randomAds.push(self.allAds[rIndex]);
+        }
+        return randomAds;
+    }
+}
+
+isolated function loadAds() returns table<AdCategory> key(category) {
+    stub:Ad hairdryer = {
+        redirect_url: "/product/2ZYFJ3GM2N",
+        text: "Hairdryer for sale. 50% off."
+    };
+    stub:Ad tankTop = {
+        redirect_url: "/product/66VCHSJNUP",
+        text: "Tank top for sale. 20% off."
+    };
+    stub:Ad candleHolder = {
+        redirect_url: "/product/0PUK6V6EV0",
+        text: "Candle holder for sale. 30% off."
+    };
+    stub:Ad bambooGlassJar = {
+        redirect_url: "/product/9SIQT8TOJO",
+        text: "Bamboo glass jar for sale. 10% off."
+    };
+    stub:Ad watch = {
+        redirect_url: "/product/1YMWWN1N4O",
+        text: "Watch for sale. Buy one, get second kit for free"
+    };
+    stub:Ad mug = {
+        redirect_url: "/product/6E92ZMYYFZ",
+        text: "Mug for sale. Buy two, get third one for free"
+    };
+    stub:Ad loafers = {
+        redirect_url: "/product/L9ECAV7KIM",
+        text: "Loafers for sale. Buy one, get second one for free"
+    };
+
+    return table [
+        {category: "clothing", ads: [tankTop]},
+        {category: "accessories", ads: [watch]},
+        {category: "footwear", ads: [loafers]},
+        {category: "hair", ads: [hairdryer]},
+        {category: "decor", ads: [candleHolder]},
+        {category: "kitchen", ads: [bambooGlassJar, mug]}
+    ];
 }
