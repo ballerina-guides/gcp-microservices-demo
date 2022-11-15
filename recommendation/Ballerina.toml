@@ -12,3 +12,4 @@ org = "wso2"
 name = "gcp.client.stub"
 version = "0.1.0"
 repository = "local"
+
