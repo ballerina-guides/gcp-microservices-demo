@@ -70,7 +70,7 @@ service "ShippingService" on new grpc:Listener(9095) {
     # + return - `ShipOrderResponse` containing the tracking id or an error
     remote function ShipOrder(stub:ShipOrderRequest request) returns stub:ShipOrderResponse|error {
         log:printInfo("[GetQuote] received request");
-        Address address = request.address;
+        stub:Address address = request.address;
         return {
             tracking_id: generateTrackingId(string `${address.street_address}, ${address.city}, ${address.state}`)
         };
