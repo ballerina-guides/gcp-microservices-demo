@@ -91,14 +91,14 @@ service / on new http:Listener(9098) {
 
         string[] supportedCurrencies = check getSupportedCurrencies();
         Cart cart = check getCart(cookie.value);
-        MetadataResponse metadataResponse = {
+                MetadataResponse metadataResponse = {
             headers: {
                 "Set-Cookie": cookie.toStringValue()
             },
             body: {
                 user_currency: [currencyCookie.value, currencyLogo(currencyCookie.value)],
                 currencies: supportedCurrencies,
-                cart_size: cart.items.length(),
+                cart_size: check getCartSize(cart),
                 is_cymbal_brand: is_cymbal_brand
             }
         };
@@ -207,7 +207,7 @@ service / on new http:Listener(9098) {
         response.setJsonPayload({
             user_currency: [request.currency, currencyLogo(request.currency)],
             currencies: supportedCurrencies,
-            cart_size: cart.items.length(),
+            cart_size: check getCartSize(cart),
             is_cymbal_brand: is_cymbal_brand
         });
         return response;

@@ -48,13 +48,22 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
         if regex:matches(pair, "^([^=]+)=.*$") {
             string[] nameValue = regex:split(pair, "=");
             http:Cookie cookie;
-            cookie = new (nameValue[0], nameValue.length() > 1 ? nameValue[1]: "", path = "/");
+            cookie = new (nameValue[0], nameValue.length() > 1 ? nameValue[1] : "", path = "/");
             cookiesInRequest.push(cookie);
         } else {
             log:printError(string `Invalid cookie: ${pair}, which must be in the format as [{name}=].`);
         }
     }
     return cookiesInRequest;
+}
+
+isolated function getCartSize(Cart cart) returns int|error {
+    int cartsize = 0;
+    check from CartItem item in cart.items
+        do {
+            cartsize += item.quantity;
+        };
+    return cartsize;
 }
 
 isolated function toProductLocalized(Product product, string price) returns ProductLocalized {
