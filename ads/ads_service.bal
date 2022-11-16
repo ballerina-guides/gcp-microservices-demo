@@ -17,9 +17,8 @@
 import ballerina/grpc;
 import ballerinax/jaeger as _;
 import ballerina/log;
-
 import ballerina/random;
-import wso2/gcp.'client.stub as stub;
+import wso2/client_stubs as stub;
 
 type AdCategory record {|
     readonly string category;

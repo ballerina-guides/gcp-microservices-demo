@@ -20,7 +20,7 @@ import ballerina/time;
 import ballerina/uuid;
 import ballerinax/jaeger as _;
 import ballerina/log;
-import wso2/gcp.'client.stub as stub;
+import wso2/client_stubs as stub;
 
 const string SESSION_ID_COOKIE = "sessionIdCookie";
 const string CURRENCY_COOKIE = "currencyCookie";
@@ -155,7 +155,6 @@ service / on new http:Listener(9098) {
         if cookie is http:Unauthorized {
             return cookie;
         }
-
         http:Cookie|http:Unauthorized currencycookie = getCurrencyFromCookieHeader(cookieHeader);
         if currencycookie is http:Unauthorized {
             return currencycookie;

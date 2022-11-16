@@ -17,9 +17,8 @@
 import ballerina/grpc;
 import ballerina/uuid;
 import ballerina/log;
-
 import ballerinax/jaeger as _;
-import wso2/gcp.'client.stub as stub;
+import wso2/client_stubs as stub;
 
 const string LOCALHOST = "localhost";
 

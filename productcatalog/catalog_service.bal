@@ -17,9 +17,8 @@
 import ballerina/grpc;
 import ballerina/io;
 import ballerina/log;
-
 import ballerinax/jaeger as _;
-import wso2/gcp.'client.stub as stub;
+import wso2/client_stubs as stub;
 
 configurable string productJsonPath = "./resources/products.json";
 
@@ -57,7 +56,6 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     # + request - `GetProductRequest` containing the product id
     # + return - `Product` related to the required id or an error
     remote function GetProduct(stub:GetProductRequest request) returns stub:Product|grpc:NotFoundError|error {
-
         foreach stub:Product product in self.products {
             if product.id == request.id {
                 return product;
