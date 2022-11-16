@@ -15,12 +15,12 @@
 // under the License.
 
 import ballerina/test;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 @test:Config {}
 function paymentTest() returns error? {
-    stub:PaymentServiceClient ep = check new ("http://localhost:9096");
-    stub:ChargeRequest req = {
+    stubs:PaymentServiceClient ep = check new ("http://localhost:9096");
+    stubs:ChargeRequest req = {
         amount: {
             currency_code: "USD",
             units: 5,
@@ -33,6 +33,6 @@ function paymentTest() returns error? {
             credit_card_expiration_month: 10
         }
     };
-    stub:ChargeResponse chargeResponse = check ep->Charge(req);
+    stubs:ChargeResponse chargeResponse = check ep->Charge(req);
     test:assertTrue(chargeResponse.transaction_id.length() > 1);
 }

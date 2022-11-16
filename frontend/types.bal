@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/http;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 //Request Records
 
@@ -56,7 +56,7 @@ public type CheckoutRequest record {|
 //Response Records
 
 type CartItemView record {
-    stub:Product product;
+    stubs:Product product;
     int quantity;
     string price;
 };
@@ -74,7 +74,7 @@ type MetadataBody record {|
 |};
 
 type ProductLocalized record {|
-    *stub:Product;
+    *stubs:Product;
     string price;
 |};
 
@@ -85,7 +85,7 @@ type HomeResponse record {|
 
 type HomeBody record {|
     ProductLocalized[] products;
-    stub:Ad ad;
+    stubs:Ad ad;
 |};
 
 type ProductResponse record {|
@@ -95,8 +95,8 @@ type ProductResponse record {|
 
 type ProductBody record {|
     ProductLocalized product;
-    stub:Product[] recommendations;
-    stub:Ad ad;
+    stubs:Product[] recommendations;
+    stubs:Ad ad;
 |};
 
 type CartResponse record {|
@@ -105,7 +105,7 @@ type CartResponse record {|
 |};
 
 type CartBody record {|
-    stub:Product[] recommendations;
+    stubs:Product[] recommendations;
     string shipping_cost;
     string total_cost;
     CartItemView[] items;
@@ -118,7 +118,7 @@ type CheckoutResponse record {|
 |};
 
 type CheckoutBody record {|
-    stub:OrderResult 'order;
+    stubs:OrderResult 'order;
     string total_paid;
-    stub:Product[] recommendations;
+    stubs:Product[] recommendations;
 |};

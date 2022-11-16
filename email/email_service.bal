@@ -19,7 +19,7 @@ import ballerina/log;
 import ballerinax/googleapis.gmail as gmail;
 import ballerina/observe;
 import ballerinax/jaeger as _;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 type GmailConfig record {|
     string refreshToken;
@@ -34,7 +34,7 @@ configurable GmailConfig gmail = ?;
     label: "Email",
     id: "email"
 }
-@grpc:Descriptor {value: stub:DEMO_DESC}
+@grpc:Descriptor {value: stubs:DEMO_DESC}
 service "EmailService" on new grpc:Listener(9097) {
 
     private final gmail:Client gmailClient;
@@ -55,7 +55,7 @@ service "EmailService" on new grpc:Listener(9097) {
     #
     # + request - `SendOrderConfirmationRequest` which contains the details about the order
     # + return - `Empty` or else an error
-    remote function SendOrderConfirmation(stub:SendOrderConfirmationRequest request) returns stub:Empty|error {
+    remote function SendOrderConfirmation(stubs:SendOrderConfirmationRequest request) returns stubs:Empty|error {
         log:printInfo(string `A request to send order confirmation email to ${request.email} has been received.`);
         int rootParentSpanId = observe:startRootSpan("OrderConfirmationSpan");
         int childSpanId = check observe:startSpan("OrderConfirmationFromClientSpan", parentSpanId = rootParentSpanId);
@@ -82,7 +82,7 @@ service "EmailService" on new grpc:Listener(9097) {
         return sendMessageResponse;
     }
 
-    function getConfirmationHtml(stub:OrderResult result) returns xml|error {
+    function getConfirmationHtml(stubs:OrderResult result) returns xml|error {
         string fontUrl =
                     "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
 
@@ -92,7 +92,7 @@ service "EmailService" on new grpc:Listener(9097) {
           <th>Price</th>
         </tr>`;
 
-        check from stub:OrderItem item in result.items
+        check from stubs:OrderItem item in result.items
             let xml content = xml `<tr>
             <td>#${item.item.product_id}</td>
             <td>${item.item.quantity}</td> 

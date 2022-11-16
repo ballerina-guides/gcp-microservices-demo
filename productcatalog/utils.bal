@@ -13,7 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 import ballerina/log;
 
@@ -30,7 +30,7 @@ type JsonProduct record {|
     string[] categories;
 |};
 
-isolated function parseProductJson(json jsonContents) returns stub:Product[]|error {
+isolated function parseProductJson(json jsonContents) returns stubs:Product[]|error {
     json|error productsJson = jsonContents.products;
     if productsJson is error {
         log:printInfo("failed to parse the catalog JSON: ", 'error = productsJson);
@@ -42,7 +42,7 @@ isolated function parseProductJson(json jsonContents) returns stub:Product[]|err
 
     JsonProduct[] jsonProducts = check productsJson.fromJsonWithType();
     return from var {id, name, description, picture, priceUsd, categories} in jsonProducts
-        let stub:Product product = {
+        let stubs:Product product = {
             id,
             name,
             description,
@@ -53,7 +53,7 @@ isolated function parseProductJson(json jsonContents) returns stub:Product[]|err
         select product;
 }
 
-isolated function parseUsdPrice(json usdPrice) returns stub:Money|error {
+isolated function parseUsdPrice(json usdPrice) returns stubs:Money|error {
     return {
         currency_code: check usdPrice.currencyCode,
         units: check usdPrice.units,
@@ -61,7 +61,7 @@ isolated function parseUsdPrice(json usdPrice) returns stub:Money|error {
     };
 }
 
-isolated function isProductRelated(stub:Product product, string query) returns boolean {
+isolated function isProductRelated(stubs:Product product, string query) returns boolean {
     string queryLowercase = query.toLowerAscii();
     return product.name.toLowerAscii().includes(queryLowercase) ||
         product.description.toLowerAscii().includes(queryLowercase);

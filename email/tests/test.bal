@@ -15,18 +15,18 @@
 // under the License.
 
 import ballerina/test;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 @test:Config {}
 function emailSendTest() returns error? {
-    stub:EmailServiceClient ep = check new ("http://localhost:9097");
-    stub:Money cost = {
+    stubs:EmailServiceClient ep = check new ("http://localhost:9097");
+    stubs:Money cost = {
         currency_code: "USD",
         nanos: 900000000,
         units: 5
     };
 
-    stub:Address address = {
+    stubs:Address address = {
         street_address: "56, Palm grove",
         city: "Colombo",
         country: "Sri Lanka",
@@ -34,7 +34,7 @@ function emailSendTest() returns error? {
         zip_code: 10300
     };
 
-    stub:OrderItem item1 = {
+    stubs:OrderItem item1 = {
         item: {
             product_id: "1",
             quantity: 2
@@ -42,7 +42,7 @@ function emailSendTest() returns error? {
         cost: cost
     };
 
-    stub:OrderItem item2 = {
+    stubs:OrderItem item2 = {
         item: {
             product_id: "2",
             quantity: 1
@@ -50,7 +50,7 @@ function emailSendTest() returns error? {
         cost: cost
     };
 
-    stub:SendOrderConfirmationRequest req = {
+    stubs:SendOrderConfirmationRequest req = {
         email: "anjanasupun05@gmail.com",
         'order: {
             order_id: "1",

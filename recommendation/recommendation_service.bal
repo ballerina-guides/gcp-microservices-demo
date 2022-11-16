@@ -18,7 +18,7 @@ import ballerina/grpc;
 import ballerina/log;
 import ballerina/observe;
 import ballerinax/jaeger as _;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 configurable string catalogHost = "localhost";
 configurable decimal catalogTimeout = 3;
@@ -28,13 +28,13 @@ configurable decimal catalogTimeout = 3;
     label: "Recommendation",
     id: "recommendation"
 }
-@grpc:Descriptor {value: stub:DEMO_DESC}
+@grpc:Descriptor {value: stubs:DEMO_DESC}
 service "RecommendationService" on new grpc:Listener(9090) {
     @display {
         label: "Catalog",
         id: "catalog"
     }
-    private final stub:ProductCatalogServiceClient catalogClient;
+    private final stubs:ProductCatalogServiceClient catalogClient;
 
     function init() returns error? {
         self.catalogClient = check new (string `http://${catalogHost}:9091`, timeout = catalogTimeout);
@@ -46,12 +46,12 @@ service "RecommendationService" on new grpc:Listener(9090) {
     #
     # + request - `ListRecommendationsRequest` containing product ids
     # + return - `ListRecommendationsResponse` containing the recommended product ids
-    remote function ListRecommendations(stub:ListRecommendationsRequest request)
-    returns stub:ListRecommendationsResponse|error {
+    remote function ListRecommendations(stubs:ListRecommendationsRequest request)
+    returns stubs:ListRecommendationsResponse|error {
         log:printInfo(string `[Recv ListRecommendations] product_ids=${request.product_ids.toString()}`);
         int rootParentSpanId = observe:startRootSpan("ListProductsSpan");
         int childSpanId = check observe:startSpan("ListProductsFromClientSpan", parentSpanId = rootParentSpanId);
-        stub:ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
+        stubs:ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
         if listProducts is grpc:Error {
             log:printError("failed to call ListProducts of catalog service", 'error = listProducts);
             return error grpc:InternalError("failed to get list of products from catalog service", listProducts);
@@ -60,7 +60,7 @@ service "RecommendationService" on new grpc:Listener(9090) {
         check observe:finishSpan(rootParentSpanId);
 
         return {
-            product_ids: from stub:Product product in listProducts.products
+            product_ids: from stubs:Product product in listProducts.products
                 where request.product_ids.indexOf(product.id) is ()
                 limit 5
                 select product.id

@@ -17,7 +17,7 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/regex;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 isolated function getSessionIdFromCookieHeader(string cookieStr) returns http:Cookie|http:Unauthorized {
     http:Cookie[] cookies = parseCookieHeader(cookieStr);
@@ -58,16 +58,16 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
     return cookiesInRequest;
 }
 
-isolated function getCartSize(stub:Cart cart) returns int|error {
+isolated function getCartSize(stubs:Cart cart) returns int|error {
     int cartsize = 0;
-    check from stub:CartItem item in cart.items
+    check from stubs:CartItem item in cart.items
         do {
             cartsize += item.quantity;
         };
     return cartsize;
 }
 
-isolated function toProductLocalized(stub:Product product, string price) returns ProductLocalized {
+isolated function toProductLocalized(stubs:Product product, string price) returns ProductLocalized {
     return {
         ...product,
         price
