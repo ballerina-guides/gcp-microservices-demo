@@ -17,7 +17,6 @@
 import ballerina/grpc;
 import ballerina/log;
 import ballerina/uuid;
-import ballerina/observe;
 import ballerinax/jaeger as _;
 import wso2/client_stubs as stub;
 
@@ -39,8 +38,6 @@ service "PaymentService" on new grpc:Listener(9096) {
     # + return - `ChargeResponse` with the transaction id or an error
     remote function Charge(stub:ChargeRequest request) returns stub:ChargeResponse|error {
         log:printInfo(string `PaymentService#Charge invoked with request ${request.toString()}`);
-        int rootParentSpanId = observe:startRootSpan("PaymentSpan");
-        int childSpanId = check observe:startSpan("PaymentFromClientSpan", parentSpanId = rootParentSpanId);
 
         stub:CreditCardInfo creditCard = request.credit_card;
         CardCompany|error cardCompany = getCardCompany(creditCard.credit_card_number, creditCard.credit_card_expiration_year,
@@ -55,8 +52,6 @@ service "PaymentService" on new grpc:Listener(9096) {
         log:printInfo(string `Transaction processed: the card ending
             ${creditCard.credit_card_number.substring(creditCard.credit_card_number.length() - 4)},
                 Amount: ${request.amount.currency_code}${request.amount.units}.${request.amount.nanos}`);
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
 
         return {
             transaction_id: uuid:createType1AsString()
