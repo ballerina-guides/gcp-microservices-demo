@@ -598,6 +598,6 @@ kubectl expose deployment frontend-deployment --type=NodePort --name=frontend-sv
 
 Execute `kubectl get svc` and get the port of the `frontend-svc-local` service.
 
-Execute `minikube ip` to get the ip of the minikube cluster.
+Execute `kubectl port-forward svc/frontend-svc-local 27017:9098` to forward the frontend listening interface to localhost.
 
-Change the value of the `FRONTEND_SVC_URL` variable in `ui/src/lib/api.js` to the frontend service (Example Value - http://192.168.49.2:32437')
+Change the value of the `FRONTEND_SVC_URL` variable in `ui/src/lib/api.js` to the frontend service (Example Value - http://localhost:27017')
