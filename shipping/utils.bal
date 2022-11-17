@@ -15,18 +15,17 @@
 // under the License.
 
 import ballerina/random;
-import ballerina/lang.'string as str;
 
 isolated function generateRandomLetter() returns string {
-    //Note - We only use checkpanic as we have valid inputs if the inputs are invalid application will be crashed.
+    //Note - We use checkpanic only because we expect valid input here, and therefore if the input is invalid it is OK for the application to crash.
     int randomLetterCodePoint = checkpanic random:createIntInRange(65, 91);
-    return checkpanic str:fromCodePointInt(randomLetterCodePoint);
+    return checkpanic string:fromCodePointInt(randomLetterCodePoint);
 }
 
 isolated function generateRandomNumber(int digit) returns string {
     string randomNumber = "";
     foreach int item in 0 ... digit {
-        //Note - We only use checkpanic as we have valid inputs if the inputs are invalid application will be crashed.
+        //Note - We use checkpanic only because we expect valid input here, and therefore if the input is invalid it is OK for the application to crash.
         int randomInt = checkpanic random:createIntInRange(0, 10);
         randomNumber += randomInt.toString();
     }

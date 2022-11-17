@@ -50,7 +50,6 @@ service "CartService" on new grpc:Listener(9092) {
         lock {
             check self.store.addItem(request.user_id, request.item.product_id, request.item.quantity);
         }
-
         return {};
     }
 
@@ -60,8 +59,7 @@ service "CartService" on new grpc:Listener(9092) {
     # + return - `Cart` containing the items or an error
     remote function GetCart(stub:GetCartRequest request) returns stub:Cart|error {
         lock {
-            stub:Cart cart = check self.store.getCart(request.user_id);
-            return cart.cloneReadOnly();
+            return self.store.getCart(request.user_id).cloneReadOnly();
         }
     }
 

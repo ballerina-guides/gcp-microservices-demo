@@ -13,27 +13,29 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import wso2/client_stubs as stub;
 
 import ballerina/log;
+import wso2/client_stubs as stub;
 
-type JsonProduct record {|
+type Price record {|
+    string currencyCode;
+    int units;
+    int nanos;
+|};
+
+type JsonProduct readonly & record {|
     string id;
     string name;
     string description;
     string picture;
-    record {|
-        string currencyCode;
-        int units;
-        int nanos;
-    |} priceUsd;
+    Price priceUsd;
     string[] categories;
 |};
 
-isolated function parseProductJson(json jsonContents) returns stub:Product[]|error {
+isolated function parseProductJson(json jsonContents) returns stub:Product[] & readonly|error {
     json|error productsJson = jsonContents.products;
     if productsJson is error {
-        log:printInfo("failed to parse the catalog JSON: ", 'error = productsJson);
+        log:printError("failed to parse the catalog JSON: ", productsJson);
         return productsJson;
     }
     if productsJson !is json[] {
@@ -42,22 +44,21 @@ isolated function parseProductJson(json jsonContents) returns stub:Product[]|err
 
     JsonProduct[] jsonProducts = check productsJson.fromJsonWithType();
     return from var {id, name, description, picture, priceUsd, categories} in jsonProducts
-        let stub:Product product = {
+        select {
             id,
             name,
             description,
             picture,
-            price_usd: check parseUsdPrice(priceUsd),
+            price_usd: parseUsdPrice(priceUsd),
             categories
-        }
-        select product;
+        }.cloneReadOnly();
 }
 
-isolated function parseUsdPrice(json usdPrice) returns stub:Money|error {
+isolated function parseUsdPrice(Price usdPrice) returns stub:Money & readonly {
     return {
-        currency_code: check usdPrice.currencyCode,
-        units: check usdPrice.units,
-        nanos: check usdPrice.nanos
+        currency_code: usdPrice.currencyCode,
+        units: usdPrice.units,
+        nanos: usdPrice.nanos
     };
 }
 

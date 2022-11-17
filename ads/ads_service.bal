@@ -35,7 +35,7 @@ service "AdService" on new grpc:Listener(9099) {
 
     private final readonly & table<AdCategory> key(category) adCategories;
     private final readonly & stub:Ad[] allAds;
-    private final int MAX_ADS_TO_SERVE = 2;
+    private final int maxAdsToServe = 2;
 
     function init() {
         self.adCategories = loadAds().cloneReadOnly();
@@ -56,23 +56,21 @@ service "AdService" on new grpc:Listener(9099) {
         log:printInfo(string `received ad request (context_words=${request.context_keys.toString()})`);
 
         stub:Ad[] ads = [];
-        foreach var category in request.context_keys {
+        foreach string category in request.context_keys {
             AdCategory? adCategory = self.adCategories[category];
             if adCategory !is () {
                 ads.push(...adCategory.ads);
             }
         }
-
         if ads.length() == 0 {
             ads = check self.getRandomAds();
         }
-
         return {ads};
     }
 
     isolated function getRandomAds() returns stub:Ad[]|error {
         stub:Ad[] randomAds = [];
-        foreach int i in 0 ..< self.MAX_ADS_TO_SERVE {
+        foreach int i in 0 ..< self.maxAdsToServe {
             int rIndex = check random:createIntInRange(0, self.allAds.length());
             randomAds.push(self.allAds[rIndex]);
         }
@@ -81,31 +79,31 @@ service "AdService" on new grpc:Listener(9099) {
 }
 
 isolated function loadAds() returns table<AdCategory> key(category) {
-    stub:Ad hairdryer = {
+    stub:Ad & readonly hairdryer = {
         redirect_url: "/product/2ZYFJ3GM2N",
         text: "Hairdryer for sale. 50% off."
     };
-    stub:Ad tankTop = {
+    stub:Ad & readonly tankTop = {
         redirect_url: "/product/66VCHSJNUP",
         text: "Tank top for sale. 20% off."
     };
-    stub:Ad candleHolder = {
+    stub:Ad & readonly candleHolder = {
         redirect_url: "/product/0PUK6V6EV0",
         text: "Candle holder for sale. 30% off."
     };
-    stub:Ad bambooGlassJar = {
+    stub:Ad & readonly bambooGlassJar = {
         redirect_url: "/product/9SIQT8TOJO",
         text: "Bamboo glass jar for sale. 10% off."
     };
-    stub:Ad watch = {
+    stub:Ad & readonly watch = {
         redirect_url: "/product/1YMWWN1N4O",
         text: "Watch for sale. Buy one, get second kit for free"
     };
-    stub:Ad mug = {
+    stub:Ad & readonly mug = {
         redirect_url: "/product/6E92ZMYYFZ",
         text: "Mug for sale. Buy two, get third one for free"
     };
-    stub:Ad loafers = {
+    stub:Ad & readonly loafers = {
         redirect_url: "/product/L9ECAV7KIM",
         text: "Loafers for sale. Buy one, get second one for free"
     };

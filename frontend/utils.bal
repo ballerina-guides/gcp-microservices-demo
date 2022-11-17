@@ -19,37 +19,28 @@ import ballerina/log;
 import ballerina/regex;
 import wso2/client_stubs as stub;
 
-isolated function getSessionIdFromCookieHeader(string cookieStr) returns http:Cookie|http:Unauthorized {
-    http:Cookie[] cookies = parseCookieHeader(cookieStr);
-    http:Cookie[] usernameCookie = cookies.filter(cookie => cookie.name == SESSION_ID_COOKIE);
-    if usernameCookie.length() == 1 {
-        return usernameCookie[0];
-    }
-    return {
-        body: string `${SESSION_ID_COOKIE} cookie is not available.`
-    };
-}
+const COOKIE_PATH = "/";
+const COOKIE_SPLIT_TOKEN = "=";
+const COOKIE_DELIMITER = "; ";
 
-isolated function getCurrencyFromCookieHeader(string cookieStr) returns http:Cookie|http:Unauthorized {
+isolated function getFromCookieHeader(string cookieName, string cookieStr) returns http:Cookie|http:Unauthorized {
     http:Cookie[] cookies = parseCookieHeader(cookieStr);
-    http:Cookie[] currencyCookie = cookies.filter(cookie => cookie.name == CURRENCY_COOKIE);
-    if currencyCookie.length() == 1 {
-        return currencyCookie[0];
+    http:Cookie[] filteredCookies = cookies.filter(cookie => cookie.name == cookieName);
+    if filteredCookies.length() == 1 {
+        return filteredCookies[0];
     }
     return {
-        body: CURRENCY_COOKIE + " cookie is not available."
+        body: string `${cookieName} cookie is not available.`
     };
 }
 
 isolated function parseCookieHeader(string cookieStringValue) returns http:Cookie[] {
     http:Cookie[] cookiesInRequest = [];
-    string cookieValue = cookieStringValue;
-    string[] nameValuePairs = regex:split(cookieValue, "; ");
+    string[] nameValuePairs = regex:split(cookieStringValue, COOKIE_DELIMITER);
     foreach string pair in nameValuePairs {
         if regex:matches(pair, "^([^=]+)=.*$") {
-            string[] nameValue = regex:split(pair, "=");
-            http:Cookie cookie;
-            cookie = new (nameValue[0], nameValue.length() > 1 ? nameValue[1] : "", path = "/");
+            string[] nameValue = regex:split(pair, COOKIE_SPLIT_TOKEN);
+            http:Cookie cookie = new (nameValue[0], nameValue.length() > 1 ? nameValue[1] : "", path = COOKIE_PATH);
             cookiesInRequest.push(cookie);
         } else {
             log:printError(string `Invalid cookie: ${pair}, which must be in the format as [{name}=].`);
@@ -58,13 +49,12 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
     return cookiesInRequest;
 }
 
-isolated function getCartSize(stub:Cart cart) returns int|error {
-    int cartsize = 0;
-    check from stub:CartItem item in cart.items
-        do {
-            cartsize += item.quantity;
-        };
-    return cartsize;
+isolated function getCartSize(stub:Cart cart) returns int {
+    int cartSize = 0;
+    foreach stub:CartItem item in cart.items {
+        cartSize += item.quantity;
+    }
+    return cartSize;
 }
 
 isolated function toProductLocalized(stub:Product product, string price) returns ProductLocalized {
