@@ -38,7 +38,8 @@ final CardCompany[] & readonly companies = [
 
 isolated function getCardCompany(string cardNumber, int expireYear, int expireMonth) returns CardCompany|error {
     string formattedCardNumber = regex:replaceAll(cardNumber, "[^0-9]+", "");
-    if (formattedCardNumber.length() < 13) || (formattedCardNumber.length() > 19) {
+    int cardNumberLength = formattedCardNumber.length();
+    if cardNumberLength < 13 || cardNumberLength > 19 {
         return error CardValidationError("Credit card info is invalid: failed length check");
     }
     if !check isLuhnValid(formattedCardNumber) {
@@ -51,7 +52,7 @@ isolated function getCardCompany(string cardNumber, int expireYear, int expireMo
     }
     if isExpired(expireYear, expireMonth) {
         return error CardValidationError(
-                string `Your credit card (ending ${formattedCardNumber.substring(formattedCardNumber.length() - 4)})
+                string `Your credit card (ending ${formattedCardNumber.substring(cardNumberLength - 4)})
                     expired on ${expireMonth}/${expireYear}`);
     }
     return gleanCompany;
@@ -88,11 +89,10 @@ isolated function getCompany(string cardNumber) returns CardCompany? {
 
 isolated function isExpired(int expireYear, int expireMonth) returns boolean {
     time:Civil currentTime = time:utcToCivil(time:utcNow());
-    int month = currentTime.month;
     int year = currentTime.year;
 
     if year > expireYear {
         return true;
     }
-    return year == expireYear && month > expireMonth;
+    return year == expireYear && currentTime.month > expireMonth;
 }

@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Header from '../components/products/Header';
 import Footer from '../components/products/Footer';
 import CartItem from '../components/products/CartItem';
@@ -56,15 +56,15 @@ const CartPage = () => {
 
         const data = {
             email,
-            street_address: address,
-            zip_code: parseInt(zip),
+            streetAddress: address,
+            zipCode: parseInt(zip),
             city,
             state,
             country,
-            credit_card_number: cardNumber,
-            credit_card_expiration_month: parseInt(expireMonth),
-            credit_card_expiration_year: parseInt(expireYear),
-            credit_card_cvv: parseInt(cvv)
+            creditCardNumber: cardNumber,
+            creditCardExpirationMonth: parseInt(expireMonth),
+            creditCardExpirationYear: parseInt(expireYear),
+            creditCardCvv: parseInt(cvv)
         };
         const data1 = await checkout(data);
         setSubmitted(data1);
@@ -101,8 +101,8 @@ const CartPage = () => {
 
     const recommendations = data.recommendations;
 
-    const shippingCost = data.shipping_cost;
-    const totalCost = data.total_cost;
+    const shippingCost = data.shippingCost;
+    const totalCost = data.totalCost;
 
     const cartItemsList = [];
     for (const [index, val] of cart.entries()) {
@@ -120,7 +120,7 @@ const CartPage = () => {
     }
 
     const expireOptionList = [];
-    for (const [index, value] of data.expiration_years.entries()) {
+    for (const [index, value] of data.expirationYears.entries()) {
         expireOptionList.push(<ExpireOptionPicker key={index} year={value} />);
     }
 
@@ -174,16 +174,16 @@ const CartPage = () => {
                             </div>
                             <div className="form-row">
                                 <div className="col cymbal-form-field">
-                                    <label htmlFor="street_address">Street Address</label>
-                                    <input type="text" name="street_address"
-                                        id="street_address" defaultValue="1600 Amphitheatre Parkway" required ref={addressRef} />
+                                    <label htmlFor="streetAddress">Street Address</label>
+                                    <input type="text" name="streetAddress"
+                                        id="streetAddress" defaultValue="1600 Amphitheatre Parkway" required ref={addressRef} />
                                 </div>
                             </div>
                             <div className="form-row">
                                 <div className="col cymbal-form-field">
-                                    <label htmlFor="zip_code">Zip Code</label>
+                                    <label htmlFor="zipCode">Zip Code</label>
                                     <input type="text"
-                                        name="zip_code" id="zip_code" defaultValue="94043" required pattern="\d{4,5}" ref={zipRef} />
+                                        name="zipCode" id="zipCode" defaultValue="94043" required pattern="\d{4,5}" ref={zipRef} />
                                 </div>
                             </div>
                             <div className="form-row">
@@ -215,9 +215,9 @@ const CartPage = () => {
 
                             <div className="form-row">
                                 <div className="col cymbal-form-field">
-                                    <label htmlFor="credit_card_number">Credit Card Number</label>
-                                    <input type="text" id="credit_card_number"
-                                        name="credit_card_number"
+                                    <label htmlFor="creditCardNumber">Credit Card Number</label>
+                                    <input type="text" id="creditCardNumber"
+                                        name="creditCardNumber"
                                         placeholder="0000-0000-0000-0000"
                                         defaultValue="4432-8015-6152-0454"
                                         required pattern="\d{4}-\d{4}-\d{4}-\d{4}" ref={cardNumberRef} />
@@ -226,8 +226,8 @@ const CartPage = () => {
 
                             <div className="form-row">
                                 <div className="col-md-5 cymbal-form-field">
-                                    <label htmlFor="credit_card_expiration_month">Month</label>
-                                    <select name="credit_card_expiration_month" id="credit_card_expiration_month" ref={expireMonthRef}>
+                                    <label htmlFor="creditCardExpirationMonth">Month</label>
+                                    <select name="creditCardExpirationMonth" id="creditCardExpirationMonth" ref={expireMonthRef}>
                                         <option value="1">January</option>
                                         <option value="2">February</option>
                                         <option value="3">March</option>
@@ -244,16 +244,16 @@ const CartPage = () => {
                                     <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_DownArrow.svg'} alt="" className="cymbal-dropdown-chevron" />
                                 </div>
                                 <div className="col-md-4 cymbal-form-field">
-                                    <label htmlFor="credit_card_expiration_year">Year</label>
-                                    <select name="credit_card_expiration_year" id="credit_card_expiration_year" ref={expireYearRef}>
+                                    <label htmlFor="creditCardExpirationYear">Year</label>
+                                    <select name="creditCardExpirationYear" id="creditCardExpirationYear" ref={expireYearRef}>
                                         {expireOptionList}
                                     </select>
                                     <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_DownArrow.svg'} alt="" className="cymbal-dropdown-chevron" />
                                 </div>
                                 <div className="col-md-3 cymbal-form-field">
-                                    <label htmlFor="credit_card_cvv">CVV</label>
-                                    <input type="password" id="credit_card_cvv"
-                                        name="credit_card_cvv" defaultValue="672" required pattern="\d{3}" ref={cvvRef} />
+                                    <label htmlFor="creditCardCvv">CVV</label>
+                                    <input type="password" id="creditCardCvv"
+                                        name="creditCardCvv" defaultValue="672" required pattern="\d{3}" ref={cvvRef} />
                                 </div>
                             </div>
 
@@ -280,7 +280,7 @@ const CartPage = () => {
     );
 
     if (Object.keys(isSubmitted).length !== 0) {
-        contents = <Order orderId={isSubmitted.order.order_id} shippingTrackingId={isSubmitted.order.shipping_tracking_id} totalPaid={isSubmitted.total_paid} />;
+        contents = <Order orderId={isSubmitted.order.order_id} shippingTrackingId={isSubmitted.order.shipping_tracking_id} totalPaid={isSubmitted.totalPaid} />;
     }
 
     return (

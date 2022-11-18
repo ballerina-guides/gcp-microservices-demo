@@ -35,7 +35,7 @@ service "AdService" on new grpc:Listener(9099) {
 
     private final readonly & table<AdCategory> key(category) adCategories;
     private final readonly & stub:Ad[] allAds;
-    private final int MAX_ADS_TO_SERVE = 2;
+    private final int maxAdsToServe = 2;
 
     function init() {
         self.adCategories = loadAds().cloneReadOnly();
@@ -56,23 +56,21 @@ service "AdService" on new grpc:Listener(9099) {
         log:printInfo(string `received ad request (context_words=${request.context_keys.toString()})`);
 
         stub:Ad[] ads = [];
-        foreach var category in request.context_keys {
+        foreach string category in request.context_keys {
             AdCategory? adCategory = self.adCategories[category];
             if adCategory !is () {
                 ads.push(...adCategory.ads);
             }
         }
-
         if ads.length() == 0 {
             ads = check self.getRandomAds();
         }
-
         return {ads};
     }
 
     isolated function getRandomAds() returns stub:Ad[]|error {
         stub:Ad[] randomAds = [];
-        foreach int i in 0 ..< self.MAX_ADS_TO_SERVE {
+        foreach int i in 0 ..< self.maxAdsToServe {
             int rIndex = check random:createIntInRange(0, self.allAds.length());
             randomAds.push(self.allAds[rIndex]);
         }

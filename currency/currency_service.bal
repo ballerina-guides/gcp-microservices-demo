@@ -20,6 +20,8 @@ import ballerina/log;
 import ballerinax/jaeger as _;
 import wso2/client_stubs as stub;
 
+const FRACTION_SIZE = 1000000000;
+
 configurable string currencyJsonPath = "./data/currency_conversion.json";
 
 # This service is used read the exchange rates from a JSON and convert one currency value to another.
@@ -34,8 +36,8 @@ service "CurrencyService" on new grpc:Listener(9093) {
     function init() returns error? {
         log:printInfo("Starting gRPC server");
         json currencyJson = check io:fileReadJson(currencyJsonPath);
-        self.currencyMap = check parseCurrencyJson(currencyJson).cloneReadOnly();
-        log:printInfo(string `Currency service gRPC server started.`);
+        self.currencyMap = check parseCurrencyJson(currencyJson);
+        log:printInfo("Currency service gRPC server started.");
     }
 
     # Provides the set of supported currencies.
@@ -54,9 +56,8 @@ service "CurrencyService" on new grpc:Listener(9093) {
     # + return - returns the `Money` in the required currency or an error
     remote function Convert(stub:CurrencyConversionRequest request) returns stub:Money|error {
         stub:Money moneyFrom = request.'from;
-        final decimal fractionSize = 1000000000;
         //From Unit
-        decimal pennies = <decimal>moneyFrom.nanos / fractionSize;
+        decimal pennies = <decimal>moneyFrom.nanos / FRACTION_SIZE;
         decimal totalUSD = <decimal>moneyFrom.units + pennies;
 
         //UNIT Euro
@@ -68,7 +69,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
         decimal targetAmount = euroAmount * targetRate;
 
         int units = <int>targetAmount.floor();
-        int nanos = <int>decimal:floor((targetAmount - <decimal>units) * fractionSize);
+        int nanos = <int>decimal:floor((targetAmount - <decimal>units) * FRACTION_SIZE);
 
         return {
             currency_code: request.to_code,
@@ -78,8 +79,8 @@ service "CurrencyService" on new grpc:Listener(9093) {
     }
 }
 
-isolated function parseCurrencyJson(json currencyJson) returns map<decimal>|error {
+isolated function parseCurrencyJson(json currencyJson) returns map<decimal> & readonly|error {
     map<string> currencyValues = check currencyJson.cloneWithType();
-    return map from string key in currencyValues.keys()
-        select [key, check decimal:fromString(currencyValues.get(key))];
+    return map from [string, string] [key, value] in currencyValues.entries()
+        select [key, check decimal:fromString(value)];
 }

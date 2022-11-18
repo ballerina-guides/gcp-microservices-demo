@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 ( cd client_stubs ; bal pack ; bal push --repository local)
+( cd money_utils ; bal pack ; bal push --repository local)
 ( cd cart ; bal build --cloud=docker)
 ( cd currency ; bal build --cloud=docker)
 ( cd email ; bal build --cloud=docker)

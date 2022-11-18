@@ -26,7 +26,11 @@ type GmailConfig record {|
     string clientSecret;
 |};
 
-configurable GmailConfig gmail = ?;
+const FONT_URL =
+    "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
+
+
+configurable GmailConfig gmailConfig = ?;
 
 # Used to send an order confirmation email to the user using the `gmail` connector.
 @display {
@@ -42,12 +46,12 @@ service "EmailService" on new grpc:Listener(9097) {
         self.gmailClient = check new ({
             auth: {
                 refreshUrl: gmail:REFRESH_URL,
-                refreshToken: gmail.refreshToken,
-                clientId: gmail.clientId,
-                clientSecret: gmail.clientSecret
+                refreshToken: gmailConfig.refreshToken,
+                clientId: gmailConfig.clientId,
+                clientSecret: gmailConfig.clientSecret
             }
         });
-        log:printInfo(string `Email service gRPC server started.`);
+        log:printInfo("Email service gRPC server started.");
     }
 
     # Sends the order confirmation email containing details about the order.
@@ -60,10 +64,9 @@ service "EmailService" on new grpc:Listener(9097) {
         gmail:MessageRequest messageRequest = {
             recipient: request.email,
             subject: "Order Confirmation",
-            messageBody: (check self.getConfirmationHtml(request.'order)).toString(),
+            messageBody: (check getConfirmationHtml(request.'order)).toString(),
             contentType: gmail:TEXT_HTML
         };
-
         gmail:Message|error sendMessageResponse = self.gmailClient->sendMessage(messageRequest);
 
         if sendMessageResponse is gmail:Message {
@@ -71,32 +74,25 @@ service "EmailService" on new grpc:Listener(9097) {
             log:printInfo(string `Sent Thread ID: ${sendMessageResponse.threadId}`);
             return {};
         }
-        log:printError("Error sending confirmation mail ", 'error = sendMessageResponse);
-
+        log:printError("Error sending confirmation mail ", sendMessageResponse);
         return sendMessageResponse;
     }
+}
 
-    function getConfirmationHtml(stub:OrderResult result) returns xml|error {
-        string fontUrl =
-                    "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
-
-        xml items = xml `<tr>
-          <th>Item No.</th>
-          <th>Quantity</th> 
-          <th>Price</th>
-        </tr>`;
-
-        check from stub:OrderItem item in result.items
-            let xml content = xml `<tr>
+function getConfirmationHtml(stub:OrderResult result) returns xml|error {
+    xml items = from stub:OrderItem item in result.items
+        select xml `<tr>
             <td>#${item.item.product_id}</td>
             <td>${item.item.quantity}</td> 
             <td>${item.cost.units}.${item.cost.nanos / 10000000} ${item.cost.currency_code}</td>
-            </tr>`
-            do {
-                items += content;
-            };
+            </tr>`;
+    items = xml `<tr>
+          <th>Item No.</th>
+          <th>Quantity</th> 
+          <th>Price</th>
+        </tr>` + items;
 
-        xml body = xml `<body>
+    xml body = xml `<body>
         <h2>Your Order Confirmation</h2>
         <p>Thanks for shopping with us!</p>
         <h3>Order ID</h3>
@@ -113,11 +109,11 @@ service "EmailService" on new grpc:Listener(9097) {
         </table>
         </body>`;
 
-        xml emailContent = xml `
+    xml emailContent = xml `
         <html>
         <head>
             <title>Your Order Confirmation</title>
-            <link href="${fontUrl}" rel="stylesheet"></link>
+            <link href="${FONT_URL}" rel="stylesheet"></link>
         </head>
         <style>
             body{
@@ -126,7 +122,5 @@ service "EmailService" on new grpc:Listener(9097) {
         </style>
             ${body}
         </html>`;
-        return emailContent;
-    }
+    return emailContent;
 }
-

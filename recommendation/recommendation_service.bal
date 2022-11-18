@@ -38,7 +38,7 @@ service "RecommendationService" on new grpc:Listener(9090) {
     function init() returns error? {
         self.catalogClient = check new (string `http://${catalogHost}:9091`, timeout = catalogTimeout);
         log:printInfo(string `Product catalog address: http://${catalogHost}:9091`);
-        log:printInfo(string `Recommendation service gRPC server started.`);
+        log:printInfo("Recommendation service gRPC server started.");
     }
 
     # Provides a product list according to the request.
@@ -50,15 +50,16 @@ service "RecommendationService" on new grpc:Listener(9090) {
         log:printInfo(string `[Recv ListRecommendations] product_ids=${request.product_ids.toString()}`);
         stub:ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
         if listProducts is grpc:Error {
-            log:printError("failed to call ListProducts of catalog service", 'error = listProducts);
+            log:printError("failed to call ListProducts of catalog service", listProducts);
             return error grpc:InternalError("failed to get list of products from catalog service", listProducts);
         }
 
         return {
             product_ids: from stub:Product product in listProducts.products
-                where request.product_ids.indexOf(product.id) is ()
+                let string productId = product.id
+                where request.product_ids.indexOf(productId) is ()
                 limit 5
-                select product.id
+                select productId
         };
     }
 }

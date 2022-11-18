@@ -34,13 +34,12 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     function init() returns error? {
         json|error productsJson = io:fileReadJson(productJsonPath);
         if productsJson is error {
-            log:printInfo("failed to open product catalog json file: ", 'error = productsJson);
+            log:printError("failed to open product catalog json file: ", productsJson);
             return productsJson;
         }
         log:printInfo("successfully parsed product catalog json");
-        stub:Product[] products = check parseProductJson(productsJson);
-        self.products = products.cloneReadOnly();
-        log:printInfo(string `Catalog service gRPC server started.`);
+        self.products = check parseProductJson(productsJson);
+        log:printInfo("Catalog service gRPC server started.");
     }
 
     # Provides a set of products.
@@ -61,7 +60,6 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
                 return product;
             }
         }
-
         return error grpc:NotFoundError(string `no product with ID ${request.id}`);
     }
 
