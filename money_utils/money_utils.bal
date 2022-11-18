@@ -16,7 +16,7 @@
 
 import wso2/client_stubs as stub;
 
-public const map<string> LOGOS = {
+public const map<string> CURRENCY_SYMBOLS = {
     "USD": "$",
     "CAD": "$",
     "JPY": "¥",
@@ -143,4 +143,4 @@ public isolated function multiplySlow(stub:Money money, int n) returns stub:Mone
 # + money - `Money` value to be rendered
 # + return - rendered value as a string
 public isolated function renderMoney(stub:Money money) returns string => 
-        string `${LOGOS.get(money.currency_code)}${money.units.toString()}.${(money.nanos / 10000000).toString()}`;
+        string `${CURRENCY_SYMBOLS.get(money.currency_code)}${money.units.toString()}.${(money.nanos / 10000000).toString()}`;

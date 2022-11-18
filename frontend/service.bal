@@ -21,7 +21,7 @@ import ballerina/time;
 import ballerina/uuid;
 import ballerinax/jaeger as _;
 import wso2/client_stubs as stub;
-import wso2/money_utils as utils;
+import wso2/money_utils as money;
 
 const SESSION_ID_COOKIE = "sessionIdCookie";
 const CURRENCY_COOKIE = "currencyCookie";
@@ -99,7 +99,7 @@ service / on new http:Listener(9098) {
                 "Set-Cookie": sessionIdCookie.toStringValue()
             },
             body: {
-                userCurrency: [currencyCookie.value, utils:LOGOS.get(currencyCookie.value)],
+                userCurrency: [currencyCookie.value, money:LOGOS.get(currencyCookie.value)],
                 currencies: check getSupportedCurrencies(),
                 cartSize: getCartSize(cart),
                 isCymbalBrand: isCymbalBrand
@@ -127,7 +127,7 @@ service / on new http:Listener(9098) {
         ProductLocalized[] productsLocalized = [];
         foreach stub:Product product in products {
             stub:Money convertedMoney = check convertCurrency(product.price_usd, currencyCookie.value);
-            productsLocalized.push(toProductLocalized(product, utils:renderMoney(convertedMoney)));
+            productsLocalized.push(toProductLocalized(product, money:renderMoney(convertedMoney)));
         }
 
         HomeResponse homeResponse = {
@@ -161,7 +161,7 @@ service / on new http:Listener(9098) {
         string userId = sessionIdCookie.value;
         stub:Product product = check getProduct(id);
         stub:Money convertedMoney = check convertCurrency(product.price_usd, currencycookie.value);
-        ProductLocalized productLocal = toProductLocalized(product, utils:renderMoney(convertedMoney));
+        ProductLocalized productLocal = toProductLocalized(product, money:renderMoney(convertedMoney));
         stub:Product[] recommendations = check getRecommendations(userId, [id]);
 
         ProductResponse productResponse = {
@@ -194,7 +194,7 @@ service / on new http:Listener(9098) {
         http:Cookie currencyCookie = new (CURRENCY_COOKIE, request.currency, path = "/");
         response.addCookie(currencyCookie);
         response.setJsonPayload({
-            userCurrency: [request.currency, utils:LOGOS.get(request.currency)],
+            userCurrency: [request.currency, money:LOGOS.get(request.currency)],
             currencies: supportedCurrencies,
             cartSize: getCartSize(cart),
             isCymbalBrand
@@ -231,16 +231,16 @@ service / on new http:Listener(9098) {
 
             stub:Money convertedPrice = check convertCurrency(product.price_usd, currencyCookie.value);
 
-            stub:Money price = utils:multiplySlow(convertedPrice, item.quantity);
-            string renderedPrice = utils:renderMoney(price);
+            stub:Money price = money:multiplySlow(convertedPrice, item.quantity);
+            string renderedPrice = money:renderMoney(price);
             cartItems.push({
                 product,
                 price: renderedPrice,
                 quantity: item.quantity
             });
-            totalPrice = utils:sum(totalPrice, price);
+            totalPrice = money:sum(totalPrice, price);
         }
-        totalPrice = utils:sum(totalPrice, shippingCost);
+        totalPrice = money:sum(totalPrice, shippingCost);
         int year = time:utcToCivil(time:utcNow()).year;
         int[] years = [year, year + 1, year + 2, year + 3, year + 4];
 
@@ -250,8 +250,8 @@ service / on new http:Listener(9098) {
             },
             body: {
                 recommendations,
-                shippingCost: utils:renderMoney(shippingCost),
-                totalCost: utils:renderMoney(totalPrice),
+                shippingCost: money:renderMoney(shippingCost),
+                totalCost: money:renderMoney(totalPrice),
                 items: cartItems,
                 expirationYears: years
             }
@@ -350,8 +350,8 @@ service / on new http:Listener(9098) {
         stub:Product[] recommendations = check getRecommendations(userId);
         stub:Money totalCost = orderResult.shipping_cost;
         foreach stub:OrderItem item in orderResult.items {
-            stub:Money multiplyRes = utils:multiplySlow(item.cost, item.item.quantity);
-            totalCost = utils:sum(totalCost, multiplyRes);
+            stub:Money multiplyRes = money:multiplySlow(item.cost, item.item.quantity);
+            totalCost = money:sum(totalCost, multiplyRes);
         }
 
         CheckoutResponse checkoutResponse = {
@@ -360,7 +360,7 @@ service / on new http:Listener(9098) {
             },
             body: {
                 'order: orderResult,
-                totalPaid: utils:renderMoney(totalCost),
+                totalPaid: money:renderMoney(totalCost),
                 recommendations: recommendations
             }
         };

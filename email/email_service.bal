@@ -26,6 +26,10 @@ type GmailConfig record {|
     string clientSecret;
 |};
 
+const FONT_URL =
+    "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
+
+
 configurable GmailConfig gmailConfig = ?;
 
 # Used to send an order confirmation email to the user using the `gmail` connector.
@@ -76,9 +80,6 @@ service "EmailService" on new grpc:Listener(9097) {
 }
 
 function getConfirmationHtml(stub:OrderResult result) returns xml|error {
-    string fontUrl =
-                    "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
-
     xml items = from stub:OrderItem item in result.items
         select xml `<tr>
             <td>#${item.item.product_id}</td>
@@ -112,7 +113,7 @@ function getConfirmationHtml(stub:OrderResult result) returns xml|error {
         <html>
         <head>
             <title>Your Order Confirmation</title>
-            <link href="${fontUrl}" rel="stylesheet"></link>
+            <link href="${FONT_URL}" rel="stylesheet"></link>
         </head>
         <style>
             body{

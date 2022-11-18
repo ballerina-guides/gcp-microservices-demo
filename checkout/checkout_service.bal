@@ -19,7 +19,7 @@ import ballerina/log;
 import ballerina/uuid;
 import ballerinax/jaeger as _;
 import wso2/client_stubs as stub;
-import wso2/money_utils as utils;
+import wso2/money_utils as money;
 
 const string LOCALHOST = "localhost";
 
@@ -107,10 +107,10 @@ service "CheckoutService" on new grpc:Listener(9094) {
             units: 0,
             nanos: 0
         };
-        totalCost = utils:sum(totalCost, shippingPrice);
+        totalCost = money:sum(totalCost, shippingPrice);
         foreach stub:OrderItem item in orderItems {
-            stub:Money itemCost = utils:multiplySlow(item.cost, item.item.quantity);
-            totalCost = utils:sum(totalCost, itemCost);
+            stub:Money itemCost = money:multiplySlow(item.cost, item.item.quantity);
+            totalCost = money:sum(totalCost, itemCost);
         }
 
         string transactionId = check self.chargeCard(totalCost, request.credit_card);
