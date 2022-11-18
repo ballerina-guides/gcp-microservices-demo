@@ -99,7 +99,7 @@ service / on new http:Listener(9098) {
                 "Set-Cookie": sessionIdCookie.toStringValue()
             },
             body: {
-                userCurrency: [currencyCookie.value, money:LOGOS.get(currencyCookie.value)],
+                userCurrency: [currencyCookie.value, money:CURRENCY_SYMBOLS.get(currencyCookie.value)],
                 currencies: check getSupportedCurrencies(),
                 cartSize: getCartSize(cart),
                 isCymbalBrand: isCymbalBrand
@@ -194,7 +194,7 @@ service / on new http:Listener(9098) {
         http:Cookie currencyCookie = new (CURRENCY_COOKIE, request.currency, path = "/");
         response.addCookie(currencyCookie);
         response.setJsonPayload({
-            userCurrency: [request.currency, money:LOGOS.get(request.currency)],
+            userCurrency: [request.currency, money:CURRENCY_SYMBOLS.get(request.currency)],
             currencies: supportedCurrencies,
             cartSize: getCartSize(cart),
             isCymbalBrand
