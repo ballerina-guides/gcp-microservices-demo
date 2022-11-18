@@ -155,7 +155,6 @@ service / on new http:Listener(9098) {
         if cookie is http:Unauthorized {
             return cookie;
         }
-    
         http:Cookie|http:Unauthorized currencycookie = getCurrencyFromCookieHeader(cookieHeader);
         if currencycookie is http:Unauthorized {
             return currencycookie;

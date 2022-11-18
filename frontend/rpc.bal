@@ -185,7 +185,7 @@ isolated function getRecommendations(string userId, string[] productIds = []) re
     };
     stub:ListRecommendationsResponse|grpc:Error recommendations = recommendClient->ListRecommendations(request);
     if recommendations is grpc:Error {
-        log:printError("failed to call listRecommnadation from recommandation service", 'error = recommendations);
+        log:printError("failed to call listRecommendation from recommandation service", 'error = recommendations);
         return recommendations;
     }
 
