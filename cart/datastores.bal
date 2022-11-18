@@ -53,27 +53,26 @@ public isolated class InMemoryStore {
     # + quantity - related product quantity
     isolated function addItem(string userId, string productId, int quantity) {
         lock {
-            if self.store.hasKey(userId) {
-                stubs:Cart existingCart = self.store.get(userId);
-                stubs:CartItem[] existingItems = existingCart.items;
-                stubs:CartItem[] matchedItem = from stubs:CartItem item in existingItems
-                    where item.product_id == productId
-                    limit 1
-                    select item;
-                if matchedItem.length() == 1 {
-                    stubs:CartItem item = matchedItem[0];
-                    item.quantity = item.quantity + quantity;
-                } else {
-                    stubs:CartItem newItem = {product_id: productId, quantity: quantity};
-                    existingItems.push(newItem);
-                }
-            } else {
-                stubs:Cart newItem = {
+            if !self.store.hasKey(userId) {
+                self.store[userId] = {
                     user_id: userId,
                     items: [{product_id: productId, quantity: quantity}]
                 };
-                self.store[userId] = newItem;
+                return;
             }
+
+            stubs:CartItem[] existingItems = self.store.get(userId).items;
+            stubs:CartItem[] matchedItem = from stubs:CartItem item in existingItems
+                where item.product_id == productId
+                limit 1
+                select item;
+            if matchedItem.length() == 1 {
+                stubs:CartItem item = matchedItem[0];
+                item.quantity = item.quantity + quantity;
+                return;
+            }
+            stubs:CartItem newItem = {product_id: productId, quantity};
+            existingItems.push(newItem);
         }
     }
 
@@ -95,12 +94,12 @@ public isolated class InMemoryStore {
             if self.store.hasKey(userId) {
                 return self.store.get(userId).cloneReadOnly();
             }
-            stubs:Cart newItem = {
+            stubs:Cart newCart = {
                 user_id: userId,
                 items: []
             };
-            self.store[userId] = newItem;
-            return newItem.cloneReadOnly();
+            self.store[userId] = newCart;
+            return newCart.cloneReadOnly();
         }
     }
 }

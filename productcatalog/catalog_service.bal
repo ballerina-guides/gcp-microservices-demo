@@ -17,7 +17,6 @@
 import ballerina/grpc;
 import ballerina/io;
 import ballerina/log;
-import ballerina/observe;
 import ballerinax/jaeger as _;
 import wso2/client_stubs as stubs;
 
@@ -35,13 +34,12 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     function init() returns error? {
         json|error productsJson = io:fileReadJson(productJsonPath);
         if productsJson is error {
-            log:printInfo("failed to open product catalog json file: ", 'error = productsJson);
+            log:printError("failed to open product catalog json file: ", productsJson);
             return productsJson;
         }
         log:printInfo("successfully parsed product catalog json");
-        stubs:Product[] products = check parseProductJson(productsJson);
-        self.products = products.cloneReadOnly();
-        log:printInfo(string `Catalog service gRPC server started.`);
+        self.products = check parseProductJson(productsJson);
+        log:printInfo("Catalog service gRPC server started.");
     }
 
     # Provides a set of products.
@@ -57,18 +55,11 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     # + request - `GetProductRequest` containing the product id
     # + return - `Product` related to the required id or an error
     remote function GetProduct(stubs:GetProductRequest request) returns stubs:Product|grpc:NotFoundError|error {
-        int rootParentSpanId = observe:startRootSpan("GetProductSpan");
-        int childSpanId = check observe:startSpan("GetProductFromClientSpan", parentSpanId = rootParentSpanId);
-
         foreach stubs:Product product in self.products {
             if product.id == request.id {
                 return product;
             }
         }
-
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
-
         return error grpc:NotFoundError(string `no product with ID ${request.id}`);
     }
 

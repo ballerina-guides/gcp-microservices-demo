@@ -17,7 +17,6 @@
 import ballerina/grpc;
 import ballerina/log;
 import ballerina/uuid;
-import ballerina/observe;
 import ballerinax/jaeger as _;
 import wso2/client_stubs as stubs;
 
@@ -30,7 +29,7 @@ import wso2/client_stubs as stubs;
 service "PaymentService" on new grpc:Listener(9096) {
 
     function init() {
-        log:printInfo(string `Payment service gRPC server started.`);
+        log:printInfo("Payment service gRPC server started.");
     }
 
     # Validate and charge the amount from the card.
@@ -39,24 +38,23 @@ service "PaymentService" on new grpc:Listener(9096) {
     # + return - `ChargeResponse` with the transaction id or an error
     remote function Charge(stubs:ChargeRequest request) returns stubs:ChargeResponse|error {
         log:printInfo(string `PaymentService#Charge invoked with request ${request.toString()}`);
-        int rootParentSpanId = observe:startRootSpan("PaymentSpan");
-        int childSpanId = check observe:startSpan("PaymentFromClientSpan", parentSpanId = rootParentSpanId);
 
         stubs:CreditCardInfo creditCard = request.credit_card;
-        CardCompany|error cardCompany = getCardCompany(creditCard.credit_card_number, creditCard.credit_card_expiration_year,
+        string creditCardNumber = creditCard.credit_card_number;
+        CardCompany|error cardCompany = getCardCompany(creditCardNumber, creditCard.credit_card_expiration_year,
             creditCard.credit_card_expiration_month);
         if cardCompany is CardValidationError {
-            log:printError("Credit card is not valid", 'error = cardCompany);
-            return cardCompany;
-        } else if cardCompany is error {
-            log:printError("Error occured while validating the credit card", 'error = cardCompany);
+            log:printError("Credit card is not valid", cardCompany);
             return cardCompany;
         }
+        if cardCompany is error {
+            log:printError("Error occured while validating the credit card", cardCompany);
+            return cardCompany;
+        }
+        stubs:Money amount = request.amount;
         log:printInfo(string `Transaction processed: the card ending
-            ${creditCard.credit_card_number.substring(creditCard.credit_card_number.length() - 4)},
-                Amount: ${request.amount.currency_code}${request.amount.units}.${request.amount.nanos}`);
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
+            ${creditCardNumber.substring(creditCardNumber.length() - 4)},
+                Amount: ${amount.currency_code}${amount.units}.${amount.nanos}`);
 
         return {
             transaction_id: uuid:createType1AsString()

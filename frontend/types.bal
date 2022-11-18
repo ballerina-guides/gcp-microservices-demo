@@ -31,26 +31,26 @@ public type AddToCartRequest record {|
 # Record containing details of the user and the card
 #
 # + email - user's email
-# + street_address - user's street address
-# + zip_code - user's zip code
+# + streetAddress - user's street address
+# + zipCode - user's zip code
 # + city - user's city
 # + state - user's state
 # + country - user's country
-# + credit_card_number - credit card number
-# + credit_card_expiration_month - expiration month of the card
-# + credit_card_expiration_year - expiration year of the card
-# + credit_card_cvv - cvv of the card
+# + creditCardNumber - credit card number
+# + creditCardExpirationMonth - expiration month of the card
+# + creditCardExpirationYear - expiration year of the card
+# + creditCardCvv - cvv of the card
 public type CheckoutRequest record {|
     string email;
-    string street_address;
-    int zip_code;
+    string streetAddress;
+    int zipCode;
     string city;
     string state;
     string country;
-    string credit_card_number;
-    int credit_card_expiration_month;
-    int credit_card_expiration_year;
-    int credit_card_cvv;
+    string creditCardNumber;
+    int creditCardExpirationMonth;
+    int creditCardExpirationYear;
+    int creditCardCvv;
 |};
 
 //Response Records
@@ -67,10 +67,10 @@ type MetadataResponse record {|
 |};
 
 type MetadataBody record {|
-    [string, string] user_currency;
+    [string, string] userCurrency;
     string[] currencies;
-    int cart_size;
-    boolean is_cymbal_brand;
+    int cartSize;
+    boolean isCymbalBrand;
 |};
 
 type ProductLocalized record {|
@@ -106,10 +106,10 @@ type CartResponse record {|
 
 type CartBody record {|
     stubs:Product[] recommendations;
-    string shipping_cost;
-    string total_cost;
+    string shippingCost;
+    string totalCost;
     CartItemView[] items;
-    int[] expiration_years;
+    int[] expirationYears;
 |};
 
 type CheckoutResponse record {|
@@ -119,6 +119,6 @@ type CheckoutResponse record {|
 
 type CheckoutBody record {|
     stubs:OrderResult 'order;
-    string total_paid;
+    string totalPaid;
     stubs:Product[] recommendations;
 |};

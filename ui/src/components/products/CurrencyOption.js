@@ -19,12 +19,12 @@ import PropTypes from 'prop-types';
 
 const CurrencyOption = (props) => {
     return (
-        <option value={props.user_currency} selected="selected">{props.user_currency}</option>
+        <option value={props.userCurrency} selected="selected">{props.userCurrency}</option>
     );
 };
 
 CurrencyOption.propTypes = {
-    user_currency: PropTypes.string.isRequired
+    userCurrency: PropTypes.string.isRequired
 };
 
 export default CurrencyOption;

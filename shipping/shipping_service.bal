@@ -16,7 +16,6 @@
 
 import ballerina/grpc;
 import ballerina/log;
-import ballerina/observe;
 import ballerinax/jaeger as _;
 import wso2/client_stubs as stubs;
 
@@ -29,38 +28,30 @@ import wso2/client_stubs as stubs;
 service "ShippingService" on new grpc:Listener(9095) {
 
     function init() {
-        log:printInfo(string `Shipping service gRPC server started.`);
+        log:printInfo("Shipping service gRPC server started.");
     }
 
     # Provides a quote with shipping cost.
     #
     # + request - `GetQuoteRequest` contaning the user's selected items
     # + return - `GetQuoteResponse` containing the shipping cost 
-    remote function GetQuote(stubs:GetQuoteRequest request) returns stubs:GetQuoteResponse|error {
+    remote function GetQuote(stubs:GetQuoteRequest request) returns stubs:GetQuoteResponse {
         log:printInfo("[GetQuote] received request");
-        int rootParentSpanId = observe:startRootSpan("GetQuoteSpan");
-        int childSpanId = check observe:startSpan("GetQuoteFromClientSpan", parentSpanId = rootParentSpanId);
 
         stubs:CartItem[] items = request.items;
         int count = 0;
-        float cost = 0.0;
         foreach stubs:CartItem item in items {
             count += item.quantity;
         }
-
+        float cost = 0.0;
         if count != 0 {
             cost = 8.99;
         }
         float cents = cost % 1;
         int dollars = <int>(cost - cents);
 
-        stubs:Money usdCost = {currency_code: "USD", nanos: <int>(cents * 1000000000), units: dollars};
-
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
-
         return {
-            cost_usd: usdCost
+            cost_usd: {currency_code: "USD", nanos: <int>(cents * 1000000000), units: dollars}
         };
     }
 
@@ -68,7 +59,7 @@ service "ShippingService" on new grpc:Listener(9095) {
     #
     # + request - `ShipOrderRequest` containing the address and the user's order items
     # + return - `ShipOrderResponse` containing the tracking id or an error
-    remote function ShipOrder(stubs:ShipOrderRequest request) returns stubs:ShipOrderResponse|error {
+    remote function ShipOrder(stubs:ShipOrderRequest request) returns stubs:ShipOrderResponse {
         log:printInfo("[GetQuote] received request");
         stubs:Address address = request.address;
         return {

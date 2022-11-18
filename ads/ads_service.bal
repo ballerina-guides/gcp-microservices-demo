@@ -17,7 +17,6 @@
 import ballerina/grpc;
 import ballerinax/jaeger as _;
 import ballerina/log;
-import ballerina/observe;
 import ballerina/random;
 import wso2/client_stubs as stubs;
 
@@ -36,7 +35,7 @@ service "AdService" on new grpc:Listener(9099) {
 
     private final readonly & table<AdCategory> key(category) adCategories;
     private final readonly & stubs:Ad[] allAds;
-    private final int MAX_ADS_TO_SERVE = 2;
+    private final int maxAdsToServe = 2;
 
     function init() {
         self.adCategories = loadAds().cloneReadOnly();
@@ -55,29 +54,23 @@ service "AdService" on new grpc:Listener(9099) {
     # + return - the related/random ad response or else an error
     remote function GetAds(stubs:AdRequest request) returns stubs:AdResponse|error {
         log:printInfo(string `received ad request (context_words=${request.context_keys.toString()})`);
-        int rootParentSpanId = observe:startRootSpan("GetAdsSpan");
-        int childSpanId = check observe:startSpan("GetAdsFromClientSpan", parentSpanId = rootParentSpanId);
 
         stubs:Ad[] ads = [];
-        foreach var category in request.context_keys {
+        foreach string category in request.context_keys {
             AdCategory? adCategory = self.adCategories[category];
             if adCategory !is () {
                 ads.push(...adCategory.ads);
             }
         }
-
         if ads.length() == 0 {
             ads = check self.getRandomAds();
         }
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
-
         return {ads};
     }
 
     isolated function getRandomAds() returns stubs:Ad[]|error {
         stubs:Ad[] randomAds = [];
-        foreach int i in 0 ..< self.MAX_ADS_TO_SERVE {
+        foreach int i in 0 ..< self.maxAdsToServe {
             int rIndex = check random:createIntInRange(0, self.allAds.length());
             randomAds.push(self.allAds[rIndex]);
         }
