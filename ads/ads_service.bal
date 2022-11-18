@@ -79,31 +79,31 @@ service "AdService" on new grpc:Listener(9099) {
 }
 
 isolated function loadAds() returns table<AdCategory> key(category) {
-    stub:Ad & readonly hairdryer = {
+    stub:Ad hairdryer = {
         redirect_url: "/product/2ZYFJ3GM2N",
         text: "Hairdryer for sale. 50% off."
     };
-    stub:Ad & readonly tankTop = {
+    stub:Ad tankTop = {
         redirect_url: "/product/66VCHSJNUP",
         text: "Tank top for sale. 20% off."
     };
-    stub:Ad & readonly candleHolder = {
+    stub:Ad candleHolder = {
         redirect_url: "/product/0PUK6V6EV0",
         text: "Candle holder for sale. 30% off."
     };
-    stub:Ad & readonly bambooGlassJar = {
+    stub:Ad bambooGlassJar = {
         redirect_url: "/product/9SIQT8TOJO",
         text: "Bamboo glass jar for sale. 10% off."
     };
-    stub:Ad & readonly watch = {
+    stub:Ad watch = {
         redirect_url: "/product/1YMWWN1N4O",
         text: "Watch for sale. Buy one, get second kit for free"
     };
-    stub:Ad & readonly mug = {
+    stub:Ad mug = {
         redirect_url: "/product/6E92ZMYYFZ",
         text: "Mug for sale. Buy two, get third one for free"
     };
-    stub:Ad & readonly loafers = {
+    stub:Ad loafers = {
         redirect_url: "/product/L9ECAV7KIM",
         text: "Loafers for sale. Buy one, get second one for free"
     };

@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-const FRONTEND_SVC_URL = 'http://localhost:31893';
+const FRONTEND_SVC_URL = 'http://localhost:9098';
 
 export async function getAllQuotes() {
     const response = await fetch(`${FRONTEND_SVC_URL}/quotes.json`);
