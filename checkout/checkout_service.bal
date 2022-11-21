@@ -94,7 +94,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
     # + request - `PlaceOrderRequest` containing user details
     # + return - returns `PlaceOrderResponse` containing order details
     remote function PlaceOrder(stubs:PlaceOrderRequest request) returns stubs:PlaceOrderResponse|grpc:Error|error {
-        log:printInfo(string `[PlaceOrder] user_id=${request.user_id} user_currency=${request.user_currency}`);
+        log:printInfo(string `received place order request with user_id=${request.user_id} user_currency=${request.user_currency}`);
 
         string orderId = uuid:createType1AsString();
         stubs:CartItem[] userCartItems = check self.getUserCartItems(request.user_id, request.user_currency);

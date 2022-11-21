@@ -37,7 +37,7 @@ service "PaymentService" on new grpc:Listener(9096) {
     # + request - `ChargeRequest` containing the card details and the amount to charge
     # + return - `ChargeResponse` with the transaction id or an error
     remote function Charge(stubs:ChargeRequest request) returns stubs:ChargeResponse|error {
-        log:printInfo(string `PaymentService#Charge invoked with request ${request.toString()}`);
+        log:printInfo(string `received charge request with ${request.toString()}`);
 
         stubs:CreditCardInfo creditCard = request.credit_card;
         string creditCardNumber = creditCard.credit_card_number;

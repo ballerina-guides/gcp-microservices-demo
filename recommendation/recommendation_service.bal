@@ -46,8 +46,8 @@ service "RecommendationService" on new grpc:Listener(9090) {
     # + request - `ListRecommendationsRequest` containing product ids
     # + return - `ListRecommendationsResponse` containing the recommended product ids
     remote function ListRecommendations(stubs:ListRecommendationsRequest request)
-    returns stubs:ListRecommendationsResponse|error {
-        log:printInfo(string `[Recv ListRecommendations] product_ids=${request.product_ids.toString()}`);
+          returns stubs:ListRecommendationsResponse|error {
+        log:printInfo(string `received list recommendations request with product_ids=${request.product_ids.toString()}`);
         stubs:ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
         if listProducts is grpc:Error {
             log:printError("failed to call ListProducts of catalog service", listProducts);
