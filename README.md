@@ -524,7 +524,6 @@ spec:
 
 ```
 
-
 # Running the Microservices on the Cloud
 
 ## Setting up Email Credentials
@@ -598,6 +597,33 @@ kubectl expose deployment frontend-deployment --type=NodePort --name=frontend-sv
 
 Execute `kubectl get svc` and get the port of the `frontend-svc-local` service.
 
-Execute `minikube ip` to get the ip of the minikube cluster.
+Execute `kubectl port-forward svc/frontend-svc-local 27017:9098` to forward the frontend listening interface to localhost.
 
-Change the value of the `FRONTEND_SVC_URL` variable in `ui/src/lib/api.js` to the frontend service (Example Value - http://192.168.49.2:32437')
+Change the value of the `FRONTEND_SVC_URL` variable in `ui/src/lib/api.js` to the frontend service (Example Value - http://localhost:27017')
+
+
+# Running the Microservices locally
+
+* Set up the email service with email credentials as explained above.
+* Build and publish the `client_stubs` and `money_utils` modules to the local central as follows.
+```bash
+cd module
+bal pack
+bal push --repository local
+```
+* Inside each module directory, execute `bal run` to start the service.
+* Once all the services are up, start the React application by executing following commands from the `ui/` directory.
+```bash
+npm install
+npm start
+```
+
+# Observe services tracing information with Jaeger
+
+After running the docker container, you can view the tracing information on Jaeger via http://localhost:16686/. You can select the service in the drop-down box as follows.
+![image info](drop-down-services-spans.png)
+
+Then click on `Find Traces` and you will be able to view spans of services in the gcp-microservice.
+![image info](tracing-spans.png)
+
+For more information about observability in Ballerina, please visit [Observe Ballerina Programs](https://ballerina.io/learn/observe-ballerina-programs/).

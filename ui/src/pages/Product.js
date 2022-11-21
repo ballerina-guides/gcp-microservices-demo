@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-import { Fragment, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import Header from '../components/products//Header';
 import Footer from '../components/products/Footer';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
@@ -34,9 +34,7 @@ const Product = () => {
 
     function submitFormHandler(event) {
         event.preventDefault();
-
         const quantity = quantityRef.current.value;
-
         addProductToCart({ quantity: parseInt(quantity), productId }).finally(() => {
             navigate('/cart');
         });

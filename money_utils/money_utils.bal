@@ -13,94 +13,92 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import wso2/client_stubs as stub;
+
+import wso2/client_stubs as stubs;
+
+public const map<string> CURRENCY_SYMBOLS = {
+    "USD": "$",
+    "CAD": "$",
+    "JPY": "¥",
+    "EUR": "€",
+    "TRY": "₺",
+    "GBP": "£"
+};
+
 # Checks if specified value has a valid units/nanos signs and ranges.
 #
 # + money - object to be validated
 # + return - Validity
-isolated function isValid(stub:Money money) returns boolean {
-    return signMatches(money) && validNanos(money.nanos);
-}
+public isolated function isValid(stubs:Money money) returns boolean => signMatches(money) && validNanos(money.nanos);
 
-# Checks if the sign matches.
+# Checks if the sign matches
 #
 # + money - object to be validated
 # + return - validity status
-isolated function signMatches(stub:Money money) returns boolean {
-    return money.nanos == 0 || money.units == 0 || (money.nanos < 0) == (money.units < 0);
-}
+public isolated function signMatches(stubs:Money money) returns boolean =>
+        money.nanos == 0 || money.units == 0 || (money.nanos < 0) == (money.units < 0);
 
-# Checks if nanos are valid.
+# Checks if nanos are valid
 #
 # + nanos - nano input
 # + return - validity status
-isolated function validNanos(int nanos) returns boolean {
-    return -999999999 <= nanos && nanos <= +999999999;
-}
+public isolated function validNanos(int nanos) returns boolean => -999999999 <= nanos && nanos <= +999999999;
 
-# Checks if the money is zero.
+# Checks if the money is zero
 #
 # + money - object to be validated
 # + return - zero status
-isolated function isZero(stub:Money money) returns boolean {
-    return money.units == 0 && money.nanos == 0;
-}
+public isolated function isZero(stubs:Money money) returns boolean => money.units == 0 && money.nanos == 0;
 
 # Returns true if the specified money value is valid and is positive.
 #
 # + money - object to the validated
 # + return - positive status
-isolated function isPositive(stub:Money money) returns boolean {
-    return isValid(money) && money.units > 0 || (money.units == 0 && money.nanos > 0);
-}
+public isolated function isPositive(stubs:Money money) returns boolean =>
+        isValid(money) && money.units > 0 || (money.units == 0 && money.nanos > 0);
 
 # Returns true if the specified money value is valid and is negative.
 #
 # + money - object to the validated
 # + return - negative status
-isolated function isNegative(stub:Money money) returns boolean {
-    return isValid(money) && money.units < 0 || (money.units == 0 && money.nanos < 0);
-}
+public isolated function isNegative(stubs:Money money) returns boolean =>
+        isValid(money) && money.units < 0 || (money.units == 0 && money.nanos < 0);
 
-# Returns true if values firstValue and secondValue have a currency code and they are the same values.
+# Returns true if values firstValue and r have a currency code and they are the same values.
 #
 # + firstValue - first money object
 # + secondValue - second money object
 # + return - currency type equal status
-isolated function areSameCurrency(stub:Money firstValue, stub:Money secondValue) returns boolean {
-    return firstValue.currency_code != "" && firstValue.currency_code == secondValue.currency_code;
-}
+public isolated function areSameCurrency(stubs:Money firstValue, stubs:Money secondValue) returns boolean =>
+        firstValue.currency_code != "" && firstValue.currency_code == secondValue.currency_code;
 
 # Returns true if values firstValue and secondValue are the equal, including the currency.
 #
 # + firstValue - first money object
 # + secondValue - second money object
 # + return - currency equal status
-isolated function areEqual(stub:Money firstValue, stub:Money secondValue) returns boolean {
-    return firstValue.currency_code == secondValue.currency_code && 
-            firstValue.units == secondValue.units && firstValue.nanos == secondValue.nanos;
+public isolated function areEqual(stubs:Money firstValue, stubs:Money secondValue) returns boolean {
+    return firstValue.currency_code == secondValue.currency_code &&
+                firstValue.units == secondValue.units && firstValue.nanos == secondValue.nanos;
 }
 
 # Negate returns the same amount with the sign negated.
 #
 # + money - object to be negated
 # + return - negated money object
-isolated function negate(stub:Money money) returns stub:Money {
-    return {
-        units: -money.units,
-        nanos: -money.nanos,
-        currency_code: money.currency_code
-    };
-}
+public isolated function negate(stubs:Money money) returns stubs:Money => {
+    units: -money.units,
+    nanos: -money.nanos,
+    currency_code: money.currency_code
+};
 
-# Sum adds two values.
+# Adds two `Money` values.
 #
 # + firstValue - first money object
 # + secondValue - second money object
 # + return - sum money object
-isolated function sum(stub:Money firstValue, stub:Money secondValue) returns stub:Money {
+public isolated function sum(stubs:Money firstValue, stubs:Money secondValue) returns stubs:Money {
     int nanosMod = 1000000000;
-
     int units = firstValue.units + secondValue.units;
     int nanos = firstValue.nanos + secondValue.nanos;
 
@@ -118,7 +116,6 @@ isolated function sum(stub:Money firstValue, stub:Money secondValue) returns stu
             nanos -= nanosMod;
         }
     }
-
     return {
         units,
         nanos,
@@ -129,14 +126,21 @@ isolated function sum(stub:Money firstValue, stub:Money secondValue) returns stu
 # Slow multiplication operation done through adding the value to itself n-1 times.
 #
 # + money - money object to be multiplied
-# + factor - multiply factor
+# + n - multiply factor
 # + return - multiplied money object
-isolated function multiplySlow(stub:Money money, int factor) returns stub:Money {
-    int t = factor;
-    stub:Money out = money;
+public isolated function multiplySlow(stubs:Money money, int n) returns stubs:Money {
+    int t = n;
+    stubs:Money out = money;
     while t > 1 {
         out = sum(out, money);
-        t = t - 1;
+        t -= 1;
     }
     return out;
 }
+
+# Used to render `Money` in a readable format.
+#
+# + money - `Money` value to be rendered
+# + return - rendered value as a string
+public isolated function renderMoney(stubs:Money money) returns string =>
+        string `${CURRENCY_SYMBOLS.get(money.currency_code)}${money.units.toString()}.${(money.nanos / 10000000).toString()}`;

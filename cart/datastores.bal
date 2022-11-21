@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerinax/redis;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 # Provides the interface for the RedisStore and InMemoryStore
 public type DataStore distinct object {
@@ -38,13 +38,13 @@ public type DataStore distinct object {
     #
     # + userId - user id of the user whose cart is required
     # + return - `Cart` or an error if error occurs
-    isolated function getCart(string userId) returns stub:Cart|error;
+    isolated function getCart(string userId) returns stubs:Cart|error;
 };
 
 # Provides in-memory functionalities by using a `map<Cart>`.
 public isolated class InMemoryStore {
     *DataStore;
-    private map<stub:Cart> store = {};
+    private map<stubs:Cart> store = {};
 
     # Adds an item to the in-memory store.
     #
@@ -53,27 +53,26 @@ public isolated class InMemoryStore {
     # + quantity - related product quantity
     isolated function addItem(string userId, string productId, int quantity) {
         lock {
-            if self.store.hasKey(userId) {
-                stub:Cart existingCart = self.store.get(userId);
-                stub:CartItem[] existingItems = existingCart.items;
-                stub:CartItem[] matchedItem = from stub:CartItem item in existingItems
-                    where item.product_id == productId
-                    limit 1
-                    select item;
-                if matchedItem.length() == 1 {
-                    stub:CartItem item = matchedItem[0];
-                    item.quantity = item.quantity + quantity;
-                } else {
-                    stub:CartItem newItem = {product_id: productId, quantity: quantity};
-                    existingItems.push(newItem);
-                }
-            } else {
-                stub:Cart newItem = {
+            if !self.store.hasKey(userId) {
+                self.store[userId] = {
                     user_id: userId,
                     items: [{product_id: productId, quantity: quantity}]
                 };
-                self.store[userId] = newItem;
+                return;
             }
+
+            stubs:CartItem[] existingItems = self.store.get(userId).items;
+            stubs:CartItem[] matchedItem = from stubs:CartItem item in existingItems
+                where item.product_id == productId
+                limit 1
+                select item;
+            if matchedItem.length() == 1 {
+                stubs:CartItem item = matchedItem[0];
+                item.quantity = item.quantity + quantity;
+                return;
+            }
+            stubs:CartItem newItem = {product_id: productId, quantity};
+            existingItems.push(newItem);
         }
     }
 
@@ -90,17 +89,17 @@ public isolated class InMemoryStore {
     #
     # + userId - user id of the user whose cart is required
     # + return - `Cart` with the cart items
-    isolated function getCart(string userId) returns stub:Cart {
+    isolated function getCart(string userId) returns stubs:Cart {
         lock {
             if self.store.hasKey(userId) {
                 return self.store.get(userId).cloneReadOnly();
             }
-            stub:Cart newItem = {
+            stubs:Cart newCart = {
                 user_id: userId,
                 items: []
             };
-            self.store[userId] = newItem;
-            return newItem.cloneReadOnly();
+            self.store[userId] = newCart;
+            return newCart.cloneReadOnly();
         }
     }
 }
@@ -147,9 +146,9 @@ public isolated class RedisStore {
     #
     # + userId - user id of the user whose cart is required
     # + return - `Cart` or an error if error occurs
-    isolated function getCart(string userId) returns stub:Cart|error {
+    isolated function getCart(string userId) returns stubs:Cart|error {
         map<any> userItems = check self.redisClient->hGetAll(userId);
-        stub:CartItem[] items = from [string, any] [productId, quantity] in userItems.entries()
+        stubs:CartItem[] items = from [string, any] [productId, quantity] in userItems.entries()
             select {product_id: productId, quantity: check int:fromString(quantity.toString())};
         return {user_id: userId, items};
     }

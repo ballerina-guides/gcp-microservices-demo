@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-import { Fragment, useEffect } from 'react';
+import { useEffect } from 'react';
 import Header from '../components/products/Header';
 import Footer from '../components/products/Footer';
 import Product from '../components/products/Product';

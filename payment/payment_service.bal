@@ -17,30 +17,27 @@
 import ballerina/grpc;
 import ballerina/log;
 import ballerina/uuid;
-import ballerina/observe;
 import ballerinax/jaeger as _;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 # This service validates the card details (using the Luhn algorithm) against the supported card providers and charges the card.
 @display {
     label: "Payment",
     id: "payment"
 }
-@grpc:Descriptor {value: stub:DEMO_DESC}
+@grpc:Descriptor {value: stubs:DEMO_DESC}
 service "PaymentService" on new grpc:Listener(9096) {
 
     function init() {
-        log:printInfo(string `Payment service gRPC server started.`);
+        log:printInfo("Payment service gRPC server started.");
     }
 
     # Validate and charge the amount from the card.
     #
     # + request - `ChargeRequest` containing the card details and the amount to charge
     # + return - `ChargeResponse` with the transaction id or an error
-    remote function Charge(stub:ChargeRequest request) returns stub:ChargeResponse|error {
-        log:printInfo(string `PaymentService#Charge invoked with request ${request.toString()}`);
-        int rootParentSpanId = observe:startRootSpan("PaymentSpan");
-        int childSpanId = check observe:startSpan("PaymentFromClientSpan", parentSpanId = rootParentSpanId);
+    remote function Charge(stubs:ChargeRequest request) returns stubs:ChargeResponse|error {
+        log:printInfo(string `received charge request with ${request.toString()}`);
 
         var {credit_card_number: cardNumber, credit_card_expiration_year: year,
                 credit_card_expiration_month: month} = request.credit_card;
@@ -52,8 +49,6 @@ service "PaymentService" on new grpc:Listener(9096) {
                     string `${currency_code}${units}.${nanos}`;
         log:printInfo(string `Transaction processed: ${cardType} ending ${lastFourDigits}, Amount: ${amount}`);
 
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
         return {
             transaction_id: uuid:createType1AsString()
         };

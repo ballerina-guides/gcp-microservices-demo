@@ -42,7 +42,8 @@ final CardTypeInfo[] & readonly cardDetails = [
 
 isolated function getCardType(string cardNumber) returns CardType|error {
     string formattedCardNumber = regex:replaceAll(cardNumber, "[^0-9]+", "");
-    if (formattedCardNumber.length() < 13) || (formattedCardNumber.length() > 19) {
+    int cardNumberLength = formattedCardNumber.length();
+    if cardNumberLength < 13 || cardNumberLength > 19 {
         return error CardValidationError("Credit card info is invalid: failed length check");
     }
 
@@ -92,11 +93,10 @@ isolated function validateCardExpiration(string cardNumber, int year, int month)
 
 isolated function isExpired(int expireYear, int expireMonth) returns boolean {
     time:Civil currentTime = time:utcToCivil(time:utcNow());
-    int month = currentTime.month;
     int year = currentTime.year;
 
     if year > expireYear {
         return true;
     }
-    return year == expireYear && month > expireMonth;
+    return year == expireYear && currentTime.month > expireMonth;
 }

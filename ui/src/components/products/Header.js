@@ -24,10 +24,10 @@ const whitelistedCurrencies = ['USD', 'CAD', 'JPY', 'TRY', 'EUR', 'GBP'];
 
 const Header = () => {
     const [myData, setMyData] = useState({
-        cart_size: 0,
+        cartSize: 0,
         currencies: whitelistedCurrencies,
-        is_cymbal_brand: false,
-        user_currency: ['USD', '$']
+        isCymbalBrand: false,
+        userCurrency: ['USD', '$']
     });
 
     useEffect(() => {
@@ -37,14 +37,14 @@ const Header = () => {
     }, []);
 
     let image = <img src={process.env.PUBLIC_URL + '/static/icons/Hipster_NavLogo.svg'} alt="" className="top-left-logo" />;
-    if (myData.is_cymbal_brand) {
+    if (myData.isCymbalBrand) {
         image = <img src={process.env.PUBLIC_URL + '/static/icons/Cymbal_NavLogo.svg'} alt="" className="top-left-logo-cymbal" />;
     }
 
     const items = [];
     for (const value of myData.currencies.values()) {
         if (whitelistedCurrencies.includes(value)) {
-            items.push(<CurrencyOption user_currency={value} />);
+            items.push(<CurrencyOption userCurrency={value} />);
         }
     }
 
@@ -66,9 +66,9 @@ const Header = () => {
     const currencyInfo = (
         <div className="h-controls">
             <div className="h-control">
-                <span className="icon currency-icon"> {myData.user_currency[1]}</span>
+                <span className="icon currency-icon"> {myData.userCurrency[1]}</span>
                 <form method="POST" className="controls-form" id="currency_form" onChange={changeCurrencyFormHandler}>
-                    <select name="currency_code" ref={currencyRef} value={myData.user_currency[0]}>
+                    <select name="currency_code" ref={currencyRef} value={myData.userCurrency[0]}>
                         {items}
                     </select>
                 </form>
@@ -77,8 +77,8 @@ const Header = () => {
         </div>
     );
     let cartSize;
-    if (myData.cart_size) {
-        cartSize = <span className="cart-size-circle">{myData.cart_size}</span>;
+    if (myData.cartSize) {
+        cartSize = <span className="cart-size-circle">{myData.cartSize}</span>;
     }
     return (
         <header>

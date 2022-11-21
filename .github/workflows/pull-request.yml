@@ -32,6 +32,12 @@ jobs:
     - name: Push gRPC Stub Module
       working-directory: "client_stubs"
       run: bal push --repository=local
+    - name: Pack Money Utils Module
+      working-directory: "money_utils"
+      run: bal pack
+    - name: Push Money Utils Module
+      working-directory: "money_utils"
+      run: bal push --repository=local
     - name: Ballerina Build
       working-directory: ${{ steps.testname.outputs.test-name }}
       run: bal build --cloud=k8s

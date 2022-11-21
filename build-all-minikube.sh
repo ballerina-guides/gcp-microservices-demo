@@ -16,6 +16,7 @@
 
 eval $(minikube docker-env)
 ( cd client_stubs ; bal pack ; bal push --repository local)
+( cd money_utils ; bal pack ; bal push --repository local)
 ( cd cart ; bal build --cloud=k8s)
 ( cd currency ; bal build --cloud=k8s)
 ( cd email ; bal build --cloud=k8s)

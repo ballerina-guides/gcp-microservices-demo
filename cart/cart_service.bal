@@ -16,9 +16,8 @@
 
 import ballerina/grpc;
 import ballerina/log;
-import ballerina/observe;
 import ballerinax/jaeger as _;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 configurable string datastore = "";
 configurable string redisHost = "";
@@ -29,7 +28,7 @@ configurable string redisPassword = "";
     label: "Cart",
     id: "cart"
 }
-@grpc:Descriptor {value: stub:DEMO_DESC}
+@grpc:Descriptor {value: stubs:DEMO_DESC}
 service "CartService" on new grpc:Listener(9092) {
     private final DataStore store;
 
@@ -47,17 +46,10 @@ service "CartService" on new grpc:Listener(9092) {
     #
     # + request - `AddItemRequest` containing the user id and the `CartItem`
     # + return - an `Empty` value or an error
-    remote function AddItem(stub:AddItemRequest request) returns stub:Empty|error {
-        int rootParentSpanId = observe:startRootSpan("AddItemSpan");
-        int childSpanId = check observe:startSpan("AddItemFromClientSpan", parentSpanId = rootParentSpanId);
-
+    remote function AddItem(stubs:AddItemRequest request) returns stubs:Empty|error {
         lock {
             check self.store.addItem(request.user_id, request.item.product_id, request.item.quantity);
         }
-
-        check observe:finishSpan(childSpanId);
-        check observe:finishSpan(rootParentSpanId);
-
         return {};
     }
 
@@ -65,10 +57,9 @@ service "CartService" on new grpc:Listener(9092) {
     #
     # + request - `GetCartRequest` containing the user id
     # + return - `Cart` containing the items or an error
-    remote function GetCart(stub:GetCartRequest request) returns stub:Cart|error {
+    remote function GetCart(stubs:GetCartRequest request) returns stubs:Cart|error {
         lock {
-            stub:Cart cart = check self.store.getCart(request.user_id);
-            return cart.cloneReadOnly();
+            return self.store.getCart(request.user_id).cloneReadOnly();
         }
     }
 
@@ -76,7 +67,7 @@ service "CartService" on new grpc:Listener(9092) {
     #
     # + request - `EmptyCartRequest` containing the user id
     # + return - `Empty` value or an error
-    remote function EmptyCart(stub:EmptyCartRequest request) returns stub:Empty|error {
+    remote function EmptyCart(stubs:EmptyCartRequest request) returns stubs:Empty|error {
         lock {
             check self.store.emptyCart(request.user_id);
         }
