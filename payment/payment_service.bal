@@ -39,22 +39,15 @@ service "PaymentService" on new grpc:Listener(9096) {
     remote function Charge(stubs:ChargeRequest request) returns stubs:ChargeResponse|error {
         log:printInfo(string `received charge request with ${request.toString()}`);
 
-        stubs:CreditCardInfo creditCard = request.credit_card;
-        string creditCardNumber = creditCard.credit_card_number;
-        CardCompany|error cardCompany = getCardCompany(creditCardNumber, creditCard.credit_card_expiration_year,
-            creditCard.credit_card_expiration_month);
-        if cardCompany is CardValidationError {
-            log:printError("Credit card is not valid", cardCompany);
-            return cardCompany;
-        }
-        if cardCompany is error {
-            log:printError("Error occured while validating the credit card", cardCompany);
-            return cardCompany;
-        }
-        stubs:Money amount = request.amount;
-        log:printInfo(string `Transaction processed: the card ending
-            ${creditCardNumber.substring(creditCardNumber.length() - 4)},
-                Amount: ${amount.currency_code}${amount.units}.${amount.nanos}`);
+        var {credit_card_number: cardNumber, credit_card_expiration_year: year,
+                credit_card_expiration_month: month} = request.credit_card;
+        CardType cardType = check getCardType(cardNumber);
+        check validateCardExpiration(cardNumber, year, month);
+
+        string lastFourDigits = cardNumber.substring(cardNumber.length() - 4);
+        string amount = let var {currency_code, units, nanos} = request.amount in
+                    string `${currency_code}${units}.${nanos}`;
+        log:printInfo(string `Transaction processed: ${cardType} ending ${lastFourDigits}, Amount: ${amount}`);
 
         return {
             transaction_id: uuid:createType1AsString()
