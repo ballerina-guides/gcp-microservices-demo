@@ -15,16 +15,16 @@
 // under the License.
 
 import ballerina/test;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 @test:Config {}
 function currencyExchangeTest() returns error? {
-    stub:CurrencyServiceClient ep = check new ("http://localhost:9093");
-    stub:Empty req = {};
-    stub:GetSupportedCurrenciesResponse getSupportedCurrenciesResponse = check ep->GetSupportedCurrencies(req);
+    stubs:CurrencyServiceClient ep = check new ("http://localhost:9093");
+    stubs:Empty req = {};
+    stubs:GetSupportedCurrenciesResponse getSupportedCurrenciesResponse = check ep->GetSupportedCurrencies(req);
     test:assertEquals(getSupportedCurrenciesResponse.currency_codes.length(), 33);
 
-    stub:CurrencyConversionRequest reqq = {
+    stubs:CurrencyConversionRequest reqq = {
         'from: {
             currency_code: "USD",
             units: 18,
@@ -32,7 +32,7 @@ function currencyExchangeTest() returns error? {
         },
         to_code: "EUR"
     };
-    stub:Money money = check ep->Convert(reqq);
+    stubs:Money money = check ep->Convert(reqq);
     test:assertEquals(money.currency_code, "EUR");
     test:assertEquals(money.nanos, 797877045);
     test:assertEquals(money.units, 16);

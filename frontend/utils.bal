@@ -17,7 +17,7 @@
 import ballerina/http;
 import ballerina/log;
 import ballerina/regex;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 const COOKIE_PATH = "/";
 const COOKIE_SPLIT_TOKEN = "=";
@@ -49,15 +49,15 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
     return cookiesInRequest;
 }
 
-isolated function getCartSize(stub:Cart cart) returns int {
+isolated function getCartSize(stubs:Cart cart) returns int {
     int cartSize = 0;
-    foreach stub:CartItem item in cart.items {
+    foreach stubs:CartItem item in cart.items {
         cartSize += item.quantity;
     }
     return cartSize;
 }
 
-isolated function toProductLocalized(stub:Product product, string price) returns ProductLocalized {
+isolated function toProductLocalized(stubs:Product product, string price) returns ProductLocalized {
     return {
         ...product,
         price

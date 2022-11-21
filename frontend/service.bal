@@ -20,7 +20,7 @@ import ballerina/os;
 import ballerina/time;
 import ballerina/uuid;
 import ballerinax/jaeger as _;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 import wso2/money_utils as money;
 
 const SESSION_ID_COOKIE = "sessionIdCookie";
@@ -93,7 +93,7 @@ service / on new http:Listener(9098) {
             return currencyCookie;
         }
 
-        stub:Cart cart = check getCart(sessionIdCookie.value);
+        stubs:Cart cart = check getCart(sessionIdCookie.value);
         MetadataResponse metadataResponse = {
             headers: {
                 "Set-Cookie": sessionIdCookie.toStringValue()
@@ -122,11 +122,11 @@ service / on new http:Listener(9098) {
         if currencyCookie is http:Unauthorized {
             return currencyCookie;
         }
-        stub:Product[] products = check getProducts();
+        stubs:Product[] products = check getProducts();
 
         ProductLocalized[] productsLocalized = [];
-        foreach stub:Product product in products {
-            stub:Money convertedMoney = check convertCurrency(product.price_usd, currencyCookie.value);
+        foreach stubs:Product product in products {
+            stubs:Money convertedMoney = check convertCurrency(product.price_usd, currencyCookie.value);
             productsLocalized.push(toProductLocalized(product, money:renderMoney(convertedMoney)));
         }
 
@@ -159,10 +159,10 @@ service / on new http:Listener(9098) {
         }
 
         string userId = sessionIdCookie.value;
-        stub:Product product = check getProduct(id);
-        stub:Money convertedMoney = check convertCurrency(product.price_usd, currencycookie.value);
+        stubs:Product product = check getProduct(id);
+        stubs:Money convertedMoney = check convertCurrency(product.price_usd, currencycookie.value);
         ProductLocalized productLocal = toProductLocalized(product, money:renderMoney(convertedMoney));
-        stub:Product[] recommendations = check getRecommendations(userId, [id]);
+        stubs:Product[] recommendations = check getRecommendations(userId, [id]);
 
         ProductResponse productResponse = {
             headers: {
@@ -189,7 +189,7 @@ service / on new http:Listener(9098) {
             return sessionIdCookie;
         }
         string[] supportedCurrencies = check getSupportedCurrencies();
-        stub:Cart cart = check getCart(sessionIdCookie.value);
+        stubs:Cart cart = check getCart(sessionIdCookie.value);
         http:Response response = new;
         http:Cookie currencyCookie = new (CURRENCY_COOKIE, request.currency, path = "/");
         response.addCookie(currencyCookie);
@@ -217,21 +217,21 @@ service / on new http:Listener(9098) {
             return currencyCookie;
         }
         string userId = sessionIdCookie.value;
-        stub:Cart cart = check getCart(userId);
-        stub:Product[] recommendations = check getRecommendations(userId, self.getProductIdFromCart(cart));
-        stub:Money shippingCost = check getShippingQuote(cart.items, currencyCookie.value);
-        stub:Money totalPrice = {
+        stubs:Cart cart = check getCart(userId);
+        stubs:Product[] recommendations = check getRecommendations(userId, self.getProductIdFromCart(cart));
+        stubs:Money shippingCost = check getShippingQuote(cart.items, currencyCookie.value);
+        stubs:Money totalPrice = {
             currency_code: currencyCookie.value,
             nanos: 0,
             units: 0
         };
         CartItemView[] cartItems = [];
-        foreach stub:CartItem item in cart.items {
-            stub:Product product = check getProduct(item.product_id);
+        foreach stubs:CartItem item in cart.items {
+            stubs:Product product = check getProduct(item.product_id);
 
-            stub:Money convertedPrice = check convertCurrency(product.price_usd, currencyCookie.value);
+            stubs:Money convertedPrice = check convertCurrency(product.price_usd, currencyCookie.value);
 
-            stub:Money price = money:multiplySlow(convertedPrice, item.quantity);
+            stubs:Money price = money:multiplySlow(convertedPrice, item.quantity);
             string renderedPrice = money:renderMoney(price);
             cartItems.push({
                 product,
@@ -271,7 +271,7 @@ service / on new http:Listener(9098) {
             return sessionIdCookie;
         }
         string userId = sessionIdCookie.value;
-        stub:Product|error product = getProduct(request.productId);
+        stubs:Product|error product = getProduct(request.productId);
         if product is error {
             http:BadRequest badRequest = {
                 body: string `invalid request ${product.message()}`
@@ -328,7 +328,7 @@ service / on new http:Listener(9098) {
         }
         string userId = sessionIdCookie.value;
 
-        stub:OrderResult orderResult = check checkoutCart({
+        stubs:OrderResult orderResult = check checkoutCart({
             email: request.email,
             address: {
                 city: request.city,
@@ -347,10 +347,10 @@ service / on new http:Listener(9098) {
             }
         });
 
-        stub:Product[] recommendations = check getRecommendations(userId);
-        stub:Money totalCost = orderResult.shipping_cost;
-        foreach stub:OrderItem item in orderResult.items {
-            stub:Money multiplyRes = money:multiplySlow(item.cost, item.item.quantity);
+        stubs:Product[] recommendations = check getRecommendations(userId);
+        stubs:Money totalCost = orderResult.shipping_cost;
+        foreach stubs:OrderItem item in orderResult.items {
+            stubs:Money multiplyRes = money:multiplySlow(item.cost, item.item.quantity);
             totalCost = money:sum(totalCost, multiplyRes);
         }
 
@@ -368,8 +368,8 @@ service / on new http:Listener(9098) {
         return checkoutResponse;
     }
 
-    function getProductIdFromCart(stub:Cart cart) returns string[] {
-        return from stub:CartItem item in cart.items
+    function getProductIdFromCart(stubs:Cart cart) returns string[] {
+        return from stubs:CartItem item in cart.items
             select item.product_id;
     }
 }

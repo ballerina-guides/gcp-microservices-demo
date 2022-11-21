@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 type Price record {|
     string currencyCode;
@@ -32,7 +32,7 @@ type JsonProduct readonly & record {|
     string[] categories;
 |};
 
-isolated function parseProductJson(json jsonContents) returns stub:Product[] & readonly|error {
+isolated function parseProductJson(json jsonContents) returns stubs:Product[] & readonly|error {
     json|error productsJson = jsonContents.products;
     if productsJson is error {
         log:printError("failed to parse the catalog JSON: ", productsJson);
@@ -54,7 +54,7 @@ isolated function parseProductJson(json jsonContents) returns stub:Product[] & r
         }.cloneReadOnly();
 }
 
-isolated function parseUsdPrice(Price usdPrice) returns stub:Money & readonly {
+isolated function parseUsdPrice(Price usdPrice) returns stubs:Money & readonly {
     return {
         currency_code: usdPrice.currencyCode,
         units: usdPrice.units,
@@ -62,7 +62,7 @@ isolated function parseUsdPrice(Price usdPrice) returns stub:Money & readonly {
     };
 }
 
-isolated function isProductRelated(stub:Product product, string query) returns boolean {
+isolated function isProductRelated(stubs:Product product, string query) returns boolean {
     string queryLowercase = query.toLowerAscii();
     return product.name.toLowerAscii().includes(queryLowercase) ||
         product.description.toLowerAscii().includes(queryLowercase);

@@ -18,7 +18,7 @@ import ballerina/grpc;
 import ballerina/log;
 import ballerinax/googleapis.gmail as gmail;
 import ballerinax/jaeger as _;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 type GmailConfig record {|
     string refreshToken;
@@ -37,7 +37,7 @@ configurable GmailConfig gmailConfig = ?;
     label: "Email",
     id: "email"
 }
-@grpc:Descriptor {value: stub:DEMO_DESC}
+@grpc:Descriptor {value: stubs:DEMO_DESC}
 service "EmailService" on new grpc:Listener(9097) {
 
     private final gmail:Client gmailClient;
@@ -58,7 +58,7 @@ service "EmailService" on new grpc:Listener(9097) {
     #
     # + request - `SendOrderConfirmationRequest` which contains the details about the order
     # + return - `Empty` or else an error
-    remote function SendOrderConfirmation(stub:SendOrderConfirmationRequest request) returns stub:Empty|error {
+    remote function SendOrderConfirmation(stubs:SendOrderConfirmationRequest request) returns stubs:Empty|error {
         log:printInfo(string `received send order confirmation request with email ${request.email}.`);
 
         gmail:MessageRequest messageRequest = {
@@ -79,8 +79,8 @@ service "EmailService" on new grpc:Listener(9097) {
     }
 }
 
-function getConfirmationHtml(stub:OrderResult result) returns xml|error {
-    xml items = from stub:OrderItem item in result.items
+function getConfirmationHtml(stubs:OrderResult result) returns xml|error {
+    xml items = from stubs:OrderItem item in result.items
         select xml `<tr>
             <td>#${item.item.product_id}</td>
             <td>${item.item.quantity}</td> 

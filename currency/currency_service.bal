@@ -18,7 +18,7 @@ import ballerina/grpc;
 import ballerina/io;
 import ballerina/log;
 import ballerinax/jaeger as _;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 const FRACTION_SIZE = 1000000000;
 
@@ -29,7 +29,7 @@ configurable string currencyJsonPath = "./data/currency_conversion.json";
     label: "Currency",
     id: "currency"
 }
-@grpc:Descriptor {value: stub:DEMO_DESC}
+@grpc:Descriptor {value: stubs:DEMO_DESC}
 service "CurrencyService" on new grpc:Listener(9093) {
     private final map<decimal> & readonly currencyMap;
 
@@ -44,7 +44,7 @@ service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - an empty request
     # + return - `GetSupportedCurrenciesResponse` containing supported currencies or else and error
-    remote function GetSupportedCurrencies(stub:Empty request) returns stub:GetSupportedCurrenciesResponse {
+    remote function GetSupportedCurrencies(stubs:Empty request) returns stubs:GetSupportedCurrenciesResponse {
         log:printInfo("Getting supported currencies.");
         return {currency_codes: self.currencyMap.keys()};
 
@@ -54,8 +54,8 @@ service "CurrencyService" on new grpc:Listener(9093) {
     #
     # + request - `CurrencyConversionRequest` containing the `Money` value and the required currency
     # + return - returns the `Money` in the required currency or an error
-    remote function Convert(stub:CurrencyConversionRequest request) returns stub:Money|error {
-        stub:Money moneyFrom = request.'from;
+    remote function Convert(stubs:CurrencyConversionRequest request) returns stubs:Money|error {
+        stubs:Money moneyFrom = request.'from;
         //From Unit
         decimal pennies = <decimal>moneyFrom.nanos / FRACTION_SIZE;
         decimal totalUSD = <decimal>moneyFrom.units + pennies;
