@@ -18,7 +18,7 @@ import ballerina/grpc;
 import ballerina/io;
 import ballerina/log;
 import ballerinax/jaeger as _;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 configurable string productJsonPath = "./resources/products.json";
 
@@ -27,9 +27,9 @@ configurable string productJsonPath = "./resources/products.json";
     label: "Catalog",
     id: "catalog"
 }
-@grpc:Descriptor {value: stub:DEMO_DESC}
+@grpc:Descriptor {value: stubs:DEMO_DESC}
 service "ProductCatalogService" on new grpc:Listener(9091) {
-    private final stub:Product[] & readonly products;
+    private final stubs:Product[] & readonly products;
 
     function init() returns error? {
         json|error productsJson = io:fileReadJson(productJsonPath);
@@ -46,7 +46,7 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - an empty request
     # + return - `ListProductsResponse` containing a `Product[]`
-    remote function ListProducts(stub:Empty request) returns stub:ListProductsResponse {
+    remote function ListProducts(stubs:Empty request) returns stubs:ListProductsResponse {
         return {products: self.products};
     }
 
@@ -54,8 +54,8 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - `GetProductRequest` containing the product id
     # + return - `Product` related to the required id or an error
-    remote function GetProduct(stub:GetProductRequest request) returns stub:Product|grpc:NotFoundError|error {
-        foreach stub:Product product in self.products {
+    remote function GetProduct(stubs:GetProductRequest request) returns stubs:Product|grpc:NotFoundError|error {
+        foreach stubs:Product product in self.products {
             if product.id == request.id {
                 return product;
             }
@@ -67,9 +67,9 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     #
     # + request - `SearchProductsRequest` containing the search query
     # + return - `SearchProductsResponse` containing the matching products
-    remote function SearchProducts(stub:SearchProductsRequest request) returns stub:SearchProductsResponse {
+    remote function SearchProducts(stubs:SearchProductsRequest request) returns stubs:SearchProductsResponse {
         return {
-            results: from stub:Product product in self.products
+            results: from stubs:Product product in self.products
                 where isProductRelated(product, request.query)
                 select product
         };

@@ -18,14 +18,14 @@ import ballerina/grpc;
 import ballerina/log;
 import ballerina/uuid;
 import ballerinax/jaeger as _;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 # This service validates the card details (using the Luhn algorithm) against the supported card providers and charges the card.
 @display {
     label: "Payment",
     id: "payment"
 }
-@grpc:Descriptor {value: stub:DEMO_DESC}
+@grpc:Descriptor {value: stubs:DEMO_DESC}
 service "PaymentService" on new grpc:Listener(9096) {
 
     function init() {
@@ -36,10 +36,10 @@ service "PaymentService" on new grpc:Listener(9096) {
     #
     # + request - `ChargeRequest` containing the card details and the amount to charge
     # + return - `ChargeResponse` with the transaction id or an error
-    remote function Charge(stub:ChargeRequest request) returns stub:ChargeResponse|error {
+    remote function Charge(stubs:ChargeRequest request) returns stubs:ChargeResponse|error {
         log:printInfo(string `PaymentService#Charge invoked with request ${request.toString()}`);
 
-        stub:CreditCardInfo creditCard = request.credit_card;
+        stubs:CreditCardInfo creditCard = request.credit_card;
         string creditCardNumber = creditCard.credit_card_number;
         CardCompany|error cardCompany = getCardCompany(creditCardNumber, creditCard.credit_card_expiration_year,
             creditCard.credit_card_expiration_month);
@@ -51,7 +51,7 @@ service "PaymentService" on new grpc:Listener(9096) {
             log:printError("Error occured while validating the credit card", cardCompany);
             return cardCompany;
         }
-        stub:Money amount = request.amount;
+        stubs:Money amount = request.amount;
         log:printInfo(string `Transaction processed: the card ending
             ${creditCardNumber.substring(creditCardNumber.length() - 4)},
                 Amount: ${amount.currency_code}${amount.units}.${amount.nanos}`);

@@ -18,7 +18,7 @@ import ballerina/grpc;
 import ballerina/log;
 import ballerina/uuid;
 import ballerinax/jaeger as _;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 import wso2/money_utils as money;
 
 const string LOCALHOST = "localhost";
@@ -42,42 +42,42 @@ configurable decimal emailTimeout = 3;
     label: "Checkout",
     id: "checkout"
 }
-@grpc:Descriptor {value: stub:DEMO_DESC}
+@grpc:Descriptor {value: stubs:DEMO_DESC}
 service "CheckoutService" on new grpc:Listener(9094) {
     @display {
         label: "Cart",
         id: "cart"
     }
-    private final stub:CartServiceClient cartClient;
+    private final stubs:CartServiceClient cartClient;
 
     @display {
         label: "Catalog",
         id: "catalog"
     }
-    private final stub:ProductCatalogServiceClient catalogClient;
+    private final stubs:ProductCatalogServiceClient catalogClient;
 
     @display {
         label: "Currency",
         id: "currency"
     }
-    private final stub:CurrencyServiceClient currencyClient;
+    private final stubs:CurrencyServiceClient currencyClient;
 
     @display {
         label: "Shipping",
         id: "shipping"
     }
-    private final stub:ShippingServiceClient shippingClient;
+    private final stubs:ShippingServiceClient shippingClient;
     @display {
         label: "Payment",
         id: "payment"
     }
-    private final stub:PaymentServiceClient paymentClient;
+    private final stubs:PaymentServiceClient paymentClient;
 
     @display {
         label: "Email",
         id: "email"
     }
-    private final stub:EmailServiceClient emailClient;
+    private final stubs:EmailServiceClient emailClient;
 
     function init() returns error? {
         self.cartClient = check new (string `http://${cartHost}:9092`, timeout = cartTimeout);
@@ -93,23 +93,23 @@ service "CheckoutService" on new grpc:Listener(9094) {
     #
     # + request - `PlaceOrderRequest` containing user details
     # + return - returns `PlaceOrderResponse` containing order details
-    remote function PlaceOrder(stub:PlaceOrderRequest request) returns stub:PlaceOrderResponse|grpc:Error|error {
+    remote function PlaceOrder(stubs:PlaceOrderRequest request) returns stubs:PlaceOrderResponse|grpc:Error|error {
         log:printInfo(string `[PlaceOrder] user_id=${request.user_id} user_currency=${request.user_currency}`);
 
         string orderId = uuid:createType1AsString();
-        stub:CartItem[] userCartItems = check self.getUserCartItems(request.user_id, request.user_currency);
-        stub:OrderItem[] orderItems = check self.prepOrderItems(userCartItems, request.user_currency);
-        stub:Money shippingPrice = check self.convertCurrency(check self.quoteShipping(request.address, userCartItems),
+        stubs:CartItem[] userCartItems = check self.getUserCartItems(request.user_id, request.user_currency);
+        stubs:OrderItem[] orderItems = check self.prepOrderItems(userCartItems, request.user_currency);
+        stubs:Money shippingPrice = check self.convertCurrency(check self.quoteShipping(request.address, userCartItems),
             request.user_currency);
 
-        stub:Money totalCost = {
+        stubs:Money totalCost = {
             currency_code: request.user_currency,
             units: 0,
             nanos: 0
         };
         totalCost = money:sum(totalCost, shippingPrice);
-        foreach stub:OrderItem item in orderItems {
-            stub:Money itemCost = money:multiplySlow(item.cost, item.item.quantity);
+        foreach stubs:OrderItem item in orderItems {
+            stubs:Money itemCost = money:multiplySlow(item.cost, item.item.quantity);
             totalCost = money:sum(totalCost, itemCost);
         }
 
@@ -118,7 +118,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         string shippingTrackingId = check self.shipOrder(request.address, userCartItems);
         check self.emptyUserCart(request.user_id);
 
-        stub:OrderResult 'order = {
+        stubs:OrderResult 'order = {
             order_id: orderId,
             shipping_tracking_id: shippingTrackingId,
             shipping_cost: shippingPrice,
@@ -126,7 +126,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
             items: orderItems
         };
 
-        stub:Empty|grpc:Error result = self.sendConfirmationMail(request.email, 'order);
+        stubs:Empty|grpc:Error result = self.sendConfirmationMail(request.email, 'order);
         if result is grpc:Error {
             log:printWarn(string `failed to send order confirmation to ${request.email}`, result);
         } else {
@@ -136,9 +136,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return {'order};
     }
 
-    function getUserCartItems(string userId, string userCurrency) returns stub:CartItem[]|grpc:Error {
-        stub:GetCartRequest getCartRequest = {user_id: userId};
-        stub:Cart|grpc:Error cartResponse = self.cartClient->GetCart(getCartRequest);
+    function getUserCartItems(string userId, string userCurrency) returns stubs:CartItem[]|grpc:Error {
+        stubs:GetCartRequest getCartRequest = {user_id: userId};
+        stubs:Cart|grpc:Error cartResponse = self.cartClient->GetCart(getCartRequest);
         if cartResponse is grpc:Error {
             log:printError("failed to call getCart of cart service", cartResponse);
             return cartResponse;
@@ -146,23 +146,23 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return cartResponse.items;
     }
 
-    function prepOrderItems(stub:CartItem[] cartItems, string userCurrency) returns stub:OrderItem[]|grpc:Error {
-        stub:OrderItem[] orderItems = [];
-        foreach stub:CartItem item in cartItems {
-            stub:GetProductRequest productRequest = {id: item.product_id};
-            stub:Product|grpc:Error productResponse = self.catalogClient->GetProduct(productRequest);
+    function prepOrderItems(stubs:CartItem[] cartItems, string userCurrency) returns stubs:OrderItem[]|grpc:Error {
+        stubs:OrderItem[] orderItems = [];
+        foreach stubs:CartItem item in cartItems {
+            stubs:GetProductRequest productRequest = {id: item.product_id};
+            stubs:Product|grpc:Error productResponse = self.catalogClient->GetProduct(productRequest);
             if productResponse is grpc:Error {
                 log:printError("failed to call getProduct from catalog service", productResponse);
                 return error grpc:InternalError(
                                     string `failed to get product ${item.product_id}`, productResponse);
             }
 
-            stub:CurrencyConversionRequest conversionRequest = {
+            stubs:CurrencyConversionRequest conversionRequest = {
                 'from: productResponse.price_usd,
                 to_code: userCurrency
             };
 
-            stub:Money|grpc:Error conversionResponse = self.currencyClient->Convert(conversionRequest);
+            stubs:Money|grpc:Error conversionResponse = self.currencyClient->Convert(conversionRequest);
             if conversionResponse is grpc:Error {
                 log:printError("failed to call convert from currency service", conversionResponse);
                 return error grpc:InternalError(string `failed to convert price of ${item.product_id} to
@@ -176,12 +176,12 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return orderItems;
     }
 
-    function quoteShipping(stub:Address address, stub:CartItem[] items) returns stub:Money|grpc:InternalError {
-        stub:GetQuoteRequest quoteRequest = {
+    function quoteShipping(stubs:Address address, stubs:CartItem[] items) returns stubs:Money|grpc:InternalError {
+        stubs:GetQuoteRequest quoteRequest = {
             address,
             items
         };
-        stub:GetQuoteResponse|grpc:Error getQuoteResponse = self.shippingClient->GetQuote(quoteRequest);
+        stubs:GetQuoteResponse|grpc:Error getQuoteResponse = self.shippingClient->GetQuote(quoteRequest);
         if getQuoteResponse is grpc:Error {
             log:printError("failed to call getQuote from shipping service", getQuoteResponse);
             return error grpc:InternalError(
@@ -190,12 +190,12 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return getQuoteResponse.cost_usd;
     }
 
-    function convertCurrency(stub:Money usd, string userCurrency) returns stub:Money|grpc:InternalError {
-        stub:CurrencyConversionRequest conversionRequest = {
+    function convertCurrency(stubs:Money usd, string userCurrency) returns stubs:Money|grpc:InternalError {
+        stubs:CurrencyConversionRequest conversionRequest = {
             'from: usd,
             to_code: userCurrency
         };
-        stub:Money|grpc:Error convertionResponse = self.currencyClient->Convert(conversionRequest);
+        stubs:Money|grpc:Error convertionResponse = self.currencyClient->Convert(conversionRequest);
         if convertionResponse is grpc:Error {
             log:printError("failed to call convert from currency service", convertionResponse);
             return error grpc:InternalError(
@@ -204,12 +204,12 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return convertionResponse;
     }
 
-    function chargeCard(stub:Money total, stub:CreditCardInfo card) returns string|grpc:InternalError {
-        stub:ChargeRequest chargeRequest = {
+    function chargeCard(stubs:Money total, stubs:CreditCardInfo card) returns string|grpc:InternalError {
+        stubs:ChargeRequest chargeRequest = {
             amount: total,
             credit_card: card
         };
-        stub:ChargeResponse|grpc:Error chargeResponse = self.paymentClient->Charge(chargeRequest);
+        stubs:ChargeResponse|grpc:Error chargeResponse = self.paymentClient->Charge(chargeRequest);
         if chargeResponse is grpc:Error {
             log:printError("failed to call charge from payment service", chargeResponse);
             return error grpc:InternalError(
@@ -218,9 +218,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
         return chargeResponse.transaction_id;
     }
 
-    function shipOrder(stub:Address address, stub:CartItem[] items) returns string|grpc:UnavailableError {
-        stub:ShipOrderRequest orderRequest = {};
-        stub:ShipOrderResponse|grpc:Error shipOrderResponse = self.shippingClient->ShipOrder(orderRequest);
+    function shipOrder(stubs:Address address, stubs:CartItem[] items) returns string|grpc:UnavailableError {
+        stubs:ShipOrderRequest orderRequest = {};
+        stubs:ShipOrderResponse|grpc:Error shipOrderResponse = self.shippingClient->ShipOrder(orderRequest);
         if shipOrderResponse is grpc:Error {
             log:printError("failed to call shipOrder from shipping service", shipOrderResponse);
             return error grpc:UnavailableError(
@@ -230,10 +230,10 @@ service "CheckoutService" on new grpc:Listener(9094) {
     }
 
     function emptyUserCart(string userId) returns grpc:InternalError? {
-        stub:EmptyCartRequest request = {
+        stubs:EmptyCartRequest request = {
             user_id: userId
         };
-        stub:Empty|grpc:Error emptyCart = self.cartClient->EmptyCart(request);
+        stubs:Empty|grpc:Error emptyCart = self.cartClient->EmptyCart(request);
         if emptyCart is grpc:Error {
             log:printError("failed to call emptyCart from cart service", emptyCart);
             return error grpc:InternalError(
@@ -241,7 +241,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         }
     }
 
-    function sendConfirmationMail(string email, stub:OrderResult orderResult) returns stub:Empty|grpc:Error {
+    function sendConfirmationMail(string email, stubs:OrderResult orderResult) returns stubs:Empty|grpc:Error {
         return self.emailClient->SendOrderConfirmation({
             email,
             'order: orderResult

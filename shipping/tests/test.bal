@@ -15,12 +15,12 @@
 // under the License.
 
 import ballerina/test;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 @test:Config {}
 function shippingTest() returns error? {
-    stub:ShippingServiceClient ep = check new ("http://localhost:9095");
-    stub:GetQuoteRequest req1 = {
+    stubs:ShippingServiceClient ep = check new ("http://localhost:9095");
+    stubs:GetQuoteRequest req1 = {
         address: {
             street_address: "Muffin Man",
             city: "London",
@@ -38,13 +38,13 @@ function shippingTest() returns error? {
             }
         ]
     };
-    stub:GetQuoteResponse getQuoteResponse = check ep->GetQuote(req1);
+    stubs:GetQuoteResponse getQuoteResponse = check ep->GetQuote(req1);
     int units = getQuoteResponse.cost_usd.units;
     int nanos = getQuoteResponse.cost_usd.nanos;
     test:assertEquals(units, 8);
     test:assertEquals(nanos, 10000000);
 
-    stub:ShipOrderRequest req = {};
-    stub:ShipOrderResponse getSupportedCurrenciesResponse = check ep->ShipOrder(req);
+    stubs:ShipOrderRequest req = {};
+    stubs:ShipOrderResponse getSupportedCurrenciesResponse = check ep->ShipOrder(req);
     test:assertEquals(getSupportedCurrenciesResponse.tracking_id.length(), 18);
 }

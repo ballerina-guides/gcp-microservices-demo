@@ -17,7 +17,7 @@
 import ballerina/grpc;
 import ballerina/log;
 import ballerina/random;
-import wso2/client_stubs as stub;
+import wso2/client_stubs as stubs;
 
 const LOCALHOST = "localhost";
 
@@ -34,7 +34,7 @@ configurable string currencyHost = LOCALHOST;
     label: "Currency",
     id: "currency"
 }
-final stub:CurrencyServiceClient currencyClient = check new (string `http://${currencyHost}:9093`,
+final stubs:CurrencyServiceClient currencyClient = check new (string `http://${currencyHost}:9093`,
                                                 timeout = currencyTimeout);
 
 configurable string catalogHost = LOCALHOST;
@@ -42,7 +42,7 @@ configurable string catalogHost = LOCALHOST;
     label: "Catalog",
     id: "catalog"
 }
-final stub:ProductCatalogServiceClient catalogClient = check new (string `http://${catalogHost}:9091`,
+final stubs:ProductCatalogServiceClient catalogClient = check new (string `http://${catalogHost}:9091`,
                                                     timeout = catalogTimeout);
 
 configurable string cartHost = LOCALHOST;
@@ -50,14 +50,14 @@ configurable string cartHost = LOCALHOST;
     label: "Cart",
     id: "cart"
 }
-final stub:CartServiceClient cartClient = check new (string `http://${cartHost}:9092`, timeout = cartTimeout);
+final stubs:CartServiceClient cartClient = check new (string `http://${cartHost}:9092`, timeout = cartTimeout);
 
 configurable string shippingHost = LOCALHOST;
 @display {
     label: "Shipping",
     id: "shipping"
 }
-final stub:ShippingServiceClient shippingClient = check new (string `http://${shippingHost}:9095`,
+final stubs:ShippingServiceClient shippingClient = check new (string `http://${shippingHost}:9095`,
                                                 timeout = shippingTimeout);
 
 configurable string recommendHost = LOCALHOST;
@@ -65,7 +65,7 @@ configurable string recommendHost = LOCALHOST;
     label: "Recommendation",
     id: "recommendation"
 }
-final stub:RecommendationServiceClient recommendClient = check new (string `http://${recommendHost}:9090`,
+final stubs:RecommendationServiceClient recommendClient = check new (string `http://${recommendHost}:9090`,
                                                         timeout = recommendationTimeout);
 
 configurable string adHost = LOCALHOST;
@@ -73,18 +73,18 @@ configurable string adHost = LOCALHOST;
     label: "Ads",
     id: "ads"
 }
-final stub:AdServiceClient adClient = check new (string `http://${adHost}:9099`, timeout = adTimeout);
+final stubs:AdServiceClient adClient = check new (string `http://${adHost}:9099`, timeout = adTimeout);
 
 configurable string checkoutHost = LOCALHOST;
 @display {
     label: "Checkout",
     id: "checkout"
 }
-final stub:CheckoutServiceClient checkoutClient = check new (string `http://${checkoutHost}:9094`,
+final stubs:CheckoutServiceClient checkoutClient = check new (string `http://${checkoutHost}:9094`,
                                                 timeout = checkoutTimeout);
 
 isolated function getSupportedCurrencies() returns string[]|grpc:Error {
-    stub:GetSupportedCurrenciesResponse|grpc:Error supportedCurrencies = currencyClient->GetSupportedCurrencies({});
+    stubs:GetSupportedCurrenciesResponse|grpc:Error supportedCurrencies = currencyClient->GetSupportedCurrencies({});
     if supportedCurrencies is grpc:Error {
         log:printError("failed to get supported currencies from the currency service", supportedCurrencies);
         return supportedCurrencies;
@@ -92,8 +92,8 @@ isolated function getSupportedCurrencies() returns string[]|grpc:Error {
     return supportedCurrencies.currency_codes;
 }
 
-isolated function getProducts() returns stub:Product[]|grpc:Error {
-    stub:ListProductsResponse|grpc:Error productsResponse = catalogClient->ListProducts({});
+isolated function getProducts() returns stubs:Product[]|grpc:Error {
+    stubs:ListProductsResponse|grpc:Error productsResponse = catalogClient->ListProducts({});
     if productsResponse is grpc:Error {
         log:printError("failed to list products from the catalog service", productsResponse);
         return productsResponse;
@@ -101,16 +101,16 @@ isolated function getProducts() returns stub:Product[]|grpc:Error {
     return productsResponse.products;
 }
 
-isolated function getProduct(string id) returns stub:Product|grpc:Error {
-    stub:Product|grpc:Error product = catalogClient->GetProduct({id});
+isolated function getProduct(string id) returns stubs:Product|grpc:Error {
+    stubs:Product|grpc:Error product = catalogClient->GetProduct({id});
     if product is grpc:Error {
         log:printError("failed to get product from the catalog service", product);
     }
     return product;
 }
 
-isolated function getCart(string userId) returns stub:Cart|grpc:Error {
-    stub:Cart|grpc:Error cart = cartClient->GetCart({
+isolated function getCart(string userId) returns stubs:Cart|grpc:Error {
+    stubs:Cart|grpc:Error cart = cartClient->GetCart({
         user_id: userId
     });
     if cart is grpc:Error {
@@ -120,7 +120,7 @@ isolated function getCart(string userId) returns stub:Cart|grpc:Error {
 }
 
 isolated function emptyCart(string userId) returns grpc:Error? {
-    stub:Empty|grpc:Error cart = cartClient->EmptyCart({
+    stubs:Empty|grpc:Error cart = cartClient->EmptyCart({
         user_id: userId
     });
     if cart is grpc:Error {
@@ -130,7 +130,7 @@ isolated function emptyCart(string userId) returns grpc:Error? {
 }
 
 isolated function insertItemToCart(string userId, string productId, int quantity) returns grpc:Error? {
-    stub:Empty|grpc:Error response = cartClient->AddItem({
+    stubs:Empty|grpc:Error response = cartClient->AddItem({
         user_id: userId,
         item: {
             product_id: productId,
@@ -143,8 +143,8 @@ isolated function insertItemToCart(string userId, string productId, int quantity
     }
 }
 
-isolated function convertCurrency(stub:Money usd, string userCurrency) returns stub:Money|grpc:Error {
-    stub:Money|grpc:Error convertedCurrency = currencyClient->Convert({
+isolated function convertCurrency(stubs:Money usd, string userCurrency) returns stubs:Money|grpc:Error {
+    stubs:Money|grpc:Error convertedCurrency = currencyClient->Convert({
         'from: usd,
         to_code: userCurrency
     });
@@ -154,8 +154,8 @@ isolated function convertCurrency(stub:Money usd, string userCurrency) returns s
     return convertedCurrency;
 }
 
-isolated function getShippingQuote(stub:CartItem[] items, string currency) returns stub:Money|grpc:Error {
-    stub:GetQuoteResponse|grpc:Error quote = shippingClient->GetQuote({
+isolated function getShippingQuote(stubs:CartItem[] items, string currency) returns stubs:Money|grpc:Error {
+    stubs:GetQuoteResponse|grpc:Error quote = shippingClient->GetQuote({
         items
     });
     if quote is grpc:Error {
@@ -165,8 +165,8 @@ isolated function getShippingQuote(stub:CartItem[] items, string currency) retur
     return convertCurrency(quote.cost_usd, currency);
 }
 
-isolated function getRecommendations(string userId, string[] productIds = []) returns stub:Product[]|grpc:Error {
-    stub:ListRecommendationsResponse|grpc:Error recommendations = recommendClient->ListRecommendations({
+isolated function getRecommendations(string userId, string[] productIds = []) returns stubs:Product[]|grpc:Error {
+    stubs:ListRecommendationsResponse|grpc:Error recommendations = recommendClient->ListRecommendations({
         user_id: userId,
         product_ids: ["2ZYFJ3GM2N", "LS4PSXUNUM"]
     });
@@ -180,8 +180,8 @@ isolated function getRecommendations(string userId, string[] productIds = []) re
         select check getProduct(productId);
 }
 
-isolated function getAds(string[] context_keys) returns stub:Ad[]|grpc:Error {
-    stub:AdResponse|grpc:Error adResponse = adClient->GetAds({context_keys});
+isolated function getAds(string[] context_keys) returns stubs:Ad[]|grpc:Error {
+    stubs:AdResponse|grpc:Error adResponse = adClient->GetAds({context_keys});
     if adResponse is grpc:Error {
         log:printError("failed to get ads from the ads service", adResponse);
         return adResponse;
@@ -189,13 +189,13 @@ isolated function getAds(string[] context_keys) returns stub:Ad[]|grpc:Error {
     return adResponse.ads;
 }
 
-isolated function chooseAd(string[] ctxKeys = []) returns stub:Ad|error {
-    stub:Ad[] ads = check getAds(ctxKeys);
+isolated function chooseAd(string[] ctxKeys = []) returns stubs:Ad|error {
+    stubs:Ad[] ads = check getAds(ctxKeys);
     return ads[check random:createIntInRange(0, ads.length())];
 }
 
-isolated function checkoutCart(stub:PlaceOrderRequest request) returns stub:OrderResult|grpc:Error {
-    stub:PlaceOrderResponse|grpc:Error placeOrderResponse = checkoutClient->PlaceOrder(request);
+isolated function checkoutCart(stubs:PlaceOrderRequest request) returns stubs:OrderResult|grpc:Error {
+    stubs:PlaceOrderResponse|grpc:Error placeOrderResponse = checkoutClient->PlaceOrder(request);
     if placeOrderResponse is grpc:Error {
         log:printError("failed to place order from the checkout service", placeOrderResponse);
         return placeOrderResponse;
