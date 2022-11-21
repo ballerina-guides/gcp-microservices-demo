@@ -524,7 +524,6 @@ spec:
 
 ```
 
-
 # Running the Microservices on the Cloud
 
 ## Setting up Email Credentials
@@ -601,6 +600,23 @@ Execute `kubectl get svc` and get the port of the `frontend-svc-local` service.
 Execute `kubectl port-forward svc/frontend-svc-local 27017:9098` to forward the frontend listening interface to localhost.
 
 Change the value of the `FRONTEND_SVC_URL` variable in `ui/src/lib/api.js` to the frontend service (Example Value - http://localhost:27017')
+
+
+# Running the Microservices locally
+
+* Set up the email service with email credentials as explained above.
+* Build and publish the `client_stubs` and `money_utils` modules to the local central as follows.
+```bash
+cd module
+bal pack
+bal push --repository local
+```
+* Inside each module directory, execute `bal run` to start the service.
+* Once all the services are up, start the React application by executing following commands from the `ui/` directory.
+```bash
+npm install
+npm start
+```
 
 # Observe services tracing information with Jaeger
 
