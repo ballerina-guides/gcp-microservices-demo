@@ -1,6 +1,6 @@
 [package]
 org = "wso2"
-name = "recommendation"
+name = "money"
 version = "0.1.0"
 distribution = "2201.2.3"
 
@@ -12,4 +12,3 @@ org = "wso2"
 name = "client_stubs"
 version = "0.1.0"
 repository = "local"
-

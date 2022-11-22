@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [ads, cart, checkout, currency, email, frontend, payment, productcatalog, recommendation, shipping]
+        test: [adservice, cartservice, checkoutservice, currencyservice, emailservice, frontendservice, paymentservice, productcatalogservice, recommendationservice, shippingservice]
     env:
       TEST_NAME: "${{ matrix.test }}"
     steps:
@@ -20,10 +20,23 @@ jobs:
       id: testname
       run: |
         echo "::set-output name=test-name::${TEST_NAME}"
-    - name: Ballerina Build
-      uses: ballerina-platform/ballerina-action@master
-      env:
-        WORKING_DIR: ${{ steps.testname.outputs.test-name }}
+    - uses: hasithaa/setup-ballerina@v1
+      name: Install Ballerina
       with:
-        args:
-          build --cloud=k8s
+        version: 2201.2.3
+    - name: Pack gRPC Stub Module
+      working-directory: "client_stubs"
+      run: bal pack
+    - name: Push gRPC Stub Module
+      working-directory: "client_stubs"
+      run: bal push --repository=local
+    - name: Pack Money Utils Module
+      working-directory: "money"
+      run: bal pack
+    - name: Push Money Utils Module
+      working-directory: "money"
+      run: bal push --repository=local
+    - name: Ballerina Build
+      working-directory: ${{ steps.testname.outputs.test-name }}
+      run: bal build --cloud=k8s
+

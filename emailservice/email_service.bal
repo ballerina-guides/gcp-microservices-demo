@@ -28,7 +28,7 @@ type GmailConfig record {|
 
 const FONT_URL =
     "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
-
+const FRACTION_SIZE = 1000000000;
 
 configurable GmailConfig gmailConfig = ?;
 
@@ -68,14 +68,12 @@ service "EmailService" on new grpc:Listener(9097) {
             contentType: gmail:TEXT_HTML
         };
         gmail:Message|error sendMessageResponse = self.gmailClient->sendMessage(messageRequest);
-
-        if sendMessageResponse is gmail:Message {
-            log:printInfo(string `Sent Message ID: ${sendMessageResponse.id}`);
-            log:printInfo(string `Sent Thread ID: ${sendMessageResponse.threadId}`);
-            return {};
+        if sendMessageResponse is error {
+            log:printError("Error sending confirmation mail ", sendMessageResponse);
+            return sendMessageResponse;
         }
-        log:printError("Error sending confirmation mail ", sendMessageResponse);
-        return sendMessageResponse;
+        log:printInfo(string `Email sent with Message ID: ${sendMessageResponse.id} and Thread ID: ${sendMessageResponse.threadId}`);
+        return {};
     }
 }
 
@@ -84,7 +82,7 @@ function getConfirmationHtml(stubs:OrderResult result) returns xml|error {
         select xml `<tr>
             <td>#${item.item.product_id}</td>
             <td>${item.item.quantity}</td> 
-            <td>${item.cost.units}.${item.cost.nanos / 10000000} ${item.cost.currency_code}</td>
+            <td>${item.cost.units}.${item.cost.nanos / FRACTION_SIZE} ${item.cost.currency_code}</td>
             </tr>`;
     items = xml `<tr>
           <th>Item No.</th>
@@ -99,7 +97,7 @@ function getConfirmationHtml(stubs:OrderResult result) returns xml|error {
         <p>#${result.order_id}</p>
         <h3>Shipping</h3>
         <p>#${result.shipping_tracking_id}</p>
-        <p>${result.shipping_cost.units}.${result.shipping_cost.nanos / 10000000}
+        <p>${result.shipping_cost.units}.${result.shipping_cost.nanos / FRACTION_SIZE}
                 ${result.shipping_cost.currency_code}</p>
         <p>${result.shipping_address.street_address}, ${result.shipping_address.city},
                 ${result.shipping_address.country} ${result.shipping_address.zip_code}</p>
@@ -117,7 +115,13 @@ function getConfirmationHtml(stubs:OrderResult result) returns xml|error {
         </head>
         <style>
             body{
-            font-family: 'DM Sans', sans-serif;
+                font-family: 'DM Sans', sans-serif;
+            }
+            th, td {
+                padding: 5px;
+            }
+            th {
+                text-align: left;
             }
         </style>
             ${body}

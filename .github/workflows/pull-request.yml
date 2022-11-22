@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [ads, cart, checkout, currency, email, frontend, payment, productcatalog, recommendation, shipping]
+        test: [adservice, cartservice, checkoutservice, currencyservice, emailservice, frontendservice, paymentservice, productcatalogservice, recommendationservice, shippingservice]
     env:
       TEST_NAME: "${{ matrix.test }}"
     steps:
@@ -33,10 +33,10 @@ jobs:
       working-directory: "client_stubs"
       run: bal push --repository=local
     - name: Pack Money Utils Module
-      working-directory: "money_utils"
+      working-directory: "money"
       run: bal pack
     - name: Push Money Utils Module
-      working-directory: "money_utils"
+      working-directory: "money"
       run: bal push --repository=local
     - name: Ballerina Build
       working-directory: ${{ steps.testname.outputs.test-name }}

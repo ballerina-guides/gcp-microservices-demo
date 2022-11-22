@@ -1,6 +1,6 @@
 [package]
 org = "wso2"
-name = "money_utils"
+name = "cartservice"
 version = "0.1.0"
 distribution = "2201.2.3"
 
