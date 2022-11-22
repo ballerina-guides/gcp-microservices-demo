@@ -19,7 +19,7 @@ import ballerina/log;
 import ballerina/uuid;
 import ballerinax/jaeger as _;
 import wso2/client_stubs as stubs;
-import wso2/money_utils as money;
+import wso2/money;
 
 const string LOCALHOST = "localhost";
 
