@@ -94,7 +94,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
     # + request - `PlaceOrderRequest` containing user details
     # + return - returns `PlaceOrderResponse` containing order details
     remote function PlaceOrder(stubs:PlaceOrderRequest request) returns stubs:PlaceOrderResponse|grpc:Error|error {
-        log:printInfo(string `received place order request with user_id=${request.user_id} user_currency=${request.user_currency}`);
+        log:printInfo(string `Received place order request with user_id=${request.user_id} user_currency=${request.user_currency}`);
 
         string orderId = uuid:createType1AsString();
         stubs:CartItem[] userCartItems = check self.getUserCartItems(request.user_id, request.user_currency);
@@ -114,7 +114,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         }
 
         string transactionId = check self.chargeCard(totalCost, request.credit_card);
-        log:printInfo(string `payment went through ${transactionId}`);
+        log:printInfo(string `Payment went through ${transactionId}`);
         string shippingTrackingId = check self.shipOrder(request.address, userCartItems);
         check self.emptyUserCart(request.user_id);
 
@@ -128,9 +128,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
 
         stubs:Empty|grpc:Error result = self.sendConfirmationMail(request.email, 'order);
         if result is grpc:Error {
-            log:printWarn(string `failed to send order confirmation to ${request.email}`, result);
+            log:printWarn(string `Failed to send order confirmation to ${request.email}`, result);
         } else {
-            log:printInfo(string `order confirmation email sent to ${request.email}`);
+            log:printInfo(string `Order confirmation email sent to ${request.email}`);
         }
 
         return {'order};
@@ -140,7 +140,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         stubs:GetCartRequest getCartRequest = {user_id: userId};
         stubs:Cart|grpc:Error cartResponse = self.cartClient->GetCart(getCartRequest);
         if cartResponse is grpc:Error {
-            log:printError("failed to call getCart of cart service", cartResponse);
+            log:printError("Failed to call getCart of cart service", cartResponse);
             return cartResponse;
         }
         return cartResponse.items;
@@ -152,7 +152,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
             stubs:GetProductRequest productRequest = {id: item.product_id};
             stubs:Product|grpc:Error productResponse = self.catalogClient->GetProduct(productRequest);
             if productResponse is grpc:Error {
-                log:printError("failed to call getProduct from catalog service", productResponse);
+                log:printError("Failed to call getProduct from catalog service", productResponse);
                 return error grpc:InternalError(
                                     string `failed to get product ${item.product_id}`, productResponse);
             }
@@ -164,7 +164,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
 
             stubs:Money|grpc:Error conversionResponse = self.currencyClient->Convert(conversionRequest);
             if conversionResponse is grpc:Error {
-                log:printError("failed to call convert from currency service", conversionResponse);
+                log:printError("Failed to call convert from currency service", conversionResponse);
                 return error grpc:InternalError(string `failed to convert price of ${item.product_id} to
                     ${userCurrency}`, conversionResponse);
             }
@@ -183,7 +183,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         };
         stubs:GetQuoteResponse|grpc:Error getQuoteResponse = self.shippingClient->GetQuote(quoteRequest);
         if getQuoteResponse is grpc:Error {
-            log:printError("failed to call getQuote from shipping service", getQuoteResponse);
+            log:printError("Failed to call getQuote from shipping service", getQuoteResponse);
             return error grpc:InternalError(
                 string `failed to get shipping quote: ${getQuoteResponse.message()}`, getQuoteResponse);
         }
@@ -197,7 +197,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         };
         stubs:Money|grpc:Error convertionResponse = self.currencyClient->Convert(conversionRequest);
         if convertionResponse is grpc:Error {
-            log:printError("failed to call convert from currency service", convertionResponse);
+            log:printError("Failed to call convert from currency service", convertionResponse);
             return error grpc:InternalError(
                 string `failed to convert currency: ${convertionResponse.message()}`, convertionResponse);
         }
@@ -211,7 +211,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         };
         stubs:ChargeResponse|grpc:Error chargeResponse = self.paymentClient->Charge(chargeRequest);
         if chargeResponse is grpc:Error {
-            log:printError("failed to call charge from payment service", chargeResponse);
+            log:printError("Failed to call charge from payment service", chargeResponse);
             return error grpc:InternalError(
                 string `could not charge the card: ${chargeResponse.message()}`, chargeResponse);
         }
@@ -222,7 +222,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         stubs:ShipOrderRequest orderRequest = {};
         stubs:ShipOrderResponse|grpc:Error shipOrderResponse = self.shippingClient->ShipOrder(orderRequest);
         if shipOrderResponse is grpc:Error {
-            log:printError("failed to call shipOrder from shipping service", shipOrderResponse);
+            log:printError("Failed to call shipOrder from shipping service", shipOrderResponse);
             return error grpc:UnavailableError(
                 string `shipment failed: ${shipOrderResponse.message()}`, shipOrderResponse);
         }
@@ -235,7 +235,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
         };
         stubs:Empty|grpc:Error emptyCart = self.cartClient->EmptyCart(request);
         if emptyCart is grpc:Error {
-            log:printError("failed to call emptyCart from cart service", emptyCart);
+            log:printError("Failed to call emptyCart from cart service", emptyCart);
             return error grpc:InternalError(
                 string `failed to empty user cart during checkout: ${emptyCart.message()}`, emptyCart);
         }

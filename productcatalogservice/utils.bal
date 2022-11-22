@@ -35,7 +35,7 @@ type JsonProduct readonly & record {|
 isolated function parseProductJson(json jsonContents) returns stubs:Product[] & readonly|error {
     json|error productsJson = jsonContents.products;
     if productsJson is error {
-        log:printError("failed to parse the catalog JSON: ", productsJson);
+        log:printError("Failed to parse the catalog JSON: ", productsJson);
         return productsJson;
     }
     if productsJson !is json[] {

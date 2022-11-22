@@ -16,6 +16,8 @@
 
 import wso2/client_stubs as stubs;
 
+const FRACTION_SIZE = 1000000000;
+
 public const map<string> CURRENCY_SYMBOLS = {
     "USD": "$",
     "CAD": "$",
@@ -143,4 +145,4 @@ public isolated function multiplySlow(stubs:Money money, int n) returns stubs:Mo
 # + money - `Money` value to be rendered
 # + return - rendered value as a string
 public isolated function renderMoney(stubs:Money money) returns string =>
-        string `${CURRENCY_SYMBOLS.get(money.currency_code)}${money.units.toString()}.${(money.nanos / 10000000).toString()}`;
+        string `${CURRENCY_SYMBOLS.get(money.currency_code)}${money.units.toString()}.${(money.nanos / FRACTION_SIZE).toString()}`;

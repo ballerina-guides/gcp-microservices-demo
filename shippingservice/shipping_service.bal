@@ -19,6 +19,8 @@ import ballerina/log;
 import ballerinax/jaeger as _;
 import wso2/client_stubs as stubs;
 
+const FRACTION_SIZE = 1000000000;
+
 # Gives the shipping cost estimates based on the shopping cart.
 @display {
     label: "Shipping",
@@ -36,7 +38,7 @@ service "ShippingService" on new grpc:Listener(9095) {
     # + request - `GetQuoteRequest` contaning the user's selected items
     # + return - `GetQuoteResponse` containing the shipping cost 
     remote function GetQuote(stubs:GetQuoteRequest request) returns stubs:GetQuoteResponse {
-        log:printInfo(string `received get quote request with ${request.toString()}`);
+        log:printInfo(string `Received get quote request with ${request.toString()}`);
 
         stubs:CartItem[] items = request.items;
         int count = 0;
@@ -51,7 +53,7 @@ service "ShippingService" on new grpc:Listener(9095) {
         int dollars = <int>(cost - cents);
 
         return {
-            cost_usd: {currency_code: "USD", nanos: <int>(cents * 1000000000), units: dollars}
+            cost_usd: {currency_code: "USD", nanos: <int>(cents * FRACTION_SIZE), units: dollars}
         };
     }
 
@@ -60,7 +62,7 @@ service "ShippingService" on new grpc:Listener(9095) {
     # + request - `ShipOrderRequest` containing the address and the user's order items
     # + return - `ShipOrderResponse` containing the tracking id or an error
     remote function ShipOrder(stubs:ShipOrderRequest request) returns stubs:ShipOrderResponse {
-        log:printInfo(string `received ship order request with ${request.toString()}`);
+        log:printInfo(string `Received ship order request with ${request.toString()}`);
         stubs:Address address = request.address;
         return {
             tracking_id: generateTrackingId(string `${address.street_address}, ${address.city}, ${address.state}`)

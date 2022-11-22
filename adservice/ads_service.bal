@@ -53,7 +53,7 @@ service "AdService" on new grpc:Listener(9099) {
     # + request - the request containing context
     # + return - the related/random ad response or else an error
     remote function GetAds(stubs:AdRequest request) returns stubs:AdResponse|error {
-        log:printInfo(string `received ad request with context_keys=${request.context_keys.toString()}`);
+        log:printInfo(string `Received ad request with context_keys=${request.context_keys.toString()}`);
 
         stubs:Ad[] ads = [];
         foreach string category in request.context_keys {

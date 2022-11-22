@@ -59,7 +59,7 @@ service "EmailService" on new grpc:Listener(9097) {
     # + request - `SendOrderConfirmationRequest` which contains the details about the order
     # + return - `Empty` or else an error
     remote function SendOrderConfirmation(stubs:SendOrderConfirmationRequest request) returns stubs:Empty|error {
-        log:printInfo(string `received send order confirmation request with email ${request.email}.`);
+        log:printInfo(string `Received send order confirmation request with email ${request.email}.`);
 
         gmail:MessageRequest messageRequest = {
             recipient: request.email,

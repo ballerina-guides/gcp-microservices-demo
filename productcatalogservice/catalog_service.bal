@@ -34,10 +34,10 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
     function init() returns error? {
         json|error productsJson = io:fileReadJson(productJsonPath);
         if productsJson is error {
-            log:printError("failed to open product catalog json file: ", productsJson);
+            log:printError("Failed to open product catalog json file: ", productsJson);
             return productsJson;
         }
-        log:printInfo("successfully parsed product catalog json");
+        log:printInfo("Successfully parsed product catalog json");
         self.products = check parseProductJson(productsJson);
         log:printInfo("Catalog service gRPC server started.");
     }
