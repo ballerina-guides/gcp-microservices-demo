@@ -117,12 +117,6 @@ function getConfirmationHtml(stubs:OrderResult result) returns xml|error {
             body{
                 font-family: 'DM Sans', sans-serif;
             }
-            th, td {
-                padding: 5px;
-            }
-            th {
-                text-align: left;
-            }
         </style>
             ${body}
         </html>`;

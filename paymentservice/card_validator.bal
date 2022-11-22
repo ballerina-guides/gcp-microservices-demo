@@ -52,7 +52,7 @@ isolated function getCardType(string cardNumber) returns CardType|error {
     }
 
     CardType[] cardTypes = from var cardTypeInfo in cardDetails
-        where regex:matches(cardNumber, cardTypeInfo.pattern)
+        where regex:matches(formattedCardNumber, cardTypeInfo.pattern)
         limit 1
         select cardTypeInfo.cardType;
 

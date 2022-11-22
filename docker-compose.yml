@@ -122,4 +122,4 @@ services:
       - jaeger
 secrets:
     email_config:
-      file: ./email/Config.toml
+      file: ./emailservice/Config.toml
