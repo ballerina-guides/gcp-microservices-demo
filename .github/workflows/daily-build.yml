@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [adservice, cartservice, checkoutservice, currencyservice, emailservice, frontendservice, paymentservice, productcatalogservice, recommendationservice, shippingservice]
+        test: [adservice, cartservice, checkoutservice, currencyservice, emailservice, frontend, paymentservice, productcatalogservice, recommendationservice, shippingservice]
     env:
       TEST_NAME: "${{ matrix.test }}"
     steps:
