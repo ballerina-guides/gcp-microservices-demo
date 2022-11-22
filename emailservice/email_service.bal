@@ -102,7 +102,7 @@ function getConfirmationHtml(stubs:OrderResult result) returns xml|error {
         <p>${result.shipping_address.street_address}, ${result.shipping_address.city},
                 ${result.shipping_address.country} ${result.shipping_address.zip_code}</p>
         <h3>Items</h3>
-        <table style="width:100%">
+        <table style="width:100%; text-align: left;">
             ${items}
         </table>
         </body>`;
