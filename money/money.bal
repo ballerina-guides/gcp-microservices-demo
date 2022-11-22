@@ -31,20 +31,20 @@ public const map<string> CURRENCY_SYMBOLS = {
 # + return - Validity
 public isolated function isValid(stubs:Money money) returns boolean => signMatches(money) && validNanos(money.nanos);
 
-# Checks if the sign matches
+# Checks if the sign matches.
 #
 # + money - object to be validated
 # + return - validity status
 public isolated function signMatches(stubs:Money money) returns boolean =>
         money.nanos == 0 || money.units == 0 || (money.nanos < 0) == (money.units < 0);
 
-# Checks if nanos are valid
+# Checks if nanos are valid.
 #
 # + nanos - nano input
 # + return - validity status
 public isolated function validNanos(int nanos) returns boolean => -999999999 <= nanos && nanos <= +999999999;
 
-# Checks if the money is zero
+# Checks if the money is zero.
 #
 # + money - object to be validated
 # + return - zero status

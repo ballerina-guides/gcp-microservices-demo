@@ -17,7 +17,7 @@
 import ballerinax/redis;
 import wso2/client_stubs as stubs;
 
-# Provides the interface for the RedisStore and InMemoryStore
+# Provides the interface for the RedisStore and InMemoryStore.
 public type DataStore distinct object {
 
     # Adds an item to the store.

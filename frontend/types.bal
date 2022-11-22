@@ -19,7 +19,7 @@ import wso2/client_stubs as stubs;
 
 //Request Records
 
-# Record containing the details of the item
+# Record containing the details of the item.
 #
 # + productId - product id
 # + quantity - product quantity
@@ -28,7 +28,7 @@ public type AddToCartRequest record {|
     int quantity;
 |};
 
-# Record containing details of the user and the card
+# Record containing details of the user and the card.
 #
 # + email - user's email
 # + streetAddress - user's street address

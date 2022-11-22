@@ -42,7 +42,7 @@ service "CartService" on new grpc:Listener(9092) {
         }
     }
 
-    # Adds an item to the cart
+    # Adds an item to the cart.
     #
     # + request - `AddItemRequest` containing the user id and the `CartItem`
     # + return - an `Empty` value or an error
