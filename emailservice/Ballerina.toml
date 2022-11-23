@@ -1,6 +1,6 @@
 [package]
 org = "wso2"
-name = "frontend"
+name = "emailservice"
 version = "0.1.0"
 distribution = "2201.2.3"
 
@@ -10,11 +10,5 @@ observabilityIncluded = true
 [[dependency]]
 org = "wso2"
 name = "client_stubs"
-version = "0.1.0"
-repository = "local"
-
-[[dependency]]
-org = "wso2"
-name = "money"
 version = "0.1.0"
 repository = "local"

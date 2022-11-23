@@ -86,7 +86,7 @@ final stubs:CheckoutServiceClient checkoutClient = check new (string `http://${c
 isolated function getSupportedCurrencies() returns string[]|grpc:Error {
     stubs:GetSupportedCurrenciesResponse|grpc:Error supportedCurrencies = currencyClient->GetSupportedCurrencies({});
     if supportedCurrencies is grpc:Error {
-        log:printError("failed to get supported currencies from the currency service", supportedCurrencies);
+        log:printError("Failed to get supported currencies from the currency service", supportedCurrencies);
         return supportedCurrencies;
     }
     return supportedCurrencies.currency_codes;
@@ -95,7 +95,7 @@ isolated function getSupportedCurrencies() returns string[]|grpc:Error {
 isolated function getProducts() returns stubs:Product[]|grpc:Error {
     stubs:ListProductsResponse|grpc:Error productsResponse = catalogClient->ListProducts({});
     if productsResponse is grpc:Error {
-        log:printError("failed to list products from the catalog service", productsResponse);
+        log:printError("Failed to list products from the catalog service", productsResponse);
         return productsResponse;
     }
     return productsResponse.products;
@@ -104,7 +104,7 @@ isolated function getProducts() returns stubs:Product[]|grpc:Error {
 isolated function getProduct(string id) returns stubs:Product|grpc:Error {
     stubs:Product|grpc:Error product = catalogClient->GetProduct({id});
     if product is grpc:Error {
-        log:printError("failed to get product from the catalog service", product);
+        log:printError("Failed to get product from the catalog service", product);
     }
     return product;
 }
@@ -114,7 +114,7 @@ isolated function getCart(string userId) returns stubs:Cart|grpc:Error {
         user_id: userId
     });
     if cart is grpc:Error {
-        log:printError("failed to get cart from the cart service", cart);
+        log:printError("Failed to get cart from the cart service", cart);
     }
     return cart;
 }
@@ -124,7 +124,7 @@ isolated function emptyCart(string userId) returns grpc:Error? {
         user_id: userId
     });
     if cart is grpc:Error {
-        log:printError("failed to empty the cart", cart);
+        log:printError("Failed to empty the cart", cart);
         return cart;
     }
 }
@@ -138,7 +138,7 @@ isolated function insertItemToCart(string userId, string productId, int quantity
         }
     });
     if response is grpc:Error {
-        log:printError("failed to add item to the cart service", response);
+        log:printError("Failed to add item to the cart service", response);
         return response;
     }
 }
@@ -149,7 +149,7 @@ isolated function convertCurrency(stubs:Money usd, string userCurrency) returns 
         to_code: userCurrency
     });
     if convertedCurrency is grpc:Error {
-        log:printError("failed to convert currency", convertedCurrency);
+        log:printError("Failed to convert currency", convertedCurrency);
     }
     return convertedCurrency;
 }
@@ -159,7 +159,7 @@ isolated function getShippingQuote(stubs:CartItem[] items, string currency) retu
         items
     });
     if quote is grpc:Error {
-        log:printError("failed to get quote from the shipping service", quote);
+        log:printError("Failed to get quote from the shipping service", quote);
         return quote;
     }
     return convertCurrency(quote.cost_usd, currency);
@@ -171,7 +171,7 @@ isolated function getRecommendations(string userId, string[] productIds = []) re
         product_ids: ["2ZYFJ3GM2N", "LS4PSXUNUM"]
     });
     if recommendations is grpc:Error {
-        log:printError("failed to list recommendations from the recommendation service", recommendations);
+        log:printError("Failed to list recommendations from the recommendation service", recommendations);
         return recommendations;
     }
 
@@ -183,7 +183,7 @@ isolated function getRecommendations(string userId, string[] productIds = []) re
 isolated function getAds(string[] context_keys) returns stubs:Ad[]|grpc:Error {
     stubs:AdResponse|grpc:Error adResponse = adClient->GetAds({context_keys});
     if adResponse is grpc:Error {
-        log:printError("failed to get ads from the ads service", adResponse);
+        log:printError("Failed to get ads from the ads service", adResponse);
         return adResponse;
     }
     return adResponse.ads;
@@ -197,7 +197,7 @@ isolated function chooseAd(string[] ctxKeys = []) returns stubs:Ad|error {
 isolated function checkoutCart(stubs:PlaceOrderRequest request) returns stubs:OrderResult|grpc:Error {
     stubs:PlaceOrderResponse|grpc:Error placeOrderResponse = checkoutClient->PlaceOrder(request);
     if placeOrderResponse is grpc:Error {
-        log:printError("failed to place order from the checkout service", placeOrderResponse);
+        log:printError("Failed to place order from the checkout service", placeOrderResponse);
         return placeOrderResponse;
     }
     return placeOrderResponse.'order;

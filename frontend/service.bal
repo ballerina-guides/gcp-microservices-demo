@@ -21,7 +21,7 @@ import ballerina/time;
 import ballerina/uuid;
 import ballerinax/jaeger as _;
 import wso2/client_stubs as stubs;
-import wso2/money_utils as money;
+import wso2/money;
 
 const SESSION_ID_COOKIE = "sessionIdCookie";
 const CURRENCY_COOKIE = "currencyCookie";
@@ -59,7 +59,7 @@ service class AuthInterceptor {
     }
 }
 
-# This service serves the data required by the UI by communicating with internal gRPC services
+# This service serves the data required by the UI by communicating with internal gRPC services.
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["http://localhost:3000"],

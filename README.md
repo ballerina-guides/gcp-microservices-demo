@@ -12,15 +12,15 @@ And also following is the automatically generated Ballerina design view of the d
 |Service name | Description |
 |-------------|-------------|
 | Frontend | Exposes an HTTP server to outside to serve data required for the React app. Acts as a frontend for all the backend microservices and abstracts the functionality.|
-| Cart | Stores the product items added to the cart and retrieves them. In memory store and Redis is supported as storage option.
-| ProductCatalog | Reads a list of products from a JSON file and provides the ability to search products and get them individually.
-| Currency | Reads the exchange rates from a JSON and converts one currency value to another.
-| Payment | Validates the card details (using the Luhn algorithm) against the supported card providers and returns a transaction ID. (Mock)
-| Shipping | Gives the shipping cost estimates based on the shopping cart. Returns a tracking ID. (Mock)
-| Email | Sends the user an order confirmation email with the cart details using the Gmail connector. (mock).
-| Checkout | Retrieves the user cart, prepares the order, and orchestrates the payment, shipping, and email notification.
-| Recommendation | Recommends other products based on the items added to the user’s cart.
-| Ads | Provides text advertisements based on the context of the given words.
+| CartService | Stores the product items added to the cart and retrieves them. In memory store and Redis is supported as storage option.
+| ProductCatalogService | Reads a list of products from a JSON file and provides the ability to search products and get them individually.
+| CurrencyService | Reads the exchange rates from a JSON and converts one currency value to another.
+| PaymentService | Validates the card details (using the Luhn algorithm) against the supported card providers and returns a transaction ID. (Mock)
+| ShippingService | Gives the shipping cost estimates based on the shopping cart. Returns a tracking ID. (Mock)
+| EmailService | Sends the user an order confirmation email with the cart details using the Gmail connector. (mock).
+| CheckoutService | Retrieves the user cart, prepares the order, and orchestrates the payment, shipping, and email notification.
+| RecommendationService | Recommends other products based on the items added to the user’s cart.
+| AdService | Provides text advertisements based on the context of the given words.
 
 
 The same load generator service will be used for load testing. 
@@ -46,7 +46,7 @@ Ballerina provides the capability to generate docker, and Kubernetes artifacts t
 ```toml
 [package]
 org = "wso2"
-name = "recommendation"
+name = "recommendationservice"
 version = "0.1.0"
 
 [build-options]
@@ -69,11 +69,10 @@ internal_domain_name="recommendation-service"
 Ballerina Language provides an in-built functionality to configure values at runtime through configurable module-level variables. This feature will be used in almost all the microservices we write in this sample. When we deploy the services in different platforms(local, docker-compose, k8s) the hostname of the service changes. Consider the following sample from the recommendation service. The recommendation service depends on the catalog service, therefore it needs to resolve the hostname of the catalog service. The value "localhost" is assigned as the default value but it will be changed depending on the value passed on to it in runtime. You can find more details about this on the [configurable learn page](https://ballerina.io/learn/configure-ballerina-programs/configure-a-sample-ballerina-service/).
 
 ```bal
-listener grpc:Listener ep = new (9090);
 configurable string catalogHost = "localhost";
 
 @grpc:Descriptor {value: DEMO_DESC}
-service "RecommendationService" on ep {
+service "RecommendationService" on new grpc:Listener(9090) {
     final ProductCatalogServiceClient catalogClient;
 
     function init() returns error? {
@@ -332,8 +331,6 @@ The HTTP service uses cookies to identify the user details. Since this sample do
 
 
 ```bal
-listener http:Listener ep = new (9098);
-
 service class AuthInterceptor {
     *http:RequestInterceptor;
     resource function 'default [string... path](http:RequestContext ctx, http:Request req)
@@ -361,7 +358,7 @@ AuthInterceptor authInterceptor = new;
     },
     interceptors: [authInterceptor]
 }
-service / on ep {
+service / on new http:Listener (9098) {
 
 }
 ```
@@ -492,16 +489,16 @@ The `Shipping Service` is a mock service where it returns a constant shipping co
 kustomization.yaml
 ```yaml
 resources:
-  - ads/target/kubernetes/ads/ads.yaml
-  - cart/target/kubernetes/cart/cart.yaml
-  - checkout/target/kubernetes/checkout/checkout.yaml
-  - currency/target/kubernetes/currency/currency.yaml
-  - email/target/kubernetes/email/email.yaml
+  - adservice/target/kubernetes/adservice/adservice.yaml
+  - cartservice/target/kubernetes/cartservice/cartservice.yaml
+  - checkoutservice/target/kubernetes/checkoutservice/checkoutservice.yaml
+  - currencyservice/target/kubernetes/currencyservice/currencyservice.yaml
+  - emailservice/target/kubernetes/emailservice/emailservice.yaml
   - frontend/target/kubernetes/frontend/frontend.yaml
-  - payment/target/kubernetes/payment/payment.yaml
-  - productcatalog/target/kubernetes/productcatalog/productcatalog.yaml
-  - recommendation/target/kubernetes/recommendation/recommendation.yaml
-  - shipping/target/kubernetes/shipping/shipping.yaml
+  - paymentservice/target/kubernetes/paymentservice/paymentservice.yaml
+  - productcatalogservice/target/kubernetes/productcatalogservice/productcatalogservice.yaml
+  - recommendationservice/target/kubernetes/recommendationservice/recommendationservice.yaml
+  - shippingservice/target/kubernetes/shippingservice/shippingservice.yaml
 
 patchesStrategicMerge:
 - secret-env-patch.yaml
@@ -512,12 +509,12 @@ secret-env-patch.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: email-deployment
+  name: emailservice-deployment
 spec:
   template:
     spec:
       containers:
-        - name: email-deployment
+        - name: emailservice-deployment
           env:
             - name: BAL_CONFIG_FILES
               value: "/home/ballerina/conf/Config.toml:"
@@ -548,7 +545,7 @@ spec:
     - When you receive your authorization code, click **Exchange authorization code for tokens** to obtain the refresh 
     token and access token.
 
-* Create the `Config.toml` file in `email/` and paste the following code after replacing the values.
+* Create the `Config.toml` file in `emailservice/` and paste the following code after replacing the values.
     ```toml
     [gmail]
     refreshToken = "<your-refresh-token>"
@@ -605,7 +602,7 @@ Change the value of the `FRONTEND_SVC_URL` variable in `ui/src/lib/api.js` to th
 # Running the Microservices locally
 
 * Set up the email service with email credentials as explained above.
-* Build and publish the `client_stubs` and `money_utils` modules to the local central as follows.
+* Build and publish the `client_stubs` and `money` modules to the local central as follows.
 ```bash
 cd module
 bal pack
