@@ -42,7 +42,7 @@ function shippingTest() returns error? {
     int units = getQuoteResponse.cost_usd.units;
     int nanos = getQuoteResponse.cost_usd.nanos;
     test:assertEquals(units, 8);
-    test:assertEquals(nanos, 10000000);
+    test:assertEquals(nanos, 990000000);
 
     stubs:ShipOrderRequest req = {};
     stubs:ShipOrderResponse getSupportedCurrenciesResponse = check ep->ShipOrder(req);
