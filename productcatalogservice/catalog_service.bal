@@ -37,7 +37,7 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
             log:printError("Failed to open product catalog json file: ", productsJson);
             return productsJson;
         }
-        log:printInfo("Successfully parsed product catalog json");
+        log:printInfo("Successfully read product catalog json");
         self.products = check parseProductJson(productsJson);
         log:printInfo("Catalog service gRPC server started.");
     }
@@ -50,7 +50,7 @@ service "ProductCatalogService" on new grpc:Listener(9091) {
         return {products: self.products};
     }
 
-    # Provides a specific product related to an id.
+    # Provides a specific product based on the product id.
     #
     # + request - `GetProductRequest` containing the product id
     # + return - `Product` related to the required id or an error
