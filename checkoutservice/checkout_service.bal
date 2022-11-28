@@ -108,8 +108,8 @@ service "CheckoutService" on new grpc:Listener(9094) {
             nanos: 0
         };
         totalCost = money:sum(totalCost, shippingPrice);
-        foreach stubs:OrderItem item in orderItems {
-            stubs:Money itemCost = money:multiplySlow(item.cost, item.item.quantity);
+        foreach var {item, cost} in orderItems {
+            stubs:Money itemCost = money:multiplySlow(cost, item.quantity);
             totalCost = money:sum(totalCost, itemCost);
         }
 
@@ -128,7 +128,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
 
         stubs:Empty|grpc:Error result = self.sendConfirmationMail(request.email, 'order);
         if result is grpc:Error {
-            log:printWarn(string `Failed to send order confirmation to ${request.email}`, result);
+            log:printError(string `Failed to send order confirmation to ${request.email}`, result);
         } else {
             log:printInfo(string `Order confirmation email sent to ${request.email}`);
         }
@@ -152,9 +152,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
             stubs:GetProductRequest productRequest = {id: item.product_id};
             stubs:Product|grpc:Error productResponse = self.catalogClient->GetProduct(productRequest);
             if productResponse is grpc:Error {
-                log:printError("Failed to call getProduct from catalog service", productResponse);
+                log:printError("Failed to call getProduct of catalog service", productResponse);
                 return error grpc:InternalError(
-                                    string `failed to get product ${item.product_id}`, productResponse);
+                                    string `Failed to get product ${item.product_id}`, productResponse);
             }
 
             stubs:CurrencyConversionRequest conversionRequest = {
@@ -164,14 +164,11 @@ service "CheckoutService" on new grpc:Listener(9094) {
 
             stubs:Money|grpc:Error conversionResponse = self.currencyClient->Convert(conversionRequest);
             if conversionResponse is grpc:Error {
-                log:printError("Failed to call convert from currency service", conversionResponse);
-                return error grpc:InternalError(string `failed to convert price of ${item.product_id} to
+                log:printError("Failed to call convert of currency service", conversionResponse);
+                return error grpc:InternalError(string `Failed to convert price of ${item.product_id} to
                     ${userCurrency}`, conversionResponse);
             }
-            orderItems.push({
-                item,
-                cost: conversionResponse
-            });
+            orderItems.push({item, cost: conversionResponse});
         }
         return orderItems;
     }
@@ -183,9 +180,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
         };
         stubs:GetQuoteResponse|grpc:Error getQuoteResponse = self.shippingClient->GetQuote(quoteRequest);
         if getQuoteResponse is grpc:Error {
-            log:printError("Failed to call getQuote from shipping service", getQuoteResponse);
+            log:printError("Failed to call getQuote of shipping service", getQuoteResponse);
             return error grpc:InternalError(
-                string `failed to get shipping quote: ${getQuoteResponse.message()}`, getQuoteResponse);
+                string `Failed to get shipping quote: ${getQuoteResponse.message()}`, getQuoteResponse);
         }
         return getQuoteResponse.cost_usd;
     }
@@ -197,9 +194,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
         };
         stubs:Money|grpc:Error convertionResponse = self.currencyClient->Convert(conversionRequest);
         if convertionResponse is grpc:Error {
-            log:printError("Failed to call convert from currency service", convertionResponse);
+            log:printError("Failed to call convert of currency service", convertionResponse);
             return error grpc:InternalError(
-                string `failed to convert currency: ${convertionResponse.message()}`, convertionResponse);
+                string `Failed to convert currency: ${convertionResponse.message()}`, convertionResponse);
         }
         return convertionResponse;
     }
@@ -211,9 +208,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
         };
         stubs:ChargeResponse|grpc:Error chargeResponse = self.paymentClient->Charge(chargeRequest);
         if chargeResponse is grpc:Error {
-            log:printError("Failed to call charge from payment service", chargeResponse);
+            log:printError("Failed to call charge of payment service", chargeResponse);
             return error grpc:InternalError(
-                string `could not charge the card: ${chargeResponse.message()}`, chargeResponse);
+                string `Could not charge the card: ${chargeResponse.message()}`, chargeResponse);
         }
         return chargeResponse.transaction_id;
     }
@@ -222,9 +219,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
         stubs:ShipOrderRequest orderRequest = {};
         stubs:ShipOrderResponse|grpc:Error shipOrderResponse = self.shippingClient->ShipOrder(orderRequest);
         if shipOrderResponse is grpc:Error {
-            log:printError("Failed to call shipOrder from shipping service", shipOrderResponse);
+            log:printError("Failed to call shipOrder of shipping service", shipOrderResponse);
             return error grpc:UnavailableError(
-                string `shipment failed: ${shipOrderResponse.message()}`, shipOrderResponse);
+                string `Shipment failed: ${shipOrderResponse.message()}`, shipOrderResponse);
         }
         return shipOrderResponse.tracking_id;
     }
@@ -235,9 +232,9 @@ service "CheckoutService" on new grpc:Listener(9094) {
         };
         stubs:Empty|grpc:Error emptyCart = self.cartClient->EmptyCart(request);
         if emptyCart is grpc:Error {
-            log:printError("Failed to call emptyCart from cart service", emptyCart);
+            log:printError("Failed to call emptyCart of cart service", emptyCart);
             return error grpc:InternalError(
-                string `failed to empty user cart during checkout: ${emptyCart.message()}`, emptyCart);
+                string `Failed to empty user cart during checkout: ${emptyCart.message()}`, emptyCart);
         }
     }
 

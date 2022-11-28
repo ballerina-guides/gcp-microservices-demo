@@ -22,21 +22,21 @@ public type DataStore distinct object {
 
     # Adds an item to the store.
     #
-    # + userId - user's id
-    # + productId - related productId 
-    # + quantity - related product quantity
+    # + userId - id of the user
+    # + productId - id of the product 
+    # + quantity - count of the selcted product
     # + return - an error if an error occured while adding, else ()
     isolated function addItem(string userId, string productId, int quantity) returns error?;
 
     # Clears the cart of the related user.
     #
-    # + userId - user id of the user
+    # + userId - id of the user
     # + return - an error if an error occured while emptying, else ()
     isolated function emptyCart(string userId) returns error?;
 
     # Provides the carts of specific users.
     #
-    # + userId - user id of the user whose cart is required
+    # + userId - id of the user
     # + return - `Cart` or an error if error occurs
     isolated function getCart(string userId) returns stubs:Cart|error;
 };
@@ -48,9 +48,9 @@ public isolated class InMemoryStore {
 
     # Adds an item to the in-memory store.
     #
-    # + userId - user's id
-    # + productId - related productId
-    # + quantity - related product quantity
+    # + userId - id of the user
+    # + productId - id of the product 
+    # + quantity - count of the selcted product
     isolated function addItem(string userId, string productId, int quantity) {
         lock {
             if !self.store.hasKey(userId) {
@@ -62,15 +62,13 @@ public isolated class InMemoryStore {
             }
 
             stubs:CartItem[] existingItems = self.store.get(userId).items;
-            stubs:CartItem[] matchedItem = from stubs:CartItem item in existingItems
-                where item.product_id == productId
-                limit 1
-                select item;
-            if matchedItem.length() == 1 {
-                stubs:CartItem item = matchedItem[0];
-                item.quantity = item.quantity + quantity;
-                return;
+            foreach stubs:CartItem item in existingItems {
+                if item.product_id == productId {
+                    item.quantity = item.quantity + quantity;
+                    return;
+                }
             }
+
             stubs:CartItem newItem = {product_id: productId, quantity};
             existingItems.push(newItem);
         }
@@ -78,16 +76,16 @@ public isolated class InMemoryStore {
 
     # Clears the cart of the related user.
     #
-    # + userId - user id of the user
+    # + userId - id of the user
     isolated function emptyCart(string userId) {
         lock {
             _ = self.store.remove(userId);
         }
     }
 
-    # Provides the carts of specific users.
+    # Provides the cart of the specific user.
     #
-    # + userId - user id of the user whose cart is required
+    # + userId - id of the user whose cart is required
     # + return - `Cart` with the cart items
     isolated function getCart(string userId) returns stubs:Cart {
         lock {
@@ -118,33 +116,34 @@ public isolated class RedisStore {
 
     # Adds an item to the redis store.
     #
-    # + userId - user's id
-    # + productId - related productId 
-    # + quantity - related product quantity
+    # + userId - id of the user
+    # + productId - id of the product 
+    # + quantity - count of the selcted product
     # + return - an error if an error occured while adding, else ()
     isolated function addItem(string userId, string productId, int quantity) returns error? {
         map<any> existingItems = check self.redisClient->hMGet(userId, [productId]);
         if existingItems.get(productId) is () {
             map<int> itemsMap = {[productId] : quantity};
             _ = check self.redisClient->hMSet(userId, itemsMap);
-        } else {
-            int existingQuantity = check int:fromString(existingItems.get(productId).toString());
-            existingItems[productId] = existingQuantity + quantity;
-            _ = check self.redisClient->hMSet(userId, existingItems);
-        }
+            return;
+        } 
+
+        int existingQuantity = check int:fromString(existingItems.get(productId).toString());
+        existingItems[productId] = existingQuantity + quantity;
+        _ = check self.redisClient->hMSet(userId, existingItems);
     }
 
     # Clears the cart of the related user.
     #
-    # + userId - user id of the user
+    # + userId - id of the user
     # + return - an error if an error occured while emptying, else ()
     isolated function emptyCart(string userId) returns error? {
         _ = check self.redisClient->del([userId]);
     }
 
-    # Provides the carts of specific users.
+    # Provides the cart of the specific user.
     #
-    # + userId - user id of the user whose cart is required
+    # + userId - id of the user whose cart is required
     # + return - `Cart` or an error if error occurs
     isolated function getCart(string userId) returns stubs:Cart|error {
         map<any> userItems = check self.redisClient->hGetAll(userId);

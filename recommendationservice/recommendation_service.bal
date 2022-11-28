@@ -51,7 +51,7 @@ service "RecommendationService" on new grpc:Listener(9090) {
         stubs:ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
         if listProducts is grpc:Error {
             log:printError("Failed to call ListProducts of catalog service", listProducts);
-            return error grpc:InternalError("failed to get list of products from catalog service", listProducts);
+            return error grpc:InternalError("Failed to get list of products from catalog service", listProducts);
         }
 
         return {

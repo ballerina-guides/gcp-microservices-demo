@@ -34,8 +34,8 @@ service "CurrencyService" on new grpc:Listener(9093) {
     private final map<decimal> & readonly currencyMap;
 
     function init() returns error? {
-        log:printInfo("Starting gRPC server");
         json currencyJson = check io:fileReadJson(currencyJsonPath);
+        log:printInfo("Successfully read currency conversion json");
         self.currencyMap = check parseCurrencyJson(currencyJson);
         log:printInfo("Currency service gRPC server started.");
     }

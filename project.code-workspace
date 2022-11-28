@@ -16,7 +16,7 @@
 			"path": "emailservice"
 		},
 		{
-			"path": "frontendservice"
+			"path": "frontend"
 		},
 		{
 			"path": "paymentservice"

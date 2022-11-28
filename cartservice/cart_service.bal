@@ -34,10 +34,10 @@ service "CartService" on new grpc:Listener(9092) {
 
     function init() returns error? {
         if datastore is "redis" {
-            log:printInfo("Redis datastore is selected");
+            log:printInfo("Redis datastore is configured for cart service");
             self.store = check new RedisStore();
         } else {
-            log:printInfo("In memory datastore used as redis config is not given");
+            log:printInfo("Redis config is not specified. Starting the cart service with in memory store");
             self.store = new InMemoryStore();
         }
     }

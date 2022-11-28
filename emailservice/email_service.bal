@@ -59,17 +59,17 @@ service "EmailService" on new grpc:Listener(9097) {
     # + request - `SendOrderConfirmationRequest` which contains the details about the order
     # + return - `Empty` or else an error
     remote function SendOrderConfirmation(stubs:SendOrderConfirmationRequest request) returns stubs:Empty|error {
-        log:printInfo(string `Received send order confirmation request with email ${request.email}.`);
+        log:printInfo(string `Received a request to send order confirmation email to ${request.email}.`);
 
         gmail:MessageRequest messageRequest = {
             recipient: request.email,
-            subject: "Order Confirmation",
+            subject: "Your Confirmation Email",
             messageBody: (check getConfirmationHtml(request.'order)).toString(),
             contentType: gmail:TEXT_HTML
         };
         gmail:Message|error sendMessageResponse = self.gmailClient->sendMessage(messageRequest);
         if sendMessageResponse is error {
-            log:printError("Error sending confirmation mail ", sendMessageResponse);
+            log:printError("An error occurred when sending the order confirmation email ", sendMessageResponse);
             return sendMessageResponse;
         }
         log:printInfo(string `Email sent with Message ID: ${sendMessageResponse.id} and Thread ID: ${sendMessageResponse.threadId}`);
