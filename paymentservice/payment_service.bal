@@ -32,12 +32,12 @@ service "PaymentService" on new grpc:Listener(9096) {
         log:printInfo("Payment service gRPC server started.");
     }
 
-    # Validate and charge the amount from the card.
+    # Validate and charge the amount from the given card.
     #
-    # + request - `ChargeRequest` containing the card details and the amount to charge
+    # + request - `ChargeRequest` containing the card details and the amount to charged
     # + return - `ChargeResponse` with the transaction id or an error
     remote function Charge(stubs:ChargeRequest request) returns stubs:ChargeResponse|error {
-        log:printInfo(string `Received charge request with ${request.toString()}`);
+        log:printInfo(string `Received card payment request with ${request.toString()}`);
 
         var {credit_card_number: cardNumber, credit_card_expiration_year: year,
                 credit_card_expiration_month: month} = request.credit_card;
@@ -47,11 +47,9 @@ service "PaymentService" on new grpc:Listener(9096) {
         string lastFourDigits = cardNumber.substring(cardNumber.length() - 4);
         string amount = let var {currency_code, units, nanos} = request.amount in
                     string `${currency_code}${units}.${nanos}`;
-        log:printInfo(string `Transaction processed: ${cardType} ending ${lastFourDigits}, Amount: ${amount}`);
+        log:printInfo(string `Payment transaction processed: ${cardType} ending ${lastFourDigits}, Amount: ${amount}`);
 
-        return {
-            transaction_id: uuid:createType1AsString()
-        };
+        return {transaction_id: uuid:createType1AsString()};
     }
 }
 

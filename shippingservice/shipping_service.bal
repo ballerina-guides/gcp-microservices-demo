@@ -35,15 +35,15 @@ service "ShippingService" on new grpc:Listener(9095) {
 
     # Provides a quote with shipping cost.
     #
-    # + request - `GetQuoteRequest` contaning the user's selected items
+    # + request - `GetQuoteRequest` contaning the user selected items
     # + return - `GetQuoteResponse` containing the shipping cost 
     remote function GetQuote(stubs:GetQuoteRequest request) returns stubs:GetQuoteResponse {
-        log:printInfo(string `Received get quote request with ${request.toString()}`);
+        log:printInfo(string `Received a quotation request with ${request.toString()}`);
 
         stubs:CartItem[] items = request.items;
         int count = 0;
-        foreach stubs:CartItem item in items {
-            count += item.quantity;
+        foreach var {quantity} in items {
+            count += quantity;
         }
         float cost = 0.0;
         if count != 0 {
@@ -57,12 +57,12 @@ service "ShippingService" on new grpc:Listener(9095) {
         };
     }
 
-    # Ships the order and provide a tracking id.
+    # Ships the order and provides a tracking id.
     #
-    # + request - `ShipOrderRequest` containing the address and the user's order items
+    # + request - `ShipOrderRequest` containing the address and the user ordered items
     # + return - `ShipOrderResponse` containing the tracking id or an error
     remote function ShipOrder(stubs:ShipOrderRequest request) returns stubs:ShipOrderResponse {
-        log:printInfo(string `Received ship order request with ${request.toString()}`);
+        log:printInfo(string `Received shipping order request with ${request.toString()}`);
         stubs:Address address = request.address;
         return {
             tracking_id: generateTrackingId(string `${address.street_address}, ${address.city}, ${address.state}`)
