@@ -51,8 +51,8 @@ isolated function parseCookieHeader(string cookieStringValue) returns http:Cooki
 
 isolated function getCartSize(stubs:Cart cart) returns int {
     int cartSize = 0;
-    foreach stubs:CartItem item in cart.items {
-        cartSize += item.quantity;
+    foreach stubs:CartItem {quantity} in cart.items {
+        cartSize += quantity;
     }
     return cartSize;
 }
