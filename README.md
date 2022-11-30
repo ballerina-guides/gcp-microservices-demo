@@ -1,5 +1,6 @@
 # Introduction
-The online boutique is a cloud-native microservices demo application written by the Google cloud platform. It consists of a 10-tier microservices application. The application is a web-based e-commerce app using which users can browse items, add them to the cart, and purchase them. This set of microservices is written using Ballerina to demonstrate the language features and showcase best practices for writing microservices using Ballerina. Communication between microservices is handled using gRPC and the frontend is exposed via an HTTP service.
+The <a href="https://github.com/GoogleCloudPlatform/microservices-demo" target="_blank">online boutique</a> is a cloud-native microservices demo application written by the Google cloud platform. It consists of a 10-tier microservices application. The application is a web-based e-commerce app using which users can browse items, add them to the cart, and purchase them. The microservices in the GCP demo are implemented using multiple programming languages such as Java, C#, Go, Javascript and Python.      
+Here, these microservices written using [Ballerina language](https://ballerina.io/) to demonstrate the language features, showcase best practices when writing microservices and provide an in-depth understanding of how ballerina services can interact in a real-world scenario. In our implementation, communication between the microservices is handled using gRPC and the frontend is exposed via an HTTP service.
 
 # Architecture
 ![image info](images/architecture-diagram.png)
@@ -239,7 +240,7 @@ Then click on `Find Traces` and you will be able to view spans of services in th
 
 For more information about observability in Ballerina, please visit [Observe Ballerina Programs](https://ballerina.io/learn/observe-ballerina-programs/).
 
-# Deviations from [Microservices Demo](https://github.com/GoogleCloudPlatform/microservices-demo)
+# Deviations from [GCP Microservices Demo](https://github.com/GoogleCloudPlatform/microservices-demo)
 
 - Ports used by the services are different.
 - In-house logic (based on Luhn algorithm) used for credit card validation.
