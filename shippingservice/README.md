@@ -31,3 +31,9 @@ remote function ShipOrder(stubs:ShipOrderRequest request) returns stubs:ShipOrde
     };
 }
 ```
+
+### A Glimpse of comparison
+
+The below figure provides a glimpse of the comparison of the source codes written in the Go and Ballerina languages.
+
+<img src="/images/shipping-service.png"  width="75%" height="75%">
