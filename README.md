@@ -1,6 +1,7 @@
 # Introduction
 The <a href="https://github.com/GoogleCloudPlatform/microservices-demo" target="_blank">online boutique</a> is a cloud-native microservices demo application written by the Google cloud platform. It consists of a 10-tier microservices application. The application is a web-based e-commerce app using which users can browse items, add them to the cart, and purchase them. The microservices in the GCP demo are implemented using multiple programming languages such as Java, C#, Go, Javascript and Python.      
-Here, these microservices written using [Ballerina language](https://ballerina.io/) to demonstrate the language features, showcase best practices when writing microservices and provide an in-depth understanding of how ballerina services can interact in a real-world scenario. In our implementation, communication between the microservices is handled using gRPC and the frontend is exposed via an HTTP service.
+
+Here, in this demo these microservices are written using [Ballerina language](https://ballerina.io/) to demonstrate the language features, showcase best practices when writing microservices and provide an in-depth understanding of how ballerina services can interact in a real-world scenario. In our implementation, communication between the microservices is handled using gRPC and the frontend is exposed via an HTTP service.
 
 # Architecture
 ![image info](images/architecture-diagram.png)
