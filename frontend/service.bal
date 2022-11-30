@@ -226,17 +226,15 @@ service / on new http:Listener(9098) {
             units: 0
         };
         CartItemView[] cartItems = [];
-        foreach stubs:CartItem item in cart.items {
-            stubs:Product product = check getProduct(item.product_id);
-
+        foreach stubs:CartItem {product_id, quantity} in cart.items {
+            stubs:Product product = check getProduct(product_id);
             stubs:Money convertedPrice = check convertCurrency(product.price_usd, currencyCookie.value);
-
-            stubs:Money price = money:multiplySlow(convertedPrice, item.quantity);
+            stubs:Money price = money:multiplySlow(convertedPrice, quantity);
             string renderedPrice = money:renderMoney(price);
             cartItems.push({
                 product,
                 price: renderedPrice,
-                quantity: item.quantity
+                quantity: quantity
             });
             totalPrice = money:sum(totalPrice, price);
         }
@@ -261,7 +259,7 @@ service / on new http:Listener(9098) {
 
     # POST method to update the cart with a product.
     #
-    # + request - `AddToCartRequest` containing the product id of the product to add
+    # + request - `AddToCartRequest` containing the product id of the product to be added
     # + cookieHeader - header containing the cookie
     # + return - `http:Created` if successful or `http:Unauthorized` or `http:BadRequest` or `error` if an error occurs
     resource function post cart(@http:Payload AddToCartRequest request,
@@ -313,7 +311,7 @@ service / on new http:Listener(9098) {
 
     # Post method to checkout the user's cart.
     #
-    # + request - `CheckoutRequest` containing user's details
+    # + request - `CheckoutRequest` containing user details
     # + cookieHeader - header containing the cookie
     # + return - `CheckoutResponse` if successful or an `http:Unauthorized` or `error` if an error occurs
     resource function post cart/checkout(@http:Payload CheckoutRequest request,
@@ -349,8 +347,8 @@ service / on new http:Listener(9098) {
 
         stubs:Product[] recommendations = check getRecommendations(userId);
         stubs:Money totalCost = orderResult.shipping_cost;
-        foreach stubs:OrderItem item in orderResult.items {
-            stubs:Money multiplyRes = money:multiplySlow(item.cost, item.item.quantity);
+        foreach stubs:OrderItem {item, cost} in orderResult.items {
+            stubs:Money multiplyRes = money:multiplySlow(cost, item.quantity);
             totalCost = money:sum(totalCost, multiplyRes);
         }
 
@@ -369,7 +367,7 @@ service / on new http:Listener(9098) {
     }
 
     function getProductIdFromCart(stubs:Cart cart) returns string[] {
-        return from stubs:CartItem item in cart.items
-            select item.product_id;
+        return from stubs:CartItem {product_id} in cart.items
+            select product_id;
     }
 }
