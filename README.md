@@ -1,7 +1,7 @@
 # Introduction
 The <a href="https://github.com/GoogleCloudPlatform/microservices-demo" target="_blank">online boutique</a> is a cloud-native microservices demo application written by the Google cloud platform. It consists of a 10-tier microservices application. The application is a web-based e-commerce app using which users can browse items, add them to the cart, and purchase them. The microservices in the GCP demo are implemented using multiple programming languages such as Java, C#, Go, Javascript and Python.      
 
-Here, in this demo these microservices are written using [Ballerina language](https://ballerina.io/) to demonstrate the language features, showcase best practices when writing microservices and provide an in-depth understanding of how ballerina services can interact in a real-world scenario. In our implementation, communication between the microservices is handled using gRPC and the frontend is exposed via an HTTP service.
+Here, in this demo these microservices are written using [Ballerina language](https://ballerina.io/) to demonstrate the language features, showcase best practices when writing microservices, provide an in-depth understanding of how ballerina services can interact in a real-world scenario and highlight the support of Ballerina to deploy services natively in the cloud. In our implementation, communication between the microservices is handled using gRPC and the frontend is exposed via an HTTP service.
 
 # Architecture
 ![image info](images/architecture-diagram.png)
@@ -241,10 +241,20 @@ Then click on `Find Traces` and you will be able to view spans of services in th
 
 For more information about observability in Ballerina, please visit [Observe Ballerina Programs](https://ballerina.io/learn/observe-ballerina-programs/).
 
+Key Highlights of Ballerina based GCP Microservices Demo implementation
+
+- [Native and extensive gRPC support](Highlights.md#grpc-support) - Ballerina supports generating server and client codes using the .proto file using the bal grpc command. Ballerina has services and clients as first-class constructs and gRPC builds upon that foundation.
+- [Easy data processing with query expressions](Highlights.md#search-products-using-query-expressions---catalog-service) - Ballerina provides first-class support to write queries for data processing. Query expressions contain a set of clauses similar to SQL to process the data. You can have much more complicated queries using the limit and let keywords, ordering, joins, and so on. You can use query expressions not only for arrays but for streams, and tables as well.
+- [Concurrency-safe execution](Highlights.md#search-products-using-query-expressions---catalog-service) - Ballerina is designed for network-based applications. The concept of isolation in Ballerina simplifies development by ensuring the safety of shared resources during concurrent execution. Ballerina Compiler warns if the application is not concurrent safe and helps to make it concurrent safe and performant at the same time.
+- [Convenient integration capabilities](Highlights.md#concurrency-safety---ad-service) - Ballerina makes it very easy to invoke other microservices, log, and handle errors. The configurable feature helps to configure the value of the variable by overriding it in the runtime.
+- [Built-in XML support](Highlights.md#html-generation-with-xml---email-service) - Ballerina programming language contains built-in support for XML data. It supports defining, validating, and manipulating XML directly from the language syntax itself.
+- [Native support for testing](Highlights.md#testing-microservices---the-recommendation-service) - Ballerina’s test framework allows you to test your microservices effortlessly. It also supports assertions, which help to verify the expected behavior of a piece of code. These assertions can be used to decide if the test is passing or failing based on the condition. Moreover, Ballerina has object mocking features that allows you to do this without even running a service.
+
 # Deviations from [GCP Microservices Demo](https://github.com/GoogleCloudPlatform/microservices-demo)
 
 - Ports used by the services are different.
 - In-house logic (based on Luhn algorithm) used for credit card validation.
 - Google Cloud Spanner based datastore is not supported by the cart service.
-- Health check service is not available for gRPC services
-- Tracing is enabled for all the ballerina gRPC services
+- Health check service is not available for gRPC services.
+- Tracing is enabled for all the ballerina gRPC services.
+- GCP Frontend service is represented by two separate services (UI and frontend).  

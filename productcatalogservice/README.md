@@ -2,7 +2,7 @@
 
 The Catalog Service maintains a list of products available in the store. The product list will be read from JSON and converted to a readonly array of `Product` when the service is initialized. The `Catalog Service` has the Search Product capability. This feature is implemented using ballerina query expressions. It allows you to write SQL like queries to filter data from the array. You can find more details about query expressions in this [blog](https://dzone.com/articles/language-integrated-queries-in-ballerina).
 
-```
+```bal
 configurable string productJsonPath = "./resources/products.json";
 
 @grpc:Descriptor {value: DEMO_DESC}
