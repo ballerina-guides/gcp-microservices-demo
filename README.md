@@ -241,7 +241,7 @@ Then click on `Find Traces` and you will be able to view spans of services in th
 
 For more information about observability in Ballerina, please visit [Observe Ballerina Programs](https://ballerina.io/learn/observe-ballerina-programs/).
 
-# Key Highlights of Ballerina based GCP Microservices Demo implementation
+# Key Highlights of Ballerina based implementation
 
 - [Native and extensive gRPC support](Highlights.md#grpc-support) - Ballerina supports generating server and client codes using the .proto file using the bal grpc command. Ballerina has services and clients as first-class constructs and gRPC builds upon that foundation.
 - [Easy data processing with query expressions](Highlights.md#search-products-using-query-expressions---catalog-service) - Ballerina provides first-class support to write queries for data processing. Query expressions contain a set of clauses similar to SQL to process the data. You can have much more complicated queries using the limit and let keywords, ordering, joins, and so on. You can use query expressions not only for arrays but for streams, and tables as well.
