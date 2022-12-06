@@ -14,7 +14,7 @@ And also following is the automatically generated Ballerina design view of the d
 | Service name                                   | Description |
 |------------------------------------------------|-------------|
 | [Frontend](frontend)                           | Exposes an HTTP server to outside to serve data required for the React app. Acts as a frontend for all the backend microservices and abstracts the functionality.|
-| [CartService](cartservice)                     | Stores the product items added to the cart and retrieves them. In memory store and Redis is supported as storage option.
+| [CartService](cartservice)                     | Stores the product items added to the cart and retrieves them. In memory store and Redis is supported as storage options.
 | [ProductCatalogService](productcatalogservice) | Reads a list of products from a JSON file and provides the ability to search products and get them individually.
 | [CurrencyService](currencyservice)             | Reads the exchange rates from a JSON and converts one currency value to another.
 | [PaymentService](paymentservice)               | Validates the card details (using the Luhn algorithm) against the supported card providers and returns a transaction ID. (Mock)
