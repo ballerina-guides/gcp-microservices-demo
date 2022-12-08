@@ -220,7 +220,6 @@ Change the value of the `FRONTEND_SVC_URL` variable in `ui/src/lib/api.js` to th
 * Set up the email service with email credentials as explained above.
 * Build and publish the `client_stubs` and `money` modules to the local central as follows.
 ```bash
-cd module
 bal pack
 bal push --repository local
 ```
