@@ -7,31 +7,30 @@ configurable string productJsonPath = "./resources/products.json";
 
 @grpc:Descriptor {value: DEMO_DESC}
 service "ProductCatalogService" on new grpc:Listener(9091) {
-    final Product[] & readonly products;
+    private final stubs:Product[] & readonly products;
 
     function init() returns error? {
-        json productsJson = check io:fileReadJson(productJsonPath);
-        Product[] products = check parseProductJson(productsJson);
-        self.products = products.cloneReadOnly();
+        json|error productsJson = io:fileReadJson(productJsonPath);
+        self.products = check parseProductJson(productsJson);
     }
 
-    remote function ListProducts(Empty value) returns ListProductsResponse {
+    remote function ListProducts(stubs:Empty request) returns stubs:ListProductsResponse {
         return {products: self.products};
     }
 
-    remote function GetProduct(GetProductRequest value) returns Product|error {
-        foreach Product product in self.products {
-            if product.id == value.id {
+    remote function GetProduct(stubs:GetProductRequest request) returns stubs:Product|grpc:NotFoundError|error {
+        foreach stubs:Product product in self.products {
+            if product.id == request.id {
                 return product;
             }
         }
-        return error("product not found");
+        return error grpc:NotFoundError(string `no product with ID ${request.id}`);
     }
 
-    remote function SearchProducts(SearchProductsRequest value) returns SearchProductsResponse|error {
+    remote function SearchProducts(stubs:SearchProductsRequest request) returns stubs:SearchProductsResponse {
         return {
-            results: from Product product in self.products
-                where isProductRelated(product, value.query)
+            results: from stubs:Product product in self.products
+                where isProductRelated(product, request.query)
                 select product
         };
     }

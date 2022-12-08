@@ -13,13 +13,14 @@ service "CurrencyService" on new grpc:Listener(9093) {
         self.currencyMap = check parseCurrencyJson(currencyJson).cloneReadOnly();
     }
 
-    remote function GetSupportedCurrencies(Empty value) returns GetSupportedCurrenciesResponse|error {
+    remote function GetSupportedCurrencies(stubs:Empty request) returns stubs:GetSupportedCurrenciesResponse {
         return {currency_codes: self.currencyMap.keys()};
-
     }
-    remote function Convert(CurrencyConversionRequest value) returns Money|error {
+    remote function Convert(stubs:CurrencyConversionRequest request) returns stubs:Money|error {
         ...
     }
+    
+    ...
 }
 ```
 

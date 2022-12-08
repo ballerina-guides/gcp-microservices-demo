@@ -4,16 +4,16 @@ Payment Service is responsible for validating the card details and sending a moc
 
 
 ```bal
-isolated function isLuhnValid() returns boolean|error {
-    int digits = self.card.length();
+isolated function isLuhnValid(string cardNumber) returns boolean|error {
+    int digits = cardNumber.length();
     int oddOrEven = digits & 1;
     int sum = 0;
 
     foreach int count in 0 ..< digits {
         int digit = 0;
-        digit = check int:fromString(self.card[count]);
+        digit = check int:fromString(cardNumber[count]);
 
-        if (((count & 1) ^ oddOrEven) == 0) {
+        if ((count & 1) ^ oddOrEven) == 0 {
             digit *= 2;
             if digit > 9 {
                 digit -= 9;

@@ -15,8 +15,10 @@ service "CheckoutService" on new grpc:Listener(9094) {
         ...
     }
 
-    remote function PlaceOrder(PlaceOrderRequest value) returns PlaceOrderResponse|error {
+    remote function PlaceOrder(stubs:PlaceOrderRequest request) returns stubs:PlaceOrderResponse|grpc:Error|error {
         ...
     }
+    
+    ...
 }
 ```
