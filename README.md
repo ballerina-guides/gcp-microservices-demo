@@ -219,9 +219,8 @@ Change the value of the `FRONTEND_SVC_URL` variable in `ui/src/lib/api.js` to th
 # Running the Microservices locally
 
 * Set up the email service with email credentials as explained above.
-* Build and publish the `client_stubs` and `money` modules to the local central as follows.
+* Build and publish the `client_stubs` and `money` modules to the local central as follows. Execute below commmands within each module. 
 ```bash
-cd module
 bal pack
 bal push --repository local
 ```
