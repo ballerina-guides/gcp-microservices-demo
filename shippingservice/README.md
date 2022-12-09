@@ -4,8 +4,6 @@ The `Shipping Service` is a mock service where it returns a constant shipping co
 
 ```bal
 remote function GetQuote(stubs:GetQuoteRequest request) returns stubs:GetQuoteResponse {
-    log:printInfo(string `Received a quotation request with ${request.toString()}`);
-
     stubs:CartItem[] items = request.items;
     int count = 0;
     foreach var {quantity} in items {
@@ -24,7 +22,6 @@ remote function GetQuote(stubs:GetQuoteRequest request) returns stubs:GetQuoteRe
 }
 
 remote function ShipOrder(stubs:ShipOrderRequest request) returns stubs:ShipOrderResponse {
-    log:printInfo(string `Received shipping order request with ${request.toString()}`);
     stubs:Address address = request.address;
     return {
         tracking_id: generateTrackingId(string `${address.street_address}, ${address.city}, ${address.state}`)

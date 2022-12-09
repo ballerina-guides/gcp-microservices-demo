@@ -4,12 +4,12 @@ The cart service manages all the details about the shopping card of the user. It
 
 In the original c# implementation, the repository is defined using an interface. You can find the ballerina representation below. As you notice, the function body is not implemented. This forces the implementer to implement the body of the function.
 ```bal
-public type DataStore object {
-    isolated function add(string userId, string productId, int quantity);
+public type DataStore distinct object {
+    isolated function addItem(string userId, string productId, int quantity) returns error?;
 
-    isolated function emptyCart(string userId);
+    isolated function emptyCart(string userId) returns error?;
 
-    isolated function getCart(string userId) returns Cart;
+    isolated function getCart(string userId) returns stubs:Cart|error;
 };
 ```
 
@@ -18,32 +18,32 @@ Then we implement the DataStore using the concrete class `InMemoryStore` and `Re
 ```bal
 public isolated class InMemoryStore {
     *DataStore;
-    private map<Cart> store = {};
+    private map<stubs:Cart> store = {};
 
-    isolated function add(string userId, string productId, int quantity) {
+    isolated function addItem(string userId, string productId, int quantity) {
     }
 
     isolated function emptyCart(string userId) {
     }
 
-    isolated function getCart(string userId) returns Cart {
+    isolated function getCart(string userId) returns stubs:Cart {
     }
 }
 ```
 
 You could also observe that we use lock statements to ensure the concurrent safety.
 ```bal
-isolated function getCart(string userId) returns Cart {
+isolated function getCart(string userId) returns stubs:Cart {
     lock {
         if self.store.hasKey(userId) {
             return self.store.get(userId).cloneReadOnly();
         }
-        Cart newItem = {
+        stubs:Cart newCart = {
             user_id: userId,
             items: []
         };
-        self.store[userId] = newItem;
-        return newItem.cloneReadOnly();
+        self.store[userId] = newCart;
+        return newCart.cloneReadOnly();
     }
 }
 ```
@@ -55,14 +55,16 @@ configurable string datastore = "";
 service "CartService" on new grpc:Listener(9092) {
     private final DataStore store;
 
-    function init() {
-        if datastore == "redis" {
-            log:printInfo("Redis datastore is selected");
-            self.store = new RedisStore();
+    function init() returns error? {
+        if datastore is "redis" {
+            log:printInfo("Redis datastore is configured for cart service");
+            self.store = check new RedisStore();
         } else {
-            log:printInfo("In memory datastore is selected");
+            log:printInfo("Redis config is not specified. Starting the cart service with in memory store");
             self.store = new InMemoryStore();
         }
+
+        ...
     }
 }
 ```

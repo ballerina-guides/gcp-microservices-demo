@@ -4,41 +4,39 @@ The service is responsible for sending an email with the order confirmation afte
 
 ```bal
 service "EmailService" on new grpc:Listener(9097) {
+    remote function SendOrderConfirmation(stubs:SendOrderConfirmationRequest request) returns stubs:Empty|error {
 
-    isolated remote function SendOrderConfirmation(SendOrderConfirmationRequest value) returns Empty|error {
-        string htmlBody = self.getConfirmationHtml(request.'order).toString();
         gmail:MessageRequest messageRequest = {
             recipient: request.email,
-            subject: "Order Confirmation",
-            messageBody: htmlBody,
+            subject: "Your Confirmation Email",
+            messageBody: (check getConfirmationHtml(request.'order)).toString(),
             contentType: gmail:TEXT_HTML
         };
-
-        gmail:Message|error sendMessageResponse = gmailClient->sendMessage(messageRequest);
+        gmail:Message|error sendMessageResponse = self.gmailClient->sendMessage(messageRequest);
         ...
         return {};
     }
-
-    isolated function getConfirmationHtml(OrderResult res) returns xml {
+    
+    function getConfirmationHtml(OrderResult res) returns xml {
         ...
+        xml items = from stubs:OrderItem item in result.items
+            select xml `<tr>
+                <td>#${item.item.product_id}</td>
+                <td>${item.item.quantity}</td> 
+                ...
+                </tr>`;
+                
+        items = xml `<tr>
+              <th>Item No.</th>
+              <th>Quantity</th> 
+              <th>Price</th>
+            </tr>` + items;   
+        
+        ...
+        
+        xml emailContent = ...
 
-        xml items = xml `<tr>
-          <th>Item No.</th>
-          <th>Quantity</th> 
-          <th>Price</th>
-        </tr>`;
-
-        foreach OrderItem item in res.items {
-            xml content = xml `<tr>
-            <td>#${item.item.product_id}</td>
-            ...
-            </tr>`;
-            items = items + content;
-        }
-
-        xml page = ...
-
-        return page;
+        return emailContent;
     }
 }
 ```

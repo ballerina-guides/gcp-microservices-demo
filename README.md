@@ -38,7 +38,7 @@ import ballerina/grpc;
 @grpc:Descriptor {value: DEMO_DESC}
 service "AdService" on new grpc:Listener(9099) {
 
-    remote function GetAds(AdRequest request) returns AdResponse|error {
+    remote function GetAds(stubs:AdRequest request) returns stubs:AdResponse|error {
     }
 }
 ```
@@ -75,13 +75,14 @@ configurable string catalogHost = "localhost";
 
 @grpc:Descriptor {value: DEMO_DESC}
 service "RecommendationService" on new grpc:Listener(9090) {
-    final ProductCatalogServiceClient catalogClient;
+    private final stubs:ProductCatalogServiceClient catalogClient;
 
     function init() returns error? {
         self.catalogClient = check new ("http://" + catalogHost + ":9091");
     }
 
-    isolated remote function ListRecommendations(ListRecommendationsRequest value) returns ListRecommendationsResponse|error {
+    remote function ListRecommendations(stubs:ListRecommendationsRequest request)
+          returns stubs:ListRecommendationsResponse|error {
         ...
     }
 }

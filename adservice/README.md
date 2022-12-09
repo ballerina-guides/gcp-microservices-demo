@@ -1,34 +1,37 @@
 # Ads Service
 
 The Ads service loads a set of ads based on the category when the service is initialized and then serves ads based on the products in the cart.
-The Ad Store represents a read only class as these ads are not updated after the service is initialized. This allows us to access the ad store without lock statements allowing the concurrent calls to the service.
+The `adCategories` is a readonly variable populated at the initialization of the service. This allows us to access the ads without lock statements allowing concurrent calls to the service.
 
 ```bal
-readonly class AdStore {
+type AdCategory record {|
+    readonly string category;
+    stubs:Ad[] ads;
+|};
 
-    final map<Ad[]> & readonly ads;
+private final readonly & table<AdCategory> key(category) adCategories;
 
-    isolated function init() {
-        self.ads =  getAds().cloneReadOnly();
+function init() {
+    self.adCategories = loadAds().cloneReadOnly();
+
+    stubs:Ad[] ads = [];
+    foreach var category in self.adCategories {
+        ads.push(...category.ads);
     }
-
-    public isolated function getRandomAds() returns Ad[]|error {
-        ...
-    }
-
-    public isolated function getAdsByCategory(string category) returns Ad[] {
-        ...
-    }
+    self.allAds = ads.cloneReadOnly();
 }
 
-isolated function getAds() returns map<Ad[]> {
-    return {
-        "clothing": [tankTop],
-        "accessories": [watch],
-        "footwear": [loafers],
-        "hair": [hairdryer],
-        "decor": [candleHolder],
-        "kitchen":[bambooGlassJar, mug]
-    };
+remote function GetAds(stubs:AdRequest request) returns stubs:AdResponse|error {
+    stubs:Ad[] ads = [];
+    foreach string category in request.context_keys {
+        AdCategory? adCategory = self.adCategories[category];
+        if adCategory !is () {
+            ads.push(...adCategory.ads);
+        }
+    }
+    if ads.length() == 0 {
+        ads = check self.getRandomAds();
+    }
+    return {ads};
 }
 ```

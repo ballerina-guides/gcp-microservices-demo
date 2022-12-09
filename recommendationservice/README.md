@@ -3,18 +3,20 @@
 `Recommendation Service` simply calls the `Catalog Service` and returns a set of product which is not included in the user's cart. For this filtration also we make use of query expressions.
 
 ```bal
-isolated remote function ListRecommendations(ListRecommendationsRequest value) returns ListRecommendationsResponse|error {
-    string[] productIds = value.product_ids;
-    ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
+remote function ListRecommendations(stubs:ListRecommendationsRequest request)
+      returns stubs:ListRecommendationsResponse|error {
+
+    stubs:ListProductsResponse|grpc:Error listProducts = self.catalogClient->ListProducts({});
     if listProducts is grpc:Error {
-        log:printError("failed to call ListProducts of catalog service", 'error = listProducts);
-        return listProducts;
+        return error grpc:InternalError("Failed to get list of products from catalog service", listProducts);
     }
 
     return {
-        product_ids: from Product product in listProducts.products
-            where productIds.indexOf(product.id) is ()
-            select product.id
+        product_ids: from stubs:Product product in listProducts.products
+            let string productId = product.id
+            where request.product_ids.indexOf(productId) is ()
+            limit 5
+            select productId
     };
 }
 ```
