@@ -164,7 +164,7 @@ spec:
 
 * Create the `Config.toml` file in `emailservice/` and paste the following code after replacing the values.
     ```toml
-    [gmail]
+    [gmailConfig]
     refreshToken = "<your-refresh-token>"
     clientId = "<your-client-id>"
     clientSecret =  "<your-client-secret>"

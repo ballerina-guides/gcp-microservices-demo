@@ -56,8 +56,6 @@ services:
     secrets:
       - source: email_config  
         target: /home/ballerina/Config.toml
-    environment:
-      BAL_CONFIG_DATA: \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
     links:
       - jaeger
     depends_on:
