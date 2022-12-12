@@ -189,16 +189,22 @@ npm start
 ```
 ## Kubernetes
 
-Kustomize is used for combining all the YAML files that have been generated into one. You can execute the following command to build the final YAML file.
+Execute the following `build-all-k8s.sh` script to build the Kubernetes artifacts.
+```
+build-all-k8s.sh
+```
+
+If you are using Minikube, you can execute the following command to use the local docker environement in the minikube cluster.
+```
+eval $(minikube docker-env)
+```
+
+If you are not using Minikube, you have to push the docker images to your Docker registry manually.
+
+You can execute the following command to build the final YAML file. Kustomize is used for combining all the YAML files that have been generated into one. 
 ```
 kubectl kustomize ./ > final.yaml
 ```
-If you are using Minikube, you can execute the following `build-all-minikube.sh` script to build the containers into the minikube cluster so you won't have to push the containers manually.
-```
-build-all-minikube.sh
-```
-
-If you are not using Minikube, you have to push the artifacts to your Docker registry manually.
 
 You can deploy the artifacts into Kubernetes using the following command.
 ```
