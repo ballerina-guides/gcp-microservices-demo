@@ -189,17 +189,17 @@ npm start
 ```
 ## Kubernetes
 
-Execute the following `build-all-k8s.sh` script to build the Kubernetes artifacts.
+You can use `build-all-k8s.sh` script to build the Kubernetes artifacts.
+
+If you are using Minikube, you can execute the following command to configure your local environment to re-use the Docker daemon inside the Minikube instance.
+```
+build-all-k8s.sh minikube
+```
+
+If you are not using Minikube, you can execute the following command and push the docker images to your Docker registry manually.
 ```
 build-all-k8s.sh
 ```
-
-If you are using Minikube, you can execute the following command to use the local docker environement in the minikube cluster.
-```
-eval $(minikube docker-env)
-```
-
-If you are not using Minikube, you have to push the docker images to your Docker registry manually.
 
 You can execute the following command to build the final YAML file. Kustomize is used for combining all the YAML files that have been generated into one. 
 ```
