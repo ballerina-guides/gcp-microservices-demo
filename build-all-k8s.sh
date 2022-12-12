@@ -14,7 +14,10 @@
 # limitations under the License.
 #
 
-eval $(minikube docker-env)
+if [ ! -z "$1" ]
+  then
+    eval $(minikube docker-env)
+fi
 ( cd client_stubs ; bal pack ; bal push --repository local)
 ( cd money ; bal pack ; bal push --repository local)
 ( cd cartservice ; bal build --cloud=k8s)
