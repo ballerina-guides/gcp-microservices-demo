@@ -9,24 +9,30 @@ services:
       - 55680:55680
   ads:
     image: wso2inc/ads-service:v0.1.0
-    environment:
-      BAL_CONFIG_DATA: \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    volumes:
+      - type: bind
+        source: ./adservice/docker/Config.toml
+        target: /home/ballerina/Config.toml
     links:
       - jaeger
     depends_on:
       - jaeger
   cart:
     image: wso2inc/cart-service:v0.1.0 #add redis
-    environment:
-      BAL_CONFIG_DATA: \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    volumes:
+      - type: bind
+        source: ./cartservice/docker/Config.toml
+        target: /home/ballerina/Config.toml
     links:
       - jaeger
     depends_on:
       - jaeger
   checkout:
     image: wso2inc/checkout-service:v0.1.0
-    environment:
-      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n currencyHost="currency" \n shippingHost="shipping" \n paymentHost="payment" \n emailHost="email" \n \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    volumes:
+      - type: bind
+        source: ./checkoutservice/docker/Config.toml
+        target: /home/ballerina/Config.toml
     links:
       - catalog
       - cart
@@ -45,25 +51,35 @@ services:
       - jaeger
   currency:
     image: wso2inc/currency-service:v0.1.0
-    environment:
-      BAL_CONFIG_DATA: \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    volumes:
+      - type: bind
+        source: ./currencyservice/docker/Config.toml
+        target: /home/ballerina/Config.toml
     links:
       - jaeger
     depends_on:
       - jaeger
   email:
     image: wso2inc/email-service:v0.1.0
+    volumes:
+      - type: bind
+        source: ./emailservice/ObserveConfig.toml
+        target: /home/ballerina/ObserveConfig.toml
     secrets:
       - source: email_config  
-        target: /home/ballerina/Config.toml
+        target: /home/ballerina/GmailConfig.toml
+    environment:
+      - BAL_CONFIG_FILES=/home/ballerina/ObserveConfig.toml:/home/ballerina/GmailConfig.toml
     links:
       - jaeger
     depends_on:
       - jaeger
   frontend:
     image: wso2inc/frontend-service:v0.1.0
-    environment:
-      BAL_CONFIG_DATA: catalogHost="catalog" \n cartHost="cart" \n recommendHost="recommendation" \n currencyHost="currency" \n shippingHost="shipping" \n checkoutHost="checkout" \n adHost="ads" \n \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    volumes:
+      - type: bind
+        source: ./frontend/docker/Config.toml
+        target: /home/ballerina/Config.toml
     ports:
       - 9098:9098
     links:
@@ -86,24 +102,30 @@ services:
       - jaeger
   payment:
     image: wso2inc/payment-service:v0.1.0
-    environment:
-      BAL_CONFIG_DATA: \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    volumes:
+      - type: bind
+        source: ./paymentservice/docker/Config.toml
+        target: /home/ballerina/Config.toml
     links:
       - jaeger
     depends_on:
       - jaeger
   catalog:
     image: wso2inc/catalog-service:v0.1.0
-    environment:
-      BAL_CONFIG_DATA: \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    volumes:
+      - type: bind
+        source: ./productcatalogservice/docker/Config.toml
+        target: /home/ballerina/Config.toml
     links:
       - jaeger
     depends_on:
       - jaeger
   recommendation:
     image: wso2inc/recommendation-service:v0.1.0
-    environment:
-      BAL_CONFIG_DATA: catalogHost="catalog" \n \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    volumes:
+      - type: bind
+        source: ./recommendationservice/docker/Config.toml
+        target: /home/ballerina/Config.toml
     links:
       - catalog
       - jaeger
@@ -112,12 +134,14 @@ services:
       - jaeger
   shipping:
     image: wso2inc/shipping-service:v0.1.0
-    environment:
-      BAL_CONFIG_DATA: \n [ballerina.observe] \n tracingEnabled=true \n tracingProvider="jaeger" \n \n [ballerinax.jaeger] \n agentHostname="jaeger" \n agentPort=55680 \n samplerType="const" \n samplerParam=1.0 \n reporterFlushInterval=2000 \n reporterBufferSize=1000
+    volumes:
+      - type: bind
+        source: ./shippingservice/docker/Config.toml
+        target: /home/ballerina/Config.toml
     links:
       - jaeger
     depends_on:
       - jaeger
 secrets:
     email_config:
-      file: ./emailservice/Config.toml
+      file: ./emailservice/GmailConfig.toml
