@@ -162,7 +162,7 @@ spec:
     - When you receive your authorization code, click **Exchange authorization code for tokens** to obtain the refresh 
     token and access token.
 
-* Create the `Config.toml` file in `emailservice/` and paste the following code after replacing the values.
+* Create the `GmailConfig.toml` file in `emailservice/` and paste the following code after replacing the values.
     ```toml
     [gmailConfig]
     refreshToken = "<your-refresh-token>"
