@@ -20,7 +20,7 @@ jobs:
       id: testname
       run: |
         echo "::set-output name=test-name::${TEST_NAME}"
-    - uses: hasithaa/setup-ballerina@v1
+    - uses: ballerina-platform/setup-ballerina@v1
       name: Install Ballerina
       with:
         version: 2201.2.3
