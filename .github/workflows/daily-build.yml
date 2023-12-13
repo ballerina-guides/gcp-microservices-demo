@@ -4,6 +4,9 @@ on:
   schedule:
     - cron:  '0 */12 * * *'
 
+env:
+  BALLERINA_VERSION: 2201.8.4    # Update this with the latest Ballerina version
+
 jobs:
   build:
     if: github.repository_owner == 'ballerina-guides'
@@ -23,7 +26,7 @@ jobs:
     - uses: ballerina-platform/setup-ballerina@v1
       name: Install Ballerina
       with:
-        version: 2201.2.3
+        version: ${{ env.BALLERINA_VERSION }}
     - name: Pack gRPC Stub Module
       working-directory: "client_stubs"
       run: bal pack
