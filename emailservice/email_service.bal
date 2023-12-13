@@ -43,14 +43,16 @@ service "EmailService" on new grpc:Listener(9097) {
     private final gmail:Client gmailClient;
 
     function init() returns error? {
-        self.gmailClient = check new ({
-            auth: {
-                refreshUrl: gmail:REFRESH_URL,
-                refreshToken: gmailConfig.refreshToken,
-                clientId: gmailConfig.clientId,
-                clientSecret: gmailConfig.clientSecret
+        self.gmailClient = check new gmail:Client(
+            config = {
+                auth: {
+                    refreshToken: gmailConfig.refreshToken,
+                    clientId: gmailConfig.clientId,
+                    clientSecret: gmailConfig.clientSecret
+                }
             }
-        });
+        );
+
         log:printInfo("Email service gRPC server started.");
     }
 
@@ -62,12 +64,11 @@ service "EmailService" on new grpc:Listener(9097) {
         log:printInfo(string `Received a request to send order confirmation email to ${request.email}.`);
 
         gmail:MessageRequest messageRequest = {
-            recipient: request.email,
+            to: [request.email],
             subject: "Your Confirmation Email",
-            messageBody: (check getConfirmationHtml(request.'order)).toString(),
-            contentType: gmail:TEXT_HTML
+            bodyInHtml: (check getConfirmationHtml(request.'order)).toString()
         };
-        gmail:Message|error sendMessageResponse = self.gmailClient->sendMessage(messageRequest);
+        gmail:Message|error sendMessageResponse = check self.gmailClient->/users/[request.email]/messages/send.post(messageRequest);
         if sendMessageResponse is error {
             log:printError("An error occurred when sending the order confirmation email ", sendMessageResponse);
             return sendMessageResponse;
