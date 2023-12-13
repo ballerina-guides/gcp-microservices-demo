@@ -6,7 +6,7 @@ services:
     ports:
       - 16686:16686
       - 13133:13133
-      - 55680:55680
+      - 4317:4317
   ads:
     image: wso2inc/ads-service:v0.1.0
     volumes:
