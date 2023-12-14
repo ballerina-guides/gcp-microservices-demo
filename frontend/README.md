@@ -31,11 +31,13 @@ AuthInterceptor authInterceptor = new;
     cors: {
         allowOrigins: ["http://localhost:3000"],
         allowCredentials: true
-    },
-    interceptors: [new AuthInterceptor()]
+    }
 }
-service / on new http:Listener (9098) {
+service http:InterceptableService / on new http:Listener (9098) {
 
+    public function createInterceptors() returns AuthInterceptor {
+        return authInterceptor;
+    }
 }
 ```
 

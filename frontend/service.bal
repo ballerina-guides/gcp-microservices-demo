@@ -64,14 +64,13 @@ service class AuthInterceptor {
     cors: {
         allowOrigins: ["http://localhost:3000"],
         allowCredentials: true
-    },
-    interceptors: [new AuthInterceptor()]
+    }
 }
 @display {
     label: "Frontend",
     id: "frontend"
 }
-service / on new http:Listener(9098) {
+service http:InterceptableService / on new http:Listener(9098) {
 
     function init() {
         log:printInfo("Frontend server started.");
@@ -369,5 +368,9 @@ service / on new http:Listener(9098) {
     function getProductIdFromCart(stubs:Cart cart) returns string[] {
         return from stubs:CartItem {product_id} in cart.items
             select product_id;
+    }
+
+    public function createInterceptors() returns AuthInterceptor {
+        return new AuthInterceptor();
     }
 }
