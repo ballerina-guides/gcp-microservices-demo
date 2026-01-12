@@ -68,7 +68,7 @@ tag="v0.1.0"
 internal_domain_name="recommendation-service"
 ```
 
-Ballerina Language provides an in-built functionality to configure values at runtime through configurable module-level variables. This feature will be used in almost all the microservices we write in this sample. When we deploy the services in different platforms(local, docker-compose, k8s) the hostname of the service changes. Consider the following sample from the recommendation service. The recommendation service depends on the catalog service, therefore it needs to resolve the hostname of the catalog service. The value "localhost" is assigned as the default value but it will be changed depending on the value passed on to it in runtime. You can find more details about this on the [configurable learn page](https://ballerina.io/learn/configure-ballerina-programs/configure-a-sample-ballerina-service/).
+Ballerina Language provides an in-built functionality to configure values at runtime through configurable module-level variables. This feature will be used in almost all the microservices we write in this sample. When we deploy the services in different platforms(local, docker-compose, k8s) the hostname of the service changes. Consider the following sample from the recommendation service. The recommendation service depends on the catalog service, therefore it needs to resolve the hostname of the catalog service. The value "localhost" is assigned as the default value but it will be changed depending on the value passed on to it in runtime. You can find more details about this on the [configurable learn page](https://ballerina.io/learn/configure-a-sample-ballerina-service/).
 
 ```bal
 configurable string catalogHost = "localhost";
