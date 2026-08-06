@@ -29,6 +29,7 @@ configurable string currencyHost = LOCALHOST;
 configurable string shippingHost = LOCALHOST;
 configurable string paymentHost = LOCALHOST;
 configurable string emailHost = LOCALHOST;
+configurable int cartPort = 9092;
 
 configurable decimal cartTimeout = 3;
 configurable decimal catalogTimeout = 3;
@@ -80,7 +81,7 @@ service "CheckoutService" on new grpc:Listener(9094) {
     private final stubs:EmailServiceClient emailClient;
 
     function init() returns error? {
-        self.cartClient = check new (string `http://${cartHost}:9092`, timeout = cartTimeout);
+        self.cartClient = check new (string `http://${cartHost}:${cartPort}`, timeout = cartTimeout);
         self.catalogClient = check new (string `http://${catalogHost}:9091`, timeout = catalogTimeout);
         self.currencyClient = check new (string `http://${currencyHost}:9093`, timeout = currencyTimeout);
         self.shippingClient = check new (string `http://${shippingHost}:9095`, timeout = shippingTimeout);

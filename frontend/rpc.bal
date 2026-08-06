@@ -46,11 +46,12 @@ final stubs:ProductCatalogServiceClient catalogClient = check new (string `http:
                                                     timeout = catalogTimeout);
 
 configurable string cartHost = LOCALHOST;
+configurable int cartPort = 9092;
 @display {
     label: "Cart",
     id: "cart"
 }
-final stubs:CartServiceClient cartClient = check new (string `http://${cartHost}:9092`, timeout = cartTimeout);
+final stubs:CartServiceClient cartClient = check new (string `http://${cartHost}:${cartPort}`, timeout = cartTimeout);
 
 configurable string shippingHost = LOCALHOST;
 @display {
