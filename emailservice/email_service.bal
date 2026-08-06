@@ -40,10 +40,10 @@ configurable GmailConfig gmailConfig = ?;
 @grpc:Descriptor {value: stubs:DEMO_DESC}
 service "EmailService" on new grpc:Listener(9097) {
 
-    private final gmail:Client? gmailClient;
+    private final gmail:Client gmailClient;
 
-    function init() {
-        gmail:Client|error gmailClient = trap new (
+    function init() returns error? {
+        self.gmailClient = check new gmail:Client(
             config = {
                 auth: {
                     refreshToken: gmailConfig.refreshToken,
@@ -52,12 +52,6 @@ service "EmailService" on new grpc:Listener(9097) {
                 }
             }
         );
-        if gmailClient is gmail:Client {
-            self.gmailClient = gmailClient;
-        } else {
-            self.gmailClient = ();
-            log:printWarn("Failed to initialize the Gmail client. Order confirmation emails will not be sent", gmailClient);
-        }
 
         log:printInfo("Email service gRPC server started.");
     }
@@ -74,11 +68,7 @@ service "EmailService" on new grpc:Listener(9097) {
             subject: "Your Confirmation Email",
             bodyInHtml: (check getConfirmationHtml(request.'order)).toString()
         };
-        gmail:Client? gmailClient = self.gmailClient;
-        if gmailClient is () {
-            return error("The Gmail client is not initialized. Cannot send the order confirmation email");
-        }
-        gmail:Message|error sendMessageResponse = gmailClient->/users/["me"]/messages/send.post(messageRequest);
+        gmail:Message|error sendMessageResponse = self.gmailClient->/users/["me"]/messages/send.post(messageRequest);
         if sendMessageResponse is error {
             log:printError("An error occurred when sending the order confirmation email ", sendMessageResponse);
             return sendMessageResponse;
