@@ -68,7 +68,7 @@ service "EmailService" on new grpc:Listener(9097) {
             subject: "Your Confirmation Email",
             bodyInHtml: (check getConfirmationHtml(request.'order)).toString()
         };
-        gmail:Message|error sendMessageResponse = check self.gmailClient->/users/[request.email]/messages/send.post(messageRequest);
+        gmail:Message|error sendMessageResponse = check self.gmailClient->/users/["me"]/messages/send.post(messageRequest);
         if sendMessageResponse is error {
             log:printError("An error occurred when sending the order confirmation email ", sendMessageResponse);
             return sendMessageResponse;

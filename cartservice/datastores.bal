@@ -79,7 +79,7 @@ public isolated class InMemoryStore {
     # + userId - id of the user
     isolated function emptyCart(string userId) {
         lock {
-            _ = self.store.remove(userId);
+            _ = self.store.removeIfHasKey(userId);
         }
     }
 
@@ -108,10 +108,11 @@ public isolated class RedisStore {
     private final redis:Client redisClient;
 
     function init() returns error? {
-        self.redisClient = check new ({
-            host: redisHost,
-            password: redisPassword
-        });
+        redis:ConnectionParams connection = {host: redisHost};
+        if redisPassword != "" {
+            connection.password = redisPassword;
+        }
+        self.redisClient = check new ({connection});
     }
 
     # Adds an item to the redis store.

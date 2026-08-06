@@ -2,7 +2,7 @@
 org = "wso2"
 name = "frontend"
 version = "0.1.0"
-distribution = "2201.2.3"
+distribution = "2201.13.4"
 
 [build-options]
 observabilityIncluded = true
@@ -18,3 +18,8 @@ org = "wso2"
 name = "money"
 version = "0.1.0"
 repository = "local"
+
+[[dependency]]
+org = "ballerina"
+name = "http"
+version = "2.14.13"

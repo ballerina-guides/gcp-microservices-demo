@@ -19,6 +19,7 @@ import ballerina/log;
 import ballerinax/jaeger as _;
 import wso2/client_stubs as stubs;
 
+configurable int port = 9092;
 configurable string datastore = "";
 configurable string redisHost = "";
 configurable string redisPassword = "";
@@ -29,7 +30,7 @@ configurable string redisPassword = "";
     id: "cart"
 }
 @grpc:Descriptor {value: stubs:DEMO_DESC}
-service "CartService" on new grpc:Listener(9092) {
+service "CartService" on new grpc:Listener(port) {
     private final DataStore store;
 
     function init() returns error? {
