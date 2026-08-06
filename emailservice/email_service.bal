@@ -78,7 +78,7 @@ service "EmailService" on new grpc:Listener(9097) {
         if gmailClient is () {
             return error("The Gmail client is not initialized. Cannot send the order confirmation email");
         }
-        gmail:Message|error sendMessageResponse = gmailClient->/users/[request.email]/messages/send.post(messageRequest);
+        gmail:Message|error sendMessageResponse = gmailClient->/users/["me"]/messages/send.post(messageRequest);
         if sendMessageResponse is error {
             log:printError("An error occurred when sending the order confirmation email ", sendMessageResponse);
             return sendMessageResponse;
